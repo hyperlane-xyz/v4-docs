@@ -130,7 +130,7 @@ function handle(    // Domain of origin chain    uint32 origin,    // Address of
 They may optionally specify a security module to verify messages before they are handled.
 
 ```
-function interchainSecurityModule() returns (address);
+function IInterchainSecurityModule() returns (address);
 ```
 
 <Info>
@@ -145,7 +145,7 @@ function interchainSecurityModule() returns (address);
 
 Interchain security modules are used to verify messages before they are processed.
 
-- [Solidity](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/interfaces/IInterchainSecurityModule.sol)
+- [Solidity](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/interfaces/IIInterchainSecurityModule.sol)
 - [Sway](https://github.com/hyperlane-xyz/fuel-contracts/blob/main/contracts/hyperlane-interfaces/src/lib.sw)
 - [CosmWasm](https://github.com/many-things/cw-hyperlane/blob/main/packages/interface/src/ism/mod.rs)
 - [Sealevel](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/rust/main/hyperlane-core/src/traits/interchain_security_module.rs)

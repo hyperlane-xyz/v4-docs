@@ -1,0 +1,138 @@
+---
+title: "Get Started Building with Hyperlane"
+---
+
+Build cross-chain applications in three simple steps. Whether you're creating token bridges, cross-chain NFTs, or interchain messaging, this guide will get you started.
+
+## Step 1: Identify Your Virtual Machine
+
+Choose the blockchain environments where you want to enable interchain functionality.
+
+<Card title="Supported Virtual Machines" icon="server">
+  Hyperlane supports multiple VM types including EVM chains (Ethereum, Polygon,
+  Arbitrum), Cosmos and Solana.
+</Card>
+
+**What you need to decide:**
+
+- Source chain (where messages originate)
+- Destination chain(s) (where messages are delivered)
+- Gas token requirements for each chain
+
+---
+
+## Step 2: Deploy Hyperlane Infrastructure
+
+Deploy core Hyperlane contracts this includes core Mailbox and ISM contracts.
+
+**Before deploying, check if Hyperlane is already available:**
+
+<AccordionGroup>
+  <Accordion title="Is Hyperlane already deployed on my chains?">
+    Check the [Hyperlane
+    registry](https://github.com/hyperlane-xyz/hyperlane-registry) to learn
+    which chains have a Hyperlane deployment. If the chain you are looking to
+    connect already has Hyperlane core contracts deployed, skip to Step 3!
+  </Accordion>
+</AccordionGroup>
+
+**If you need to deploy:**
+
+- Use the Hyperlane CLI for automated deployment
+- Configure your security settings
+- Deploy the Hyperlane core contracts
+
+[Deploy Hyperlane infrastructure →](/docs/guides/chains/deploy-hyperlane)
+
+---
+
+## Step 3: Create Your Warp Route
+
+Bridge your tokens using Hyperlane's messaging infrastructure.
+
+<Card
+  title="Warp Routes"
+  icon="route"
+  href="/docs/applications/warp-routes/overview"
+>
+  Warp Routes are modular cross-chain asset bridges using Hyperlane's messaging
+  infrastructure. Learn more about how they work.
+</Card>
+
+**Common Warp Route types:**
+
+- **ERC-20 bridges**: Bridge any ERC-20 token
+- **Native bridges**: Move native tokens (ETH, SOL, etc.)
+- **Collateral routes**: Lock tokens on origin, mint on destination
+- **Synthetic routes**: Create wrapped versions on destination chains
+
+**Choose your deployment guide:**
+
+<CardGroup cols={3}>
+  <Card
+    title="EVM Warp Route"
+    icon="code"
+    href="/docs/guides/quickstart/deploy-warp-route"
+  >
+    Deploy on Ethereum, Polygon, Arbitrum, and other EVM chains
+  </Card>
+
+{" "}
+
+<Card
+  title="Solana Warp Route"
+  icon="code"
+  href="/docs/guides/warp-routes/svm/svm-warp-route-guide"
+>
+  Deploy on Solana and other Sealevel VM chains
+</Card>
+
+  <Card
+    title="Cosmos SDK"
+    icon="code"
+    href="/docs/alt-vm-implementations/cosmos-sdk"
+  >
+    Deploy on Cosmos SDK-based chains
+  </Card>
+</CardGroup>
+
+<Note>
+  **Advanced Warp Routes**: Check out our [Warp Route
+  resources](/docs/applications/warp-routes/types) and [Warp Route
+  guides](/docs/guides/warp-routes) for more complex use cases.
+</Note>
+
+---
+
+## Next Steps
+
+<CardGroup cols={3}>
+  <Card title="Deploy Bridge UI" icon="window" href="/docs/guides/warp-routes/bridge-ui-guide">
+    Create a user interface for your Warp Route
+  </Card>
+
+<Card
+  title="Run a Validator and Relayer"
+  icon="shield-check"
+  href="/docs/guides/chains/deploy-hyperlane-with-local-agents"
+>
+  Deploy Hyperlane with local Validators and Relayers
+</Card>
+
+<Card
+  title="Security Modules"
+  icon="shield"
+  href="/docs/protocol/ISM/modular-security"
+>
+  Configure custom security for your interchain messages
+</Card>
+
+{" "}
+
+</CardGroup>
+
+## Need Help?
+
+<Note>
+  Join our [Discord community](https://discord.gg/hyperlane) for support!
+</Note>

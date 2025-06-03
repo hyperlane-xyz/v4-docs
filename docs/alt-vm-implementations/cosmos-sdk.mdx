@@ -48,7 +48,7 @@ Interchain Security and Post Dispatch are submodules with dedicated keepers and 
 This submodule implements the ISM logic and is responsible for verifying that interchain messages being delivered on the destination chain were *actually sent* on the origin chain. The modular design allows developers to easily add custom ISM implementations. Currently, three ISM types are available: `MessageIdMultisig`, `MerkleRootMultisig`, and `Noop`.
 
 ```
-type InterchainSecurityModule interface {	Verify(ctx context.Context, ismId HexAddress, metadata []byte, message HyperlaneMessage) (bool, error)}
+type IInterchainSecurityModule interface {	Verify(ctx context.Context, ismId HexAddress, metadata []byte, message HyperlaneMessage) (bool, error)}
 ```
 
 **`MultisigIsm`**

@@ -1,172 +1,184 @@
 ---
 title: "Create your own Hook & ISM"
-description: "Hooks and ISMs have a complementary relationship: you can customize your behavior from origin and they use a pairwise ISM contract on the destination to verify your custom hook behavior."
 ---
+
+Hooks and ISMs have a complementary relationship: you can customize your behavior from origin and they use a pairwise ISM contract on the destination to verify your custom hook behavior.
 
 You can implement and utilize your own hook and ISM pattern as per your requirements. You can use an external bridge provider like Wormhole or Chainlink's CCIP by implementing the `IPostDispatchHook` interface on the source chain and `IInterchainSecurityModule` on the destination chain.
 
-<Accordion title="IPostDispatchHook Interface">
-  ``
+<AccordionGroup>
+  <Accordion title="IPostDispatchHook Interface">
+    ```solidity
+        interface IPostDispatchHook {
+          enum Types {
+              UNUSED,
+              ROUTING,
+              AGGREGATION,
+              MERKLE_TREE,
+              INTERCHAIN_GAS_PAYMASTER,
+              FALLBACK_ROUTING,
+              ID_AUTH_ISM,
+              PAUSABLE,
+              PROTOCOL_FEE,
+              LAYER_ZERO_V1,
+              RATE_LIMITED,
+              ARB_L2_TO_L1,
+              OP_L2_TO_L1,
+              MAILBOX_DEFAULT_HOOK,
+              AMOUNT_ROUTING
+          }
 
-- Solidity
+          /**
+          * @notice Returns an enum that represents the type of hook
+          */
+          function hookType() external view returns (uint8);
 
-```
-interface IPostDispatchHook {    enum Types {        UNUSED,        ROUTING,        AGGREGATION,        MERKLE_TREE,        INTERCHAIN_GAS_PAYMASTER,        FALLBACK_ROUTING,        ID_AUTH_ISM,        PAUSABLE,        PROTOCOL_FEE,        LAYER_ZERO_V1,        RATE_LIMITED,        ARB_L2_TO_L1,        OP_L2_TO_L1    }    /**     * @notice Returns an enum that represents the type of hook     */    function hookType() external view returns (uint8);    /**     * @notice Returns whether the hook supports metadata     * @param metadata metadata     * @return Whether the hook supports metadata     */    function supportsMetadata(        bytes calldata metadata    ) external view returns (bool);    /**     * @notice Post action after a message is dispatched via the Mailbox     * @param metadata The metadata required for the hook     * @param message The message passed from the Mailbox.dispatch() call     */    function postDispatch(        bytes calldata metadata,        bytes calldata message    ) external payable;    /**     * @notice Compute the payment required by the postDispatch call     * @param metadata The metadata required for the hook     * @param message The message passed from the Mailbox.dispatch() call     * @return Quoted payment for the postDispatch call     */    function quoteDispatch(
-```
+          /**
+          * @notice Returns whether the hook supports metadata
+          * @param metadata metadata
+          * @return Whether the hook supports metadata
+          */
+          function supportsMetadata(
+              bytes calldata metadata
+          ) external view returns (bool);
 
-</Accordion>
+          /**
+          * @notice Post action after a message is dispatched via the Mailbox
+          * @param metadata The metadata required for the hook
+          * @param message The message passed from the Mailbox.dispatch() call
+          */
+          function postDispatch(
+              bytes calldata metadata,
+              bytes calldata message
+          ) external payable;
 
-<Accordion title="IInterchainSecurityModule Interface">
-  ``
+          /**
+          * @notice Compute the payment required by the postDispatch call
+          * @param metadata The metadata required for the hook
+          * @param message The message passed from the Mailbox.dispatch() call
+          * @return Quoted payment for the postDispatch call
+          */
+          function quoteDispatch(
+              bytes calldata metadata,
+              bytes calldata message
+          ) external view returns (uint256);
+        }
+    ```
 
-- Solidity
+  </Accordion>
 
-```
-interface IInterchainSecurityModule {    enum Types {        UNUSED,        ROUTING,        AGGREGATION,        LEGACY_MULTISIG,        MERKLE_ROOT_MULTISIG,        MESSAGE_ID_MULTISIG,        NULL, // used with relayer carrying no metadata        CCIP_READ,        ARB_L2_TO_L1,        WEIGHTED_MERKLE_ROOT_MULTISIG,        WEIGHTED_MESSAGE_ID_MULTISIG,        OP_L2_TO_L1    }    /**     * @notice Returns an enum that represents the type of security model     * encoded by this ISM.     * @dev Relayers infer how to fetch and format metadata.     */    function moduleType() external view returns (uint8);    /**     * @notice Defines a security model responsible for verifying interchain     * messages based on the provided metadata.     * @param _metadata Off-chain metadata provided by a relayer, specific to     * the security model encoded by the module (e.g. validator signatures)     * @param _message Hyperlane encoded interchain message     * @return True if the message was verified     */    function verify(
-```
+  <Accordion title="IInterchainSecurityModule Interface">
+    ```solidity
+    // SPDX-License-Identifier: MIT OR Apache-2.0
+    pragma solidity >=0.6.11;
 
-</Accordion>
+    interface IInterchainSecurityModule {
+    enum Types {
+    UNUSED,
+    ROUTING,
+    AGGREGATION,
+    LEGACY_MULTISIG,
+    MERKLE_ROOT_MULTISIG,
+    MESSAGE_ID_MULTISIG,
+    NULL, // used with relayer carrying no metadata
+    CCIP_READ,
+    ARB_L2_TO_L1,
+    WEIGHTED_MERKLE_ROOT_MULTISIG,
+    WEIGHTED_MESSAGE_ID_MULTISIG,
+    OP_L2_TO_L1
+    }
 
-<Info>
+        /**
+        * @notice Returns an enum that represents the type of security model
+        * encoded by this ISM.
+        * @dev Relayers infer how to fetch and format metadata.
+        */
+        function moduleType() external view returns (uint8);
+
+        /**
+        * @notice Defines a security model responsible for verifying interchain
+        * messages based on the provided metadata.
+        * @param _metadata Off-chain metadata provided by a relayer, specific to
+        * the security model encoded by the module (e.g. validator signatures)
+        * @param _message Hyperlane encoded interchain message
+        * @return True if the message was verified
+        */
+        function verify(
+            bytes calldata _metadata,
+            bytes calldata _message
+        ) external returns (bool);
+
+    }
+
+    interface ISpecifiesInterchainSecurityModule {
+    function interchainSecurityModule()
+    external
+    view
+    returns (IInterchainSecurityModule);
+    }
+    ```
+
+  </Accordion>
+</AccordionGroup>
+
+<Note>
   Hooks currently expect metadata to be formatted with the
   [`StandardHookMetadata`
   library](/docs/reference/developer-tools/libraries/hookmetadata).
-</Info>
+</Note>
 
 You can also inherit from our `AbstractMessageIdAuthorizedIsm` which allows for access control for an intermediate `verifyMessageId` function call which sets in storage the messageId to true if received from the authorized `AbstractMessageIdAuthHook` hook. This pattern is used currently in the [`OpStackHook`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/ef2ece300e71a30e8f4f59e5b26e21eea012d43b/solidity/contracts/hooks/OPStackHook.sol#L33C8-L33C8) \<> [`OpStackIsm`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/ef2ece300e71a30e8f4f59e5b26e21eea012d43b/solidity/contracts/isms/hook/OPStackIsm.sol#L31) pattern.
 
-### Workflow[​](#workflow "Direct link to Workflow")
+## Workflow
 
-### Interface[​](#interface "Direct link to Interface")
+```mermaid
+flowchart TB
+    subgraph Origin Chain
+      Sender
+      M_O[(Mailbox)]
+      E_B_O[(ExternalBridgeOrigin)]
 
-After implementing the above interfaces, you can override default hook along the hook metadata by using the overloaded `dispatch` call in our mailbox:
+      C_H[AbstractMessageIdAuthorizedIsm]
+      Sender -- "dispatch(..., metadata){value}" --> M_O
 
-- Solidity
+      M_O -. "postDispatch(metadata, ...)<br>{value - fee}" ..-> C_H
+      C_H -- "externalCall(metadata, message)" --> E_B_O
 
-```
-* @notice Dispatches a message to the destination domain & recipient.* @param destinationDomain Domain of destination chain* @param recipientAddress Address of recipient on destination chain as bytes32* @param messageBody Raw bytes content of message body* @param metadata Metadata used by the post dispatch hook* @param hook Custom hook to use instead of the default* @return The message ID inserted into the Mailbox's merkle tree
-```
+    end
 
-### Examples[​](#examples "Direct link to Examples")
+    E_B_O -. "crosschainCall(metadata,message)" ..-> E_B_D
+    M_O -. "relay" ..-> M_D
 
-origin:
+    subgraph Destination Chain
+        Recipient
+        M_D[(Mailbox)]
+        E_B_D[(ExternalBridgeDestination)]
+        ISM{AbstractMessageIdAuthorizedIsm}
 
-abstracttestnet
+        M_D -- "handle(origin,sender,message)" --> Recipient
+        M_D -- "verify(metadata, message)" --> ISM
+        ISM -. "interchainSecurityModule()" .- Recipient
 
-- [abstracttestnet](#origin=abstracttestnet)
-- [alephzeroevmtestnet](#origin=alephzeroevmtestnet)
-- [alfajores](#origin=alfajores)
-- [arbitrumsepolia](#origin=arbitrumsepolia)
-- [arcadiatestnet2](#origin=arcadiatestnet2)
-- [auroratestnet](#origin=auroratestnet)
-- [basecamptestnet](#origin=basecamptestnet)
-- [basesepolia](#origin=basesepolia)
-- [bepolia](#origin=bepolia)
-- [bsctestnet](#origin=bsctestnet)
-- [carrchaintestnet](#origin=carrchaintestnet)
-- [chronicleyellowstone](#origin=chronicleyellowstone)
-- [citreatestnet](#origin=citreatestnet)
-- [cotitestnet](#origin=cotitestnet)
-- [ecotestnet](#origin=ecotestnet)
-- [flametestnet](#origin=flametestnet)
-- [formtestnet](#origin=formtestnet)
-- [fuji](#origin=fuji)
-- [holesky](#origin=holesky)
-- [hyperliquidevmtestnet](#origin=hyperliquidevmtestnet)
-- [infinityvmmonza](#origin=infinityvmmonza)
-- [inksepolia](#origin=inksepolia)
-- [megaethtestnet](#origin=megaethtestnet)
-- [modetestnet](#origin=modetestnet)
-- [monadtestnet](#origin=monadtestnet)
-- [odysseytestnet](#origin=odysseytestnet)
-- [optimismsepolia](#origin=optimismsepolia)
-- [plumetestnet2](#origin=plumetestnet2)
-- [polygonamoy](#origin=polygonamoy)
-- [scrollsepolia](#origin=scrollsepolia)
-- [sepolia](#origin=sepolia)
-- [somniatestnet](#origin=somniatestnet)
-- [soneiumtestnet](#origin=soneiumtestnet)
-- [sonicblaze](#origin=sonicblaze)
-- [sonictestnet](#origin=sonictestnet)
-- [suavetoliman](#origin=suavetoliman)
-- [subtensortestnet](#origin=subtensortestnet)
-- [superpositiontestnet](#origin=superpositiontestnet)
-- [tangletestnet](#origin=tangletestnet)
-- [treasuretopaz](#origin=treasuretopaz)
-- [unichaintestnet](#origin=unichaintestnet)
-- [weavevmtestnet](#origin=weavevmtestnet)
+        E_B_D -- "verifiedMessageId(message)" --> ISM
+    end
 
-destination:
-
-alephzeroevmtestnet
-
-- [abstracttestnet](#destination=abstracttestnet)
-- [alephzeroevmtestnet](#destination=alephzeroevmtestnet)
-- [alfajores](#destination=alfajores)
-- [arbitrumsepolia](#destination=arbitrumsepolia)
-- [arcadiatestnet2](#destination=arcadiatestnet2)
-- [auroratestnet](#destination=auroratestnet)
-- [basecamptestnet](#destination=basecamptestnet)
-- [basesepolia](#destination=basesepolia)
-- [bepolia](#destination=bepolia)
-- [bsctestnet](#destination=bsctestnet)
-- [carrchaintestnet](#destination=carrchaintestnet)
-- [chronicleyellowstone](#destination=chronicleyellowstone)
-- [citreatestnet](#destination=citreatestnet)
-- [cotitestnet](#destination=cotitestnet)
-- [ecotestnet](#destination=ecotestnet)
-- [flametestnet](#destination=flametestnet)
-- [formtestnet](#destination=formtestnet)
-- [fuji](#destination=fuji)
-- [holesky](#destination=holesky)
-- [hyperliquidevmtestnet](#destination=hyperliquidevmtestnet)
-- [infinityvmmonza](#destination=infinityvmmonza)
-- [inksepolia](#destination=inksepolia)
-- [megaethtestnet](#destination=megaethtestnet)
-- [modetestnet](#destination=modetestnet)
-- [monadtestnet](#destination=monadtestnet)
-- [odysseytestnet](#destination=odysseytestnet)
-- [optimismsepolia](#destination=optimismsepolia)
-- [plumetestnet2](#destination=plumetestnet2)
-- [polygonamoy](#destination=polygonamoy)
-- [scrollsepolia](#destination=scrollsepolia)
-- [sepolia](#destination=sepolia)
-- [somniatestnet](#destination=somniatestnet)
-- [soneiumtestnet](#destination=soneiumtestnet)
-- [sonicblaze](#destination=sonicblaze)
-- [sonictestnet](#destination=sonictestnet)
-- [suavetoliman](#destination=suavetoliman)
-- [subtensortestnet](#destination=subtensortestnet)
-- [superpositiontestnet](#destination=superpositiontestnet)
-- [tangletestnet](#destination=tangletestnet)
-- [treasuretopaz](#destination=treasuretopaz)
-- [unichaintestnet](#destination=unichaintestnet)
-- [weavevmtestnet](#destination=weavevmtestnet)
-
-body: Hello, world
-
-- Solidity
-- CosmWasm
-- Sealevel
-
-```
-// send message from abstracttestnet to alephzeroevmtestnet TestRecipientIMailbox mailbox = IMailbox("0x28f448885bEaaF662f8A9A6c9aF20fAd17A5a1DC");IPostDispatchHook merkleTree = IPostDispatchHook("0x7fa6009b59F139813eA710dB5496976eE8D80E64");mailbox.dispatch(  2039,  "0x0000000000000000000000009EC79CA89DeF61BFa2f38cD4fCC137b9e49d60dD",  bytes("Hello, world"),  "0x", // empty metadata  merkleTree);
+    style E_B_O fill: #FF0099
+    style E_B_D fill: #FF0099
 ```
 
-🚧 Coming soon! 🚧
+## Interface
 
-🚧 Coming soon! 🚧
+After implementing the above interfaces, you can override default hook along the hook metadata by using the overloaded `dispatch` call in our mailbox.
+**On the source chain:**
 
-- On the source chain,
+- `mailbox.dispatch()` calls your custom hook via `AbstractMessageIdAuthHook.postDispatch()`.
+- `_postDispatch` checks whether `latestDispatchedId` is the id being dispatched from the hook to make the mailbox is the contract calling the hook (since calling `postDispatch` isn't access controlled)
+- `_sendMessageId` calls your custom external bridge logic like calling the CCIP router contract.
 
-  - `mailbox.dispatch()` calls your custom hook via `AbstractMessageIdAuthHook.postDispatch()`.
-  - `_postDispatch` checks whether `latestDispatchedId` is the id being dispatched from the hook to make the mailbox is the contract calling the hook (since calling `postDispatch` isn't access controlled)
-  - `_sendMessageId` calls your custom external bridge logic like calling the CCIP router contract.
+**On the destination chain:**
 
-- On the destination chain,
-
-  - the external bridge will call `verifyMessageId` function (which is access-controlled) and sets the `messageId` in the `verifiedMessages` mapping to true.
-  - on receiving the message for the relayer, the mailbox will call your ISM contract (specified in your recipient address) which checks if the messageId in the `verifiedMessages` mapping is true and returns true to the mailbox and vice versa.
+- The external bridge will call `verifyMessageId` function (which is access-controlled) and sets the `messageId` in the `verifiedMessages` mapping to true.
+- On receiving the message for the relayer, the mailbox will call your ISM contract (specified in your recipient address) which checks if the messageId in the `verifiedMessages` mapping is true and returns true to the mailbox and vice versa.
 
 <Warning>
   `AbstractMessageIdAuthorizedIsm` can send `msg.value` through `postDispatch`
@@ -177,19 +189,13 @@ body: Hello, world
   of value of native token on the destination chain.
 </Warning>
 
-### Access Control[​](#access-control "Direct link to Access Control")
+## Access Control
 
 If `postDispatch` must only be called with a `message` that was _just_ dispatched, the `latestDispatchedId` function on the Mailbox can be used to verify the message was _actually_ dispatched.
 
-<Info>
+<Note>
   This is used instead of some `require(mailbox == msg.sender)` to support
   **composition** where a hook may pass a `message` along to another hook.
-</Info>
-
-- Solidity
+</Note>
 
 The following utility is provided in the [`MailboxClient` library](/docs/reference/developer-tools/libraries/mailbox-client) for convenience.
-
-```
-* @notice Sets the address of the application's custom interchain security module.* @param _module The address of the interchain security module contract.*/
-```

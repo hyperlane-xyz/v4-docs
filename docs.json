@@ -82,6 +82,7 @@
           {
             "group": "Quickstart",
             "pages": [
+              "docs/get-started-building",
               "docs/guides/quickstart/deploy-warp-route",
               "docs/guides/quickstart/local-testnet-setup"
             ]
