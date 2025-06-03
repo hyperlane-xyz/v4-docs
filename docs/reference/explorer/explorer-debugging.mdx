@@ -1,0 +1,55 @@
+---
+title: "Explorer Debugging"
+---
+
+You'll know that a message failed to process because the message status near the top of the page will show as "Error" and the upper right section of the page will specify a reason why the message wasn't able to be processed.
+
+If your message was not delivered it can be due to several factors.
+
+### Invalid Destination
+
+If the destination domain identifier (`uint32`) is not known to relay clients they will have no way to deliver your message. Refer to the [domains](../../reference/domains) for known domains and the canonical identifiers to use when sending messages to these destinations.
+
+### Invalid Recipient
+
+If the recipient address (`bytes32`) is not a contract address that implements the `IMessageRecipient`, the relayer will not be able to deliver your message.
+
+```solidity
+// IMessageRecipient interface
+interface IMessageRecipient {
+    function handle(
+        uint32 _origin,
+        bytes32 _sender,
+        bytes calldata _message
+    ) external;
+}
+```
+
+<Warning>
+  EVM addresses (`address`) must be left-padded with zeroes to be compliant.
+  Refer to the [TypeCasts
+  library](/docs/reference/developer-tools/libraries/typecasts) for a `pure
+  addressToBytes32` utility function, and the message
+  [dispatch](../../reference/messaging/send#dispatch) section for other details.
+</Warning>
+
+### Unprocessable
+
+If the gas estimation of the message recipient's `IMessageRecipient.handle()` function fails, [relayers](../../protocol/agents/relayer) will not be able to deliver the message. Relayers will continue to estimate gas for message delivery, as state changes may allow for successful delivery of a previously undeliverable message.
+
+<Info>
+  If you have a use case which is not accommodated by this behavior, **please
+  reach out** [on Discord](https://discord.com/invite/hyperlane).
+</Info>
+
+### Underfunded
+
+An underfunded message implies the [interchain gas payments](../../reference/hooks/interchain-gas) made to deliver this message are insufficient.
+
+Relayers use the [`eth_estimateGas`](https://ethereum.github.io/execution-apis/api-documentation/) RPC on the destination chain to determine the absolute cost of relaying a message. If this amount exceeds the total amount of gas paid for on the origin chain, relayers will typically refuse to deliver a message.
+
+You can [manually pay for interchain gas](../../reference/hooks/interchain-gas#retrying) to resolve this.
+
+## Using Etherscan
+
+You can also look at the [Etherscan](https://etherscan.io/) page of the recipient on the destination chain however be aware that the processing transaction won't show up on list of transactions as you would typically imagine. The reason for that is that relayers actually call the Mailbox contracts which in turn call the `handle` function on the recipient. Thus, you will find evidence of processing under the `Internal Txns` tab instead.

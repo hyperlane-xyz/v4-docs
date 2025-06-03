@@ -1,0 +1,161 @@
+---
+title: "Local Setup: Sending Messages between Anvil Nodes"
+description: "This guide walks you through sending interchain messages between two local Anvil nodes using the Hyperlane CLI."
+---
+
+## Prerequisites[​](#prerequisites "Direct link to Prerequisites")
+
+- **[Hyperlane CLI](https://docs.hyperlane.xyz/docs/reference/developer-tools/cli):** Make sure you have the latest version of the Hyperlane CLI installed.
+
+  ```
+  npm install -g @hyperlane-xyz/cli
+  ```
+
+- **[Anvil (foundry)](https://book.getfoundry.sh/getting-started/installation):** Installed to run local chains. Install it via
+
+  ```
+  curl -L https://foundry.paradigm.xyz | bash
+  ```
+
+- **Node.js** (v18 or later)
+
+- **Deployer Wallet Private Key**: You need a funded wallet for deploying contracts. This will be used as the HYP_KEY.
+
+  ```
+  export HYP_KEY=<YOUR_PRIVATE_KEY>
+  ```
+
+## Step-by-Step Guide[​](#step-by-step-guide "Direct link to Step-by-Step Guide")
+
+### 1. Environment Setup: Create a working directory for the Hyperlane configuration:[​](#1-environment-setup-create-a-working-directory-for-the-hyperlane-configuration "Direct link to 1. Environment Setup: Create a working directory for the Hyperlane configuration:")
+
+```
+mkdir hyperlane-local-test && cd hyperlane-local-test
+```
+
+### 2. Start Two Distinct Anvil Nodes[​](#2-start-two-distinct-anvil-nodes "Direct link to 2. Start Two Distinct Anvil Nodes")
+
+We will run two Anvil nodes with unique chain IDs.
+
+- On a first terminal, start the first Anvil node:
+
+  ```
+  anvil --port 8545 --chain-id 31337 --block-time 1
+  ```
+
+  - Runs on `http://localhost:8545`.
+  - Chain ID: `31337`.
+
+- In a new terminal, start the second Anvil node:
+
+  ```
+  anvil --port 8546 --chain-id 31338 --block-time 1
+  ```
+
+  - Runs on `http://localhost:8546`.
+  - Chain ID: `31338`.
+
+### 3. Initialize the Hyperlane Registry[​](#3-initialize-the-hyperlane-registry "Direct link to 3. Initialize the Hyperlane Registry")
+
+On a new terminal, use the Hyperlane CLI to create configurations for both Anvil nodes:
+
+```
+hyperlane registry init
+```
+
+Follow the prompts to set up `anvilnode1`. The CLI will ask you for the details of your chains including chainId and RPC URLs. Repeat the process for `anvilnode2`.
+
+This process will create `metadata.yaml` files under `$HOME/.hyperlane/chains/anvilnode1` and `$HOME/.hyperlane/chains/anvilnode2`.
+
+Example metadata:
+
+- **anvilnode1**
+
+```
+chainId: 31337displayName: Anvilnode1domainId: 31337isTestnet: truename: anvilnode1nativeToken:  decimals: 18  name: ETH  symbol: ETHprotocol: ethereumrpcUrls:  - http: http://localhost:8545
+```
+
+- **anvilnode2**
+
+```
+chainId: 31338displayName: Anvilnode2domainId: 31338isTestnet: truename: anvilnode2nativeToken:  decimals: 18  name: ETH  symbol: ETHprotocol: ethereumrpcUrls:  - http: http://localhost:8546
+```
+
+### 4. Deploy Core Contracts[​](#4-deploy-core-contracts "Direct link to 4. Deploy Core Contracts")
+
+We'll configure and deploy Hyperlane core contracts.
+
+<Check>
+  You'll need the deployer wallet private key to deploy the core contracts. You can use `export HYP_KEY='<YOUR_PRIVATE_KEY>'` to set the private key as an environment variable.
+</Check>
+
+```
+hyperlane core init
+```
+
+The deployment configuration will be saved to `./configs/core-config.yaml`.
+
+Next, deploy the core contracts:
+
+```
+hyperlane core deploy
+```
+
+Follow the prompts to select `anvilnode1`. The CLI will deploy Mailbox, Interchain Security Modules (ISMs), and other required contracts. Repeat the process for `anvilnode2`.
+
+Once complete, you’ll find `addresses.yaml` in `$HOME/.hyperlane/chains/anvilnode1` and `$HOME/.hyperlane/chains/anvilnode2`, with the deployed contract addresses.
+
+<Check>
+  You should be able to see the messages of the contract deployments on your
+  terminals running the local nodes.
+</Check>
+
+### 5. Send a Test Message[​](#5-send-a-test-message "Direct link to 5. Send a Test Message")
+
+Use the Hyperlane CLI to send a message from `anvilnode1` to `anvilnode2`.
+
+```
+hyperlane send message --relay
+```
+
+The CLI will prompt you to provide the origin chain (`anvilnode1`) and the destination chain (`anvilnode2`).
+
+<Check>
+  For local testing, the `--relay` flag automatically relays the message to the
+  destination chain.
+</Check>
+
+After sending the message, check the following:
+
+- Validator Logs: Look for entries indicating that signatures were generated and stored.
+- Relayer Logs: Look for successful metadata retrieval and message processing.
+- Anvil Logs: Ensure blocks were mined to process the transactions.
+
+<Check>
+  🎉 You've sent a message between two local Anvil nodes using Hyperlane!
+</Check>
+
+## Troubleshooting[​](#troubleshooting "Direct link to Troubleshooting")
+
+1. “Could not fetch metadata” warning:
+
+   - **Reason:** This occurs when the relayer cannot retrieve validator signatures required to process a message. Common causes:
+
+     - The validator key lacks testnet funds.
+     - The validator has not announced its storage locations.
+
+   - **Solution:**
+
+     - Ensure the validators have announced their storage locations. Check validator logs for a message such as: `Validator has announced signature storage location, locations: ["file:///tmp/hyperlane-validator-signatures-local"].`
+     - Verify that each validator has a unique signature storage path (`--checkpointSyncer.path`) to prevent overwriting.
+     - Confirm that the relayer has read access to the storage paths.
+
+2. Messages time out:
+
+   - **Reason:** Anvil doesn't auto-mine blocks by default, causing validators or relayers to wait indefinitely for new blocks.
+   - **Solution:** Make sure to use the `--block-time 1 flag` when starting Anvil to auto-mine blocks every second.
+
+3. Validator mismatch or misconfiguration:
+
+   - **Reason:** The ISM configuration on the destination chain does not match the validator key(s) used by the origin chain.
+   - **Solution:** Check that the ISM configuration includes the correct validator addresses. Validator logs can help identify the announced addresses.

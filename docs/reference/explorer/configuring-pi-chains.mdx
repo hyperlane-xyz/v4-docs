@@ -1,0 +1,35 @@
+---
+title: "Configuring New Chains in the Hyperlane Explorer"
+---
+
+Hyperlane can be deployed to any chain by anyone, this open access is called Permissionless Interoperability (PI). However the messages on PI chains cannot be identified by the default Hyperlane Agents. To view details about messages from PI chains, first configure the explorer with metadata about that chain.
+
+## Adding Chain Metadata to Hyperlane Explorer
+
+1. On the Explorer’s homepage, click either the Origin or Destination button to open the chain selection. This will open the chain selection modal. From there, click the plus icon in the top-right.
+
+![](/images/docs/guides/explorer/explorer-add-metadata.png)
+
+2. On the form that appears, enter the chain’s metadata using JSON or YAML conforming to the [ChainMetadata schema](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/sdk/src/metadata/chainMetadataTypes.ts).
+
+3. If a valid Etherscan-based block explorer config is provided, the Hyperlane Explorer will utilize it to find the desired messages. If not, it will use the RPC URL. Note, Explorers with API keys (even just free-tier keys), perform faster and more reliably.
+
+### Chain Metadata Examples
+
+**A minimal example in JSON:**
+
+```
+{  "chainId": 11155111,  "name": "sepolia",  "protocol": "ethereum",  "rpcUrls": [{ "http": "https://foobar.com" }]}
+```
+
+**A more detailed example in YAML:**
+
+```
+# Yaml metadata exampleblockExplorers:  - apiUrl: https://api-sepolia.etherscan.io/api    family: etherscan    name: Etherscan    url: https://sepolia.etherscan.ioblocks:  confirmations: 1  estimateBlockTime: 13  reorgPeriod: 2chainId: 11155111deployer:  name: Abacus Works  url: https://www.hyperlane.xyzdisplayName: SepoliadomainId: 11155111isTestnet: truename: sepolianativeToken:  decimals: 18  name: Ether  symbol: ETHprotocol: ethereumrpcUrls:  - http: https://ethereum-sepolia.publicnode.com  - http: https://ethereum-sepolia.blockpi.network/v1/rpc/public
+```
+
+<Note>
+  If the origin or destination `domainId` of chains in your messages doesn't
+  match their `chainId` then you must include the `domainId` field in your chain
+  config.
+</Note>

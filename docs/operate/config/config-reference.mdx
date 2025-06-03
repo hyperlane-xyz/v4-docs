@@ -1,0 +1,1817 @@
+---
+title: "Configuration Reference"
+---
+
+## CONFIG_FILES
+
+**Description:** (Env only) List of additional configuration file paths to load in order (such as those in `hyperlane-monorepo/rust/main/config`). They will be merged first to last, so if both the first one and the last one specify a specific config path, the value set in the last file listed will be used.
+
+These files must be accessible within the filesystem your agent has access to. If you're running in Docker, see [the agent configuration guide](./agent-config.mdx#config-files-with-docker) for tips on mounting your config files into your Docker container.
+
+**Optional:** Yes
+
+**Agents:** All
+
+**Type:** `string` (Comma separated list of file paths)
+
+<CodeGroup>
+```bash As Arg
+# Not supported as an argument
+```
+
+```bash As Env
+export CONFIG_FILES='./config/ethereum/my-config.json,./config/ethereum/my-validator-config.json'
+```
+
+```json As Config
+# Not supported in configuration files
+```
+
+</CodeGroup>
+
+## chains
+
+**Description:** Configuration for each of the chains that must be used by an agent.
+
+**Optional:** No
+
+**Agents:** All
+
+**Type:** `Map<string, ChainSetup (Object)>` (See `chains.*` for `ChainSetup` values)
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.*
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_*="...."
+export HYP_CHAINS_ETHEREUM_*="...."
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {},
+    "ethereum": {}
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.name
+
+**Description:** Name of the domain. Allows specifying a different name for the domain than the chain's true name. This should _almost always_ be the same as `chain_name`.
+
+**Requires:** Alignment with domain id if it is a known domain name.
+
+**Optional:** No
+
+**Agents:** All
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.name $DOMAIN_NAME
+--chains.ethereum.name ethereum
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_NAME="$DOMAIN_NAME"
+export HYP_CHAINS_ETHEREUM_NAME="ethereum"
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {
+      "name": "<domain_name>"
+    },
+    "ethereum": {
+      "name": "ethereum"
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.domain
+
+**Description:** Hyperplane domain id to uniquely identify the domain. See also: [Domain Identifiers](/docs/reference/domains).
+
+**Requires:** Alignment with domain name if it is a known domain.
+
+**Optional:** No
+
+**Agents:** All
+
+**Type:** `Numeric (string | number)`
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.domain $DOMAIN_ID
+--chains.ethereum.domain 1
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_DOMAIN="$DOMAIN_NAME"
+export HYP_CHAINS_ETHEREUM_DOMAIN=1
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {
+      "domain": "<domain_id>"
+    },
+    "ethereum": {
+      "domain": 1
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.mailbox
+
+**Description:** Address of the mailbox contract on the chain. See also [contract addresses](/docs/reference/addresses/deployments/mainnet/mailbox).
+
+**Optional:** No
+
+**Agents:** All
+
+**Type:** `Hash (string)`
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.mailbox "$MAILBOX_ADDRESS"
+--chains.ethereum.mailbox "0x35231d4c2D8B8ADcB5617A638A0c4548684c7C70"
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_MAILBOX="$MAILBOX_ADDRESS"
+export HYP_CHAINS_ETHEREUM_MAILBOX="0x35231d4c2D8B8ADcB5617A638A0c4548684c7C70"
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {
+      "addresses": {
+        "mailbox": "<mailbox_address>"
+      }
+    },
+    "ethereum": {
+      "addresses": {
+        "mailbox": "0x35231d4c2D8B8ADcB5617A638A0c4548684c7C70"
+      }
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.interchainGasPaymaster
+
+**Description:** Address of the interchain gas paymaster contract on the chain. See also [contract addresses](/docs/reference/addresses/deployments/mainnet/interchainGasPaymaster).
+
+**Optional:** No
+
+**Agents:** All
+
+**Type:** `Hash (string)`
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.interchainGasPaymaster "$IGP_ADDRESS"
+--chains.ethereum.interchainGasPaymaster "0x6cA0B6D22da47f091B7613223cD4BB03a2d77918"
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_INTERCHAINGASPAYMASTER="$IGP_ADDRESS"
+export HYP_CHAINS_ETHEREUM_INTERCHAINGASPAYMASTER="0x6cA0B6D22da47f091B7613223cD4BB03a2d77918"
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {
+      "addresses": {
+        "interchainGasPaymaster": "<igp_address>"
+      }
+    },
+    "ethereum": {
+      "addresses": {
+        "interchainGasPaymaster": "0x6cA0B6D22da47f091B7613223cD4BB03a2d77918"
+      }
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.validatorAnnounce
+
+**Description:** Address of the validator announce contract on the chain. See also [contract addresses](/docs/reference/addresses/deployments/mainnet/validatorAnnounce).
+
+**Optional:** No
+
+**Agents:** All
+
+**Type:** `Hash (string)`
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.validatorAnnounce "$VALIDATOR_ANNOUNCE_ADDRESS"
+--chains.ethereum.validatorAnnounce "0x9bBdef63594D5FFc2f370Fe52115DdFFe97Bc524"
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_VALIDATORANNOUNCE="$VALIDATOR_ANNOUNCE_ADDRESS"
+export HYP_CHAINS_ETHEREUM_VALIDATORANNOUNCE="0x9bBdef63594D5FFc2f370Fe52115DdFFe97Bc524"
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {
+      "addresses": {
+        "validatorAnnounce": "<validator_announce_address>"
+      }
+    },
+    "ethereum": {
+      "addresses": {
+        "validatorAnnounce": "0x9bBdef63594D5FFc2f370Fe52115DdFFe97Bc524"
+      }
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.merkleTreeHook
+
+**Description:** Address of the merkle tree hook contract on the chain. See also [contract addresses](/docs/reference/addresses/deployments/mainnet/merkleTreeHook).
+
+**Optional:** No
+
+**Agents:** All
+
+**Type:** `Hash (string)`
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.merkleTreeHook "$MERKLE_TREE_HOOK_ADDRESS"
+--chains.ethereum.merkleTreeHook "0x48e6c30B97748d1e2e03bf3e9FbE3890ca5f8CCA"
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_MERKLETREEHOOK="$MERKLE_TREE_HOOK_ADDRESS"
+export HYP_CHAINS_ETHEREUM_MERKLETREEHOOK="0x48e6c30B97748d1e2e03bf3e9FbE3890ca5f8CCA"
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {
+      "addresses": {
+        "merkleTreeHook": "<merkle_tree_hook_address>"
+      }
+    },
+    "ethereum": {
+      "addresses": {
+        "merkleTreeHook": "0x48e6c30B97748d1e2e03bf3e9FbE3890ca5f8CCA"
+      }
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.signer
+
+**Description:** The signer that should be used this chain
+
+**Optional:** Yes (Will use `defaultsigner` if not specified)
+
+**Agents:** All
+
+**Type:** `SignerConf (Object)`
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.signer.*
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_SIGNER_*="...."
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {
+      "signer": {}
+    },
+    "ethereum": {
+      "signer": {}
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.signer.type
+
+**Description:** The type of signer that is defined. A `HexKey` signer uses a private key, an `Aws` signer uses an AWS based KMS, and `Node` assumes the local node will sign RPC calls.
+
+**Optional:** Yes; Defaults to `node` unless a `key` is specified in which case it defaults to `hexKey`
+
+**Agents:** All
+
+**Type:** `Enum ("hexKey" | "aws" | "cosmosKey" | "node")`
+
+Accepted values for the different VMs are:
+
+- EVM: `hexKey` (ECDSA) or `aws` (ECDSA)
+- sealevel: `hexKey` (ED25519)
+- cosmos: `cosmosKey`
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.signer.type hexKey
+--chains.ethereum.signer.type node
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_SIGNER_TYPE="hexKey"
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {
+      "signer": {
+        "type": "hexKey"
+      }
+    },
+    "ethereum": {
+      "signer": {
+        "type": "node"
+      }
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.signer.key
+
+**Description:** A hex key. The hex string of a private key.
+
+**Requires:** `chains.<chain_name>.signer.type = "hexKey" | undefined`
+
+**Optional:** No (iff requirements are met)
+
+**Agents:** All
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.signer.key "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_SIGNER_KEY="8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {
+      "signer": {
+        "key": "<key_in_hex>"
+      }
+    },
+    "ethereum": {
+      "signer": {
+        "key": "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"
+      }
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.signer.id
+
+**Description:** The UUID identifying the AWS KMS key
+
+**Requires:** `chains.<chain_name>.signer.type = "aws"`
+
+**Optional:** No (iff requirements are met)
+
+**Agents:** All
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--chains.ethereum.signer.type "alias/validator-signer-ethereum"
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_SIGNER_ID="alias/validator-signer-ethereum"
+```
+
+```json As Config
+{
+  "chains": {
+    "ethereum": {
+      "signer": {
+        "type": "aws",
+        "id": "alias/validator-signer-ethereum"
+      }
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.signer.region
+
+**Description:** The AWS region
+
+**Requires:** `chains.<chain_name>.signer.type = "aws"`
+
+**Optional:** No (iff requirements are met)
+
+**Agents:** All
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.signer.region us-east-1
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_SIGNER_REGION="us-east-1"
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {
+      "signer": {
+        "type": "aws",
+        "region": "us-east-1"
+      }
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.protocol
+
+**Description:** Connection protocol to use.
+
+**Optional:** Defaults to `"ethereum"`
+
+**Agents:** All
+
+**Type:** `Enum ("ethereum" | "fuel")`
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.protocol ethereum
+--chains.ethereum.protocol ethereum
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_PROTOCOL="ethereum"
+export HYP_CHAINS_ARBITRUM_PROTOCOL="ethereum"
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {
+      "protocol": "<protocol>"
+    },
+    "arbitrum": {
+      "protocol": "ethereum"
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.rpcConsensusType
+
+<Info>
+
+**The consensus type currently only applies to EVM chains.**
+
+Connections to non-EVM chains only support a single RPC url. If more than one RPC url is specified in [rpcUrls](#chainschain_namerpcurls), only the first one will be used.
+
+</Info>
+
+**Description:** How to communicate with the provider
+
+- `"single"` uses a basic http connection
+- `"fallback"` will try the first URL and then automatically "fall back" on a connection or other provider failure to the next provider; this should only retry calls which fail due to the provider and not the call itself such; an insufficient gas error for instance would not fall back.
+- `"quorum"` requires a majority of the URLs to agree with the exception of submitting transactions; it will automatically coordinate the "latest" block if not specified to reduce sync errors.
+
+**Requires:** `chains.<chain_name>.protocol = "ethereum" | undefined`
+
+**Optional:** Defaults to `"fallback"`
+
+**Agents:** All
+
+**Type:** `Enum ("fallback", "single", "quorum")`
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.rpcConsensusType single
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_RPCCONSENSUSTYPE="single"
+export HYP_CHAINS_ETHEREUM_RPCCONSENSUSTYPE="single"
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {
+      "rpcConsensusType": "single"
+    },
+    "ethereum": {
+      "rpcConsensusType": "single"
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.customRpcUrls
+
+<Info>
+
+Connections to non-EVM chains only support a single RPC url. If more than one RPC url is specified, only the first one will be used.
+
+</Info>
+
+**Description:** Comma-separated URLs to connect the provider to. The difference between `customRpcUrls` and [rpcUrls](#chainschain_namerpcurls) is that `customRpcUrls` allows for more user friendly inputs from the CLI or environment variables (comma-separated vs array).
+
+**Type:** `string` (comma separated list of urls without spaces)
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.customrpcurls "$CONNECTION_URLS"
+--chains.ethereum.customrpcurls "http://127.0.0.1:8545,http://127.0.0.1:8546,http://127.0.0.1:8547"
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_CUSTOMRPCURLS="$CONNECTION_URLS"
+export HYP_CHAINS_ETHEREUM_CUSTOMRPCURLS="http://127.0.0.1:8545,http://127.0.0.1:8546,http://127.0.0.1:8547"
+```
+
+```json As Config
+{
+  "chains": {
+    "ethereum": {
+      "customRpcUrls": "http://127.0.0.1:8545,http://127.0.0.1:8546"
+    }
+  }
+}
+```
+
+</CodeGroup>
+## chains.`<chain_name>`.rpcUrls
+
+<Info>
+
+Connections to non-EVM chains only support a single RPC url. If more than one RPC url is specified, only the first one will be used.
+
+</Info>
+
+**Description:** URLs to connect the provider to. The first one is initially used, and on failure the other ones are tried. See [rpcConsensusType](#chainschain_namerpcconsensustype) for more information.
+
+**Requires:**
+
+```
+(chains.<chain_name>.protocol = "ethereum" | undefined)
+    AND (chains.<chain_name>.connection.type = "fallback" | "quorum")
+    OR chains.<chain_name>.protocol = "cosmos" | "sealevel" | "fuel"
+```
+
+**Optional:** No (iff requirements are met)
+
+**Agents:** All
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.rpcurls.0.https "$CONNECTION_URL_0"
+--chains.${CHAIN_NAME}.rpcurls.1.https "$CONNECTION_URL_1"
+--chains.${CHAIN_NAME}.rpcurls.2.https "$CONNECTION_URL_2"
+--chains.ethereum.rpcurls.0.https "http://127.0.0.1:8545"
+--chains.ethereum.rpcurls.1.https "http://127.0.0.1:8546"
+--chains.ethereum.rpcurls.2.https "http://127.0.0.1:8547"
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_RPCURLS_0_HTTPS="$CONNECTION_URL_0"
+export HYP_CHAINS_${CHAIN_NAME}_RPCURLS_1_HTTPS="$CONNECTION_URL_1"
+export HYP_CHAINS_${CHAIN_NAME}_RPCURLS_2_HTTPS="$CONNECTION_URL_2"
+export HYP_CHAINS_ETHEREUM_RPCURLS_0_HTTPS="http://127.0.0.1:8545"
+export HYP_CHAINS_ETHEREUM_RPCURLS_1_HTTPS="http://127.0.0.1:8546"
+export HYP_CHAINS_ETHEREUM_RPCURLS_2_HTTPS="http://127.0.0.1:8547"
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {
+      "rpcUrls": [
+        {
+          "http": "<connection_url_1>"
+        },
+        {
+          "http": "<connection_url_2>"
+        }
+      ]
+    },
+    "ethereum": {
+      "rpcUrls": [
+        {
+          "http": "http://127.0.0.1:8545"
+        },
+        {
+          "http": "http://127.0.0.1:8546"
+        }
+      ]
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.customGrpcUrls
+
+<Info>
+
+Connections to Cosmos chains require **both** RPC and gRPC URLs. There is **no `rpcConsensusType` configuration** for Cosmos chains, and gRPC URLs always operate in **fallback mode**—if the first URL fails, the next one is used.
+
+</Info>
+
+**Description:** Comma-separated gRPC URLs used to connect to the provider. Similar to [`customRpcUrls`](#chainschain_namecustomrpcurls).
+
+**Type:** `string` (comma-separated list of URLs without spaces)
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.customgrpcurls "$CONNECTION_URLS"
+--chains.cosmos.customgrpcurls "http://127.0.0.1:8545,http://127.0.0.1:8546,http://127.0.0.1:8547"
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_CUSTOMGRPCURLS="$CONNECTION_URLS"
+export HYP_CHAINS_COSMOS_CUSTOMGRPCURLS="http://127.0.0.1:8545,http://127.0.0.1:8546,http://127.0.0.1:8547"
+```
+
+```json As Config
+{
+  "chains": {
+    "cosmos": {
+      "customRpcUrls": "<connection_urls>",
+      "customGrpcUrls": "http://127.0.0.1:8545,http://127.0.0.1:8546,http://127.0.0.1:8547"
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.index.from
+
+**Description:** Height at which to start indexing contracts.
+
+**Optional:** Defaults to `0`
+
+**Agents:** Relayer & Scraper
+
+**Type:** `Numeric (string | number)`
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.index.from 0
+--chains.ethereum.index.from 16271503
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_INDEX_FROM=0
+export HYP_CHAINS_ETHEREUM_INDEX_FROM=16271503
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {
+      "index": {
+        "from": 0
+      }
+    },
+    "ethereum": {
+      "index": {
+        "from": 16271503
+      }
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.index.chunk
+
+**Description:** Number of blocks to query at once when indexing contracts. Note that the configured providers must support whatever value is set. The default should work with nearly all providers.
+
+**Optional:** Defaults to `1999`
+
+**Agents:** Relayer & Scraper
+
+**Type:** `Numeric (string | number)`
+
+<CodeGroup>
+```bash As Arg
+--chains.${CHAIN_NAME}.index.chunk 1999
+--chains.ethereum.index.chunk 1999
+```
+
+```bash As Env
+export HYP_CHAINS_${CHAIN_NAME}_INDEX_CHUNK=1999
+export HYP_CHAINS_ETHEREUM_INDEX_CHUNK=1999
+```
+
+```json As Config
+{
+  "chains": {
+    "<chain_name>": {
+      "index": {
+        "chunk": 1999
+      }
+    },
+    "ethereum": {
+      "index": {
+        "chunk": 1999
+      }
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## defaultsigner
+
+<Info>
+
+Because each VM supports a different signer type, the default signer can only support a single VM type. For instance, if the default signer is a ECDSA one, it will only be able to sign on EVM chains.
+
+</Info>
+
+**Description:** The default signer that should be used for all chains which did not specify their own.
+
+**Optional:** Yes
+
+**Agents:** All
+
+**Type:** `SignerConf (Object)`
+
+<CodeGroup>
+```bash As Arg
+--defaultSigner.*
+```
+
+```bash As Env
+export HYP_DEFAULTSIGNER_*="...."
+```
+
+```json As Config
+{
+  "defaultsigner": {}
+}
+```
+
+</CodeGroup>
+
+## defaultsigner.type
+
+**Description:** The type of signer that is defined. A `HexKey` signer uses a private key, an `Aws` signer uses an AWS-based KMS, and `Node` assumes the local node will sign RPC calls.
+
+**Optional:** Yes; Defaults to `node` unless a `key` is specified in which case it defaults to `hexKey`
+
+**Agents:** All
+
+**Type:** `Enum ("hexKey" | "aws" | "cosmosKey" | "node")`
+
+<CodeGroup>
+```bash As Arg
+--defaultSigner.type hexKey
+```
+
+```bash As Env
+export HYP_DEFAULTSIGNER_TYPE="hexKey"
+```
+
+```json As Config
+{
+  "defaultsigner": {
+    "type": "hexKey"
+  }
+}
+```
+
+</CodeGroup>
+
+## defaultsigner.key
+
+**Description:** A hex key. The hex string of a private key.
+
+**Requires:** `defaultsigner.type = "hexKey" | undefined`
+
+**Optional:** No (iff requirements are met)
+
+**Agents:** All
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--defaultSigner.key "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"
+```
+
+```bash As Env
+export HYP_DEFAULTSIGNER_KEY="8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"
+```
+
+```json As Config
+{
+  "defaultsigner": {
+    "type": "hexKey",
+    "key": "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"
+  }
+}
+```
+
+</CodeGroup>
+
+## defaultsigner.id
+
+**Description:** The UUID identifying the AWS KMS key
+
+**Requires:** `defaultsigner.type = "aws"`
+
+**Optional:** No (iff requirements are met)
+
+**Agents:** All
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--defaultSigner.id "alias/validator-signer-ethereum"
+```
+
+```bash As Env
+export HYP_DEFAULTSIGNER_ID="alias/validator-signer-ethereum"
+```
+
+```json As Config
+{
+  "defaultsigner": {
+    "type": "aws",
+    "id": "alias/validator-signer-ethereum"
+  }
+}
+```
+
+</CodeGroup>
+
+## defaultsigner.region
+
+**Description:** The AWS region
+
+**Requires:** `defaultsigner.type = "aws"`
+
+**Optional:** No (iff requirements are met)
+
+**Agents:** All
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--defaultSigner.region us-east-1
+```
+
+```bash As Env
+export HYP_DEFAULTSIGNER_REGION="us-east-1"
+```
+
+```json As Config
+{
+  "defaultsigner": {
+    "type": "aws",
+    "region": "us-east-1"
+  }
+}
+```
+
+</CodeGroup>
+## metricsport
+
+**Description:** Port to expose prometheus metrics on
+
+**Optional:** Defaults to `9090`
+
+**Agents:** All
+
+**Type:** `Numeric (string | number)`
+
+<CodeGroup>
+```bash As Arg
+--metrics-port 9090
+```
+
+```bash As Env
+export HYP_METRICSPORT=9090
+```
+
+```json As Config
+{
+  "metrics": 9090
+}
+```
+
+</CodeGroup>
+
+## log.format
+
+**Description:** Configuration for the log module. This controls logging.
+
+**Optional:** Defaults to `pretty`
+
+**Agents:** All
+
+**Type:** `Enum ("pretty" | "json" | "full" | "compact")`
+
+<CodeGroup>
+```bash As Arg
+--log.format pretty
+```
+
+```bash As Env
+export HYP_LOG_FORMAT="pretty"
+```
+
+```json As Config
+{
+  "log": {
+    "format": "pretty"
+  }
+}
+```
+
+</CodeGroup>
+
+## log.level
+
+**Description:** Configuration for the log module. This controls logging. For full verbosity (including that of dependencies), use `dependencyTrace`.
+
+**Optional:** Defaults to `info`
+
+**Agents:** All
+
+**Type:** `Enum ("dependencyTrace" | "trace" | "debug" | "info" | "warn" | "error" | "off")`
+
+<CodeGroup>
+```bash As Arg
+--log.level info
+```
+
+```bash As Env
+export HYP_LOG_LEVEL="info"
+```
+
+```json As Config
+{
+  "log": {
+    "level": "info"
+  }
+}
+```
+
+</CodeGroup>
+
+## originchainname
+
+**Description:** Name of the chain a validator should validate for and name of the chain a relayer should relayer messages from. **Deprecated for Relayer, use** [#relaychains](#relaychains) **instead.**
+
+**Optional:** No - Validators; Yes - Relayer
+
+**Agents:** Validator & Relayer
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--originChainName ethereum
+```
+
+```bash As Env
+export HYP_ORIGINCHAINNAME="ethereum"
+```
+
+```json As Config
+{
+  "originchainname": "ethereum"
+}
+```
+
+</CodeGroup>
+
+## validator
+
+**Description:** The signer that should be used by the validator.
+
+**Optional:** Yes
+
+**Agents:** All
+
+**Type:** `SignerConf (Object)`
+
+<CodeGroup>
+```bash As Arg
+--validator.*
+```
+
+```bash As Env
+export HYP_VALIDATOR_*="...."
+```
+
+```json As Config
+{
+  "validator": {}
+}
+```
+
+</CodeGroup>
+
+## validator.type
+
+**Description:** The type of EVM signer that is defined. Note that regardless of the VM the validator is operating on, checkpoints are always signed using the EVM ECDSA curve. A `HexKey` signer uses a private key, an `Aws` signer uses an AWS based KMS, and `Node` assumes the local node will sign RPC calls.
+
+**Optional:** Yes; Defaults to `node` unless a `key` is specified in which case it defaults to `hexKey`
+
+**Agents:** All
+
+**Type:** `Enum ("hexKey" | "aws" | "node")`
+
+<CodeGroup>
+```bash As Arg
+--validator.type hexKey
+```
+
+```bash As Env
+export HYP_VALIDATOR_TYPE="hexKey"
+```
+
+```json As Config
+{
+  "validator": {
+    "type": "hexKey"
+  }
+}
+```
+
+</CodeGroup>
+
+## validator.key
+
+**Description:** A hex key. The hex string of a private key.
+
+**Requires:** `validator.type = "hexKey" | undefined`
+
+**Optional:** No (iff requirements are met)
+
+**Agents:** All
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--validator.key 8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61
+```
+
+```bash As Env
+export HYP_VALIDATOR_KEY="8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"
+```
+
+```json As Config
+{
+  "validator": {
+    "type": "hexKey",
+    "key": "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"
+  }
+}
+```
+
+</CodeGroup>
+
+## validator.id
+
+**Description:** The UUID identifying the AWS KMS key
+
+**Requires:** `validator.type = "aws"`
+
+**Optional:** No (iff requirements are met)
+
+**Agents:** All
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--validator.id "alias/validator-signer-ethereum"
+```
+
+```bash As Env
+export HYP_VALIDATOR_ID="alias/validator-signer-ethereum"
+```
+
+```json As Config
+{
+  "validator": {
+    "type": "aws",
+    "id": "alias/validator-signer-ethereum"
+  }
+}
+```
+
+</CodeGroup>
+
+## validator.region
+
+**Description:** The AWS region
+
+**Requires:** `validator.type = "aws"`
+
+**Optional:** No (iff requirements are met)
+
+**Agents:** All
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--validator.region us-east-1
+```
+
+```bash As Env
+export HYP_VALIDATOR_REGION="us-east-1"
+```
+
+```json As Config
+{
+  "validator": {
+    "type": "aws",
+    "region": "us-east-1"
+  }
+}
+```
+
+</CodeGroup>
+
+## checkpointsyncer.type
+
+**Description:** Defines the method of syncing checkpoints
+
+**Optional:** No
+
+**Agents:** Validator
+
+**Type:** `Enum ("localStorage" | "s3")`
+
+<CodeGroup>
+```bash As Arg
+--checkpointSyncer.type localStorage
+```
+
+```bash As Env
+export HYP_CHECKPOINTSYNCER_TYPE="localStorage"
+```
+
+```json As Config
+{
+  "checkpointsyncer": {
+    "type": "localStorage"
+  }
+}
+```
+
+</CodeGroup>
+## checkpointsyncer.path
+
+**Description:** Path on the local disk of a local storage type checkpoint syncer configuration.
+
+**Requires:** `checkpointsyncer.type = "localStorage"`
+
+**Optional:** No (iff conditions are met)
+
+**Agents:** Validator
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--checkpointSyncer.path "/tmp/syncer"
+```
+
+```bash As Env
+export HYP_CHECKPOINTSYNCER_PATH="/tmp/syncer"
+```
+
+```json As Config
+{
+  "checkpointsyncer": {
+    "type": "localStorage",
+    "path": "/tmp/syncer"
+  }
+}
+```
+
+</CodeGroup>
+
+## checkpointsyncer.bucket
+
+**Description:** S3 bucket name
+
+**Requires:** `checkpointsyncer.type = "s3"`
+
+**Optional:** No (iff conditions are met)
+
+**Agents:** Validator
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--checkpointSyncer.bucket signatures-ethereum
+```
+
+```bash As Env
+export HYP_CHECKPOINTSYNCER_BUCKET="signatures-ethereum"
+```
+
+```json As Config
+{
+  "checkpointsyncer": {
+    "type": "s3",
+    "bucket": "signatures-ethereum"
+  }
+}
+```
+
+</CodeGroup>
+
+## checkpointsyncer.folder
+
+**Description:** Folder in the S3 bucket
+
+**Requires:** `checkpointsyncer.type = "s3"`
+
+**Optional:** No (iff conditions are met)
+
+**Agents:** Validator
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--checkpointSyncer.folder signatures-ethereum
+```
+
+```bash As Env
+export HYP_CHECKPOINTSYNCER_FOLDER="signatures-ethereum"
+```
+
+```json As Config
+{
+  "checkpointsyncer": {
+    "type": "s3",
+    "folder": "signatures-ethereum"
+  }
+}
+```
+
+</CodeGroup>
+
+## checkpointsyncer.region
+
+**Description:** S3 bucket region
+
+**Requires:** `checkpointsyncer.type = "s3"`
+
+**Optional:** No (iff conditions are met)
+
+**Agents:** Validator
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--checkpointSyncer.region us-east-1
+```
+
+```bash As Env
+export HYP_CHECKPOINTSYNCER_REGION="us-east-1"
+```
+
+```json As Config
+{
+  "checkpointsyncer": {
+    "type": "s3",
+    "region": "us-east-1"
+  }
+}
+```
+
+</CodeGroup>
+
+## interval
+
+**Description:** How frequently the validator should check for new checkpoints in seconds? See also [latencies](/docs/reference/addresses/validators/latencies).
+
+**Optional:** No
+
+**Agents:** Validator
+
+**Type:** `Numeric (string | number)`
+
+<CodeGroup>
+```bash As Arg
+--interval 30
+```
+
+```bash As Env
+export HYP_INTERVAL=30
+```
+
+```json As Config
+{
+  "interval": 30
+}
+```
+
+</CodeGroup>
+
+## db
+
+**Description:** This is a local filesystem path to where the agents store relevant data on disk. **This must be unique per agent!** Multiple agents must have different paths. The path is relative to the current working directory if it does not start with a system defined root path such as `/` on unix. When using docker images, ensure that this folder gets persisted across runs.
+
+For the scraper, this is the connection string to a postgresql database.
+
+**Optional:** For validators and relayer it is optional and defaults to a path in the current working directory which includes the `originchainname`. For the scraper it is required.
+
+**Agents:** All
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+# Validator
+--db "/tmp/hyp/validator/ethereum-cache"
+
+# Relayer
+
+--db "/tmp/hyp/relayer/ethereum-cache"
+
+# Scraper
+
+--db "postgresql://postgres:password@localhost:5432/dbname"
+
+````
+
+```bash As Env
+# Validator
+export HYP_DB="/tmp/hyp/validator/ethereum-cache"
+
+# Relayer
+export HYP_DB="/tmp/hyp/relayer/ethereum-cache"
+
+# Scraper
+export HYP_DB="postgresql://postgres:password@localhost:5432/dbname"
+````
+
+```json As Config
+# For the validator:
+{
+  "db": "/tmp/hyp/validator/ethereum-cache"
+}
+
+# For the relayer:
+{
+  "db": "/tmp/hyp/relayer/ethereum-cache"
+}
+
+# For the scraper:
+{
+  "db": "postgresql://postgres:password@localhost:5432/dbname"
+}
+```
+
+</CodeGroup>
+
+## relaychains
+
+**Description:** List of chains to deliver messages between.
+
+**Optional:** No
+
+**Agents:** Relayer
+
+**Type:** `string` (comma separated list)
+
+<CodeGroup>
+```bash As Arg
+--relayChains "arbitrum,ethereum,bsc"
+```
+
+```bash As Env
+export HYP_RELAYCHAINS="arbitrum,ethereum,bsc"
+```
+
+```json As Config
+{
+  "relaychains": "arbitrum,ethereum,bsc"
+}
+```
+
+</CodeGroup>
+
+## gaspaymentenforcement
+
+**Description:** JSON stringified array of gas payment enforcement configurations sorted by highest priority first. The last policy should be a catch-all and handle any messages that did not match a previous policy.
+
+**Optional:** Defaults to no enforcement (`[{"type": "none"}]`)
+
+**Agents:** Relayer
+
+**Type:** `JSON (string)`
+
+<CodeGroup>
+```typescript Type Definition
+type gaspaymentenforcement = Array<GasPaymentEnforcementPolicy>;
+
+type GasPaymentEnforcementPolicy =
+| // fields specific to each type...
+// No requirements - all messages are processed regardless of gas payment
+({
+type: "none";
+} & {
+// Messages that have paid a minimum amount will be processed
+type: "minimum";
+payment: U256;
+} & { type: "onChainFeeQuoting"; gasfraction?: GasFraction }) // to on-chain fee quoting. `gasfraction` defaults to "1 / 2". // Required amount of gas on the foreign chain has been paid according
+| {
+// all types have the following fields...
+// If a message matches, this policy will be used.
+// If no matching list is specified, all messages will match.
+matchingList?: MatchingList;
+};
+
+// A list of matching rules. A message matches if any of the list
+// elements matches the message.
+type MatchingList = Array<MatchingListElement>;
+
+// Matches a message if any of the provided values matches.
+interface MatchingListElement {
+originDomain?: NumericFilter;
+senderAddress?: HashFilter;
+destinationDomain?: NumericFilter;
+recipientAddress?: HashFilter;
+}
+
+type NumericFilter = Wildcard | U32 | Array<U32>;
+type HashFilter = Wildcard | H256 | Array<H256>;
+
+// 32-bit unsigned integer
+type U32 = number | string;
+// 256-bit unsigned integer; Note: `number` type has limited precision.
+type U256 = string | number;
+// 256-bit hash (can also be less) encoded as hex
+type H256 = string;
+// Matches anything
+type Wildcard = "\*";
+// A numeric string in the form `{numerator} / {denominator}`, e.g. "1 / 2"
+type GasFraction = string;
+
+````
+
+```bash As Arg
+--gasPaymentEnforcement '[
+  {"type": "none", "matchingList": [{"senderAddress": "0xa441b15fe9a3cf56661190a0b93b9dec7d041272"}]},
+  {"type": "minimum", "payment": 100000}
+]'
+````
+
+```bash As Env
+export HYP_GASPAYMENTENFORCEMENT='[
+  {"type": "none", "matchingList": [{"senderAddress": "0xa441b15fe9a3cf56661190a0b93b9dec7d041272"}]},
+  {"type": "minimum", "payment": 100000}
+]'
+```
+
+```json As Config
+{
+  "gaspaymentenforcement": "[{\"type\": \"none\", \"matchingList\": [{\"senderAddress\": \"0xa441b15fe9a3cf56661190a0b93b9dec7d041272\"}]}, {\"type\": \"minimum\", \"payment\": 100000}]"
+}
+```
+
+</CodeGroup>
+
+## whitelist
+
+**Description:** A matching list to define what messages should be allowed. Any messages which do not match this list will not be relayed. If no whitelist is supplied all messages will be allowed.
+
+See also [message filtering](/docs/operate/relayer/message-filtering)
+
+**Optional:** Yes
+
+**Agents:** Relayer
+
+**Type:** `JSON (string)`
+
+<CodeGroup>
+```typescript Type Definition
+// A list of matching rules. A message matches if any of the list
+// elements matches the message.
+type MatchingList = Array<MatchingListElement>;
+
+// Matches a message if any of the provided values matches.
+interface MatchingListElement {
+originDomain?: NumericFilter
+senderAddress?: HashFilter
+destinationDomain?: NumericFilter
+recipientAddress?: HashFilter
+}
+
+type NumericFilter = Wildcard | U32 | Array<U32>;
+type HashFilter = Wildcard | H256 | Array<H256>;
+
+// 32-bit unsigned integer
+type U32 = number | string;
+// 256-bit hash (can also be less) encoded as hex
+type H256 = string;
+// Matches anything
+type Wildcard = "\*";
+
+````
+
+```bash As Arg
+--whitelist '[
+  {"senderAddress": "0xa441b15fe9a3cf56661190a0b93b9dec7d041272", "originDomain": [1, 42]},
+  {"destinationDomain": 1}
+]'
+````
+
+```bash As Env
+export HYP_WHITELIST='[
+  {"senderAddress": "0xa441b15fe9a3cf56661190a0b93b9dec7d041272", "originDomain": [1, 42]},
+  {"destinationDomain": 1}
+]'
+```
+
+```json As Config
+{
+  "whitelist": "[{\"senderAddress\": \"0xa441b15fe9a3cf56661190a0b93b9dec7d041272\", \"originDomain\": [1, 42]}, {\"destinationDomain\": 1}]"
+}
+```
+
+</CodeGroup>
+
+## blacklist
+
+**Description:** A matching list to define what messages should be ignored. Any messages which match this list will not be relayed. If no blacklist is supplied all messages will be allowed.
+
+See also [message filtering](/docs/operate/relayer/message-filtering)
+
+**Optional:** Yes
+
+**Agents:** Relayer
+
+**Type:** `JSON (string)`
+
+<CodeGroup>
+```typescript Type Definition
+type blacklist = MatchingList | undefined;
+
+// A list of matching rules. A message matches if any of the list
+// elements matches the message.
+type MatchingList = Array<MatchingListElement>;
+
+// Matches a message if any of the provided values matches.
+interface MatchingListElement {
+originDomain?: NumericFilter;
+senderAddress?: HashFilter;
+destinationDomain?: NumericFilter;
+recipientAddress?: HashFilter;
+}
+
+type NumericFilter = Wildcard | U32 | Array<U32>;
+type HashFilter = Wildcard | H256 | Array<H256>;
+
+// 32-bit unsigned integer
+type U32 = number | string;
+// 256-bit hash (can also be less) encoded as hex
+type H256 = string;
+// Matches anything
+type Wildcard = "\*";
+
+````
+
+```bash As Arg
+--blacklist '[
+  {"senderAddress": "0xa441b15fe9a3cf56661190a0b93b9dec7d041272", "originDomain": [1, 42]},
+  {"destinationDomain": 1}
+]'
+````
+
+```bash As Env
+export HYP_BLACKLIST='[
+  {"senderAddress": "0xa441b15fe9a3cf56661190a0b93b9dec7d041272", "originDomain": [1, 42]},
+  {"destinationDomain": 1}
+]'
+```
+
+```json As Config
+{
+  "blacklist": "[{\"senderAddress\": \"0xa441b15fe9a3cf56661190a0b93b9dec7d041272\", \"originDomain\": [1, 42]}, {\"destinationDomain\": 1}]"
+}
+```
+
+</CodeGroup>
+
+## transactiongaslimit
+
+**Description:** The max allowable gas to relay a transaction.
+
+**Optional:** Defaults to no limit
+
+**Agents:** Relayer
+
+**Type:** `Numeric (string | number)`
+
+<CodeGroup>
+```bash As Arg
+--transactionGasLimit 250000000
+```
+
+```bash As Env
+export HYP_TRANSACTIONGASLIMIT="250000000"
+```
+
+```json As Config
+{
+  "transactiongaslimit": "250000000"
+}
+```
+
+</CodeGroup>
+
+## skiptransactiongaslimitfor
+
+**Description:** List of domain ids to skip applying the `transactiongaslimit` for.
+
+**Optional:** Defaults to using the `transactiongaslimit` for all domains
+
+**Agents:** Relayer
+
+**Type:** `string` (comma separated list of domain ids)
+
+<CodeGroup>
+```bash As Arg
+--skipTransactionGasLimitFor "43114,10,42220"
+```
+
+```bash As Env
+export HYP_SKIPTRANSACTIONGASLIMITFOR="43114,10,42220"
+```
+
+```json As Config
+{
+  "skiptransactiongaslimitfor": "43114,10,42220"
+}
+```
+
+</CodeGroup>
+
+## allowlocalcheckpointsyncers
+
+**Description:** Whether to allow local `checkpointsyncer` types, if `false` it will ignore them.
+
+**Optional:** Defaults to `false`
+
+**Agents:** Relayer
+
+**Type:** `boolean`
+
+<CodeGroup>
+```bash As Arg
+--allowLocalCheckpointSyncers false
+```
+
+```bash As Env
+export HYP_ALLOWLOCALCHECKPOINTSYNCERS=false
+```
+
+```json As Config
+{
+  "allowlocalcheckpointsyncers": false
+}
+```
+
+</CodeGroup>
+
+## AWS_ACCESS_KEY_ID
+
+**Description:** (Env only) The access key ID of your validator's AWS IAM user.
+
+**Optional**: Required if any signer configuration uses `aws`
+
+**Agents:** Relayer & Validator
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+# Not supported as an argument
+```
+
+```bash As Env
+export AWS_ACCESS_KEY_ID="AKIAIOSFODNN7EXAMPLE"
+```
+
+```json As Config
+# Not supported in configuration files
+```
+
+</CodeGroup>
+
+## AWS_SECRET_ACCESS_KEY
+
+**Description:** (Env only) The secret access key of your validator's AWS IAM user.
+
+**Optional:** Required if any signer configuration uses `aws`
+
+**Agents:** Relayer & Validator
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+# Not supported as an argument
+```
+
+```bash As Env
+export AWS_SECRET_ACCESS_KEY="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+```
+
+```json As Config
+# Not supported in configuration files
+```
+
+</CodeGroup>

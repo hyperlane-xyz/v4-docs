@@ -1,0 +1,9 @@
+{
+  "name": "scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@hyperlane-xyz/registry": "latest",
+    "@hyperlane-xyz/sdk": "latest"
+  }
+}

@@ -1,0 +1,57 @@
+---
+title: "OP Stack Hook"
+---
+
+Optimism and other [OP Stack](https://stack.optimism.io/) rollups have their own interface for message passing between L1 and L2 called the `CrossDomainMessenger`. Messages passed via this interface benefit from the security of the rollup [settlement layer](https://stack.optimism.io/docs/understand/landscape/#execution).
+
+```solidity
+interface ICrossDomainMessenger {
+    function sendMessage(
+        address target,
+        bytes calldata message,
+        uint32 gasLimit
+    ) external;
+}
+```
+
+To provide this security as an option in Hyperlane, we created a Hook and ISM combo that can be transparently configured to reuse the native OP Stack interface.
+
+See the [addresses](/docs/reference/addresses/deployments/mainnet/mailbox) page for Hook and ISM addresses.
+
+## How It Works
+
+The OPStackHook sends the messageId to the L1CrossDomainMessenger which registers it as an Optimism `TransactionDeposited` event with ETH deposit and message data which gets picked up by the rollup node.
+The rollup node calls the precompiled contract `L2CrossDomainMessenger`'s relayMessage function which in turn makes calls configured OptimismISM contract, setting the messageId in the verifiedMessageId's mapping to the original L1 sender (ie. the user). The relayer carries just the message with no metadata, waiting for the Optimism node to pick and make a storage write to Optimism and the message delivery is then verified.
+
+```mermaid
+flowchart TB
+    subgraph Origin L1
+      Sender
+      M_O[(Mailbox)]
+      Hook[OPStackHook]
+      L_1[(L1CrossDomainMessenger)]
+
+      Sender -- "dispatch(...)" --> M_O
+      M_O -- "postDispatch(message)" --> Hook
+      Hook -- "sendMessage(messageId)" --> L_1
+    end
+
+    M_O -. "relay" .-> M_D
+    L_1 -. "rollup node" .-> L_2
+
+    subgraph Destination L2
+      Recipient
+      M_D[(Mailbox)]
+      ISM{OPStackISM}
+      L_2[(L2CrossDomainMessenger)]
+
+      M_D -- "verify(..., message)" --> ISM
+      M_D -- "handle(...)" --> Recipient
+      ISM -. "interchainSecurityModule()" .- Recipient
+
+      L_2 -- "verifyMessageId(messageId)" --> ISM
+    end
+
+    style L_1 fill: #ff0402
+    style L_2 fill: #ff0402
+```

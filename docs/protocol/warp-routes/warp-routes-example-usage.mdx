@@ -1,0 +1,73 @@
+---
+title: "Warp Routes: Example Usage"
+description: "Warp Routes define how assets move between chains, whether as native tokens, synthetic representations, or collateral-backed assets. The choice of route depends on the asset type and the desired behavior on the destination chain."
+---
+
+## Warp Route Combinations[​](#warp-route-combinations "Direct link to Warp Route Combinations")
+
+### 1. Native to Native[​](#1-native-to-native "Direct link to 1. Native to Native")
+
+This route allows for the transfer of native tokens between chains that both use their own native tokens.
+
+<Info>
+  This type of route should only be used when both networks have native tokens
+  of equivalent value, e.g. inEVM & Ethereum.
+</Info>
+
+#### Setup[​](#setup "Direct link to Setup")
+
+- **HypNative** contract deployed on both chains.
+
+#### Example Flow[​](#example-flow "Direct link to Example Flow")
+
+```
+Transaction Type: Native to Native TransferFrom: Ethereum (ETH)To: inEVM (ETH)Amount: 1 ETH
+```
+
+#### Diagram[​](#diagram "Direct link to Diagram")
+
+#### Use Case[​](#use-case "Direct link to Use Case")
+
+- Alice wants to quickly move value from Ethereum to inEVM.
+
+### 2. Native to Synthetic[​](#2-native-to-synthetic "Direct link to 2. Native to Synthetic")
+
+This route creates a synthetic representation of a native token on another chain.
+
+#### Setup[​](#setup-1 "Direct link to Setup")
+
+- **HypNative** contract deployed on the origin chain where the native asset exists.
+- **HypERC20** contract deployed on the destination chain where the synthetic token is minted.
+
+#### Example Flow[​](#example-flow-1 "Direct link to Example Flow")
+
+```
+Transaction Type: Minting Synthetic Token from Native TokenFrom: Celo (CELO)To: Optimism (wCELO)Amount: 100 CELO
+```
+
+#### Diagram[​](#diagram-1 "Direct link to Diagram")
+
+#### Use Case[​](#use-case-1 "Direct link to Use Case")
+
+- A Celo-based project wants to make their native CELO token available for use on Optimism.
+
+### 3. Collateral to Synthetic[​](#3-collateral-to-synthetic "Direct link to 3. Collateral to Synthetic")
+
+This route allows for the creation of synthetic tokens based on collateralized ERC20 tokens.
+
+#### Setup[​](#setup-2 "Direct link to Setup")
+
+- **Collateral contract (HypERC20Collateral)** is deployed on the source chain where the original asset exists.
+- **Synthetic contract (HypERC20)** is deployed on the destination chain, where the asset is minted.
+
+#### Example Flow[​](#example-flow-2 "Direct link to Example Flow")
+
+```
+Transaction Type: Minting Synthetic Token from Collateral TokenFrom: Ethereum (USDC - Original Asset) - Collateral SourceTo: Arbitrum (wUSDC - Minted Synthetic Asset) - Synthetic DestinationAmount: 1000 USDC
+```
+
+#### Diagram[​](#diagram-2 "Direct link to Diagram")
+
+#### Use Case[​](#use-case-2 "Direct link to Use Case")
+
+- Alice wants to use her USDC on Arbitrum without moving actual USDC to Arbitrum or relying on Arbitrum's bridged USDC.

@@ -1,0 +1,10 @@
+---
+title: "Overview"
+---
+
+The Hyperlane protocol decouples the transport layer from the security layer of cross-chain message passing. To run a deployment, it relies on offchain agents that observe onchain activity and carry out either the transport or security aspects of the protocol.
+
+These agents are implemented in Rust and distributed as Docker images and binaries.
+
+1. [Relayers](/docs/protocol/agents/relayer) fulfill the message transport requirement of the protocol. They aggregate off-chain security metadata for the [`IInterchainSecurityModule` interface](/docs/protocol/ISM/modular-security#core-concepts) and deliver messages to their recipients.
+2. [Validators](/docs/protocol/agents/validators) fulfill the security requirement of the protocol, as part of the [Multisig ISM](/docs/protocol/ISM/standard-ISMs/multisig-ISM) or the [Hyperlane AVS](/docs/protocol/ISM/economic-security/hyperlane-avs), by attesting to the validity of [Mailbox](/docs/protocol/core/mailbox) messages and making their signatures available to a relayer.

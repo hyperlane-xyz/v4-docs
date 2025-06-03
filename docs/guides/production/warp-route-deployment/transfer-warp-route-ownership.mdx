@@ -1,0 +1,128 @@
+---
+title: "Transfer Ownership"
+---
+
+import PrerequisitesPartial from "/snippets/prerequisites-config-symbol.mdx";
+import WarpReadSymbolChainPartial from "/snippets/warp-read-symbol-chain.mdx";
+import WarpApplySymbolConfigDefaultPartial from "/snippets/warp-apply-symbol-config-default.mdx";
+
+This guide provides a step-by-step guide to transferring ownership of your Hyperlane Warp Route. It also explains the responsibilities, security considerations, and configuration options that come with owning a Warp Route.
+
+## Warp Route Ownership Overview
+
+Before transferring ownership of your Warp Route, it's important to understand what this ownership entails. Ownership grants control over configuration settings, such as the Interchain Security Module (ISM), Validator options, and other parameters critical to security.
+
+<Note>
+  Once a mailbox is set up on the chain, anyone can deploy a Warp Route. Warp
+  Routes are commonly deployed by a few different groups - the Abacus Works
+  team, the asset issuer, the chain team, or the application team.
+</Note>
+
+### Overview of Ownership
+
+- **Responsibilities:** As the owner, you take on responsibilities that include managing security configurations, like the ISM and Validator settings, to meet your specific security and operational goals.
+- **Security & Autonomy**: Ownership choices often come down to security and control preferences. We strongly recommend using a multisig like a Gnosis Safe for any production setups. Teams can choose **full ownership** for complete autonomy, or **joint ownership** on the multisig to share security management. Joint ownership enables collaborative decision-making on critical updates, which can increase trust for users and developers.
+
+### ISM, Validator, and Relayer Options
+
+When configuring or transferring a Warp Route, owners have flexibility in managing ISM, Validator, and Relayer settings:
+
+- **ISM Customization**: Each Warp Route may require a tailored ISM configuration depending on security needs. Owners can set up a custom ISM or use Hyperlane's default setup.
+- **Validator Options**: Ownership allows you to choose or manage your Validator set. Hyperlane can handle Validator responsibilities by default, making it optional to run your own.
+- **Relayer Support**: Hyperlane provides Relayer services by default, but teams can operate their own Relayers for more control over security, reliability, and costs. This customization enables teams to tailor message handling to fit specific performance, compliance, or operational requirements.
+
+## Warp Route Ownership Transfer Guide
+
+### Using the Hyperlane CLI
+
+One of the quickest way to transfer a warp route ownership is by using the [Hyperlane CLI](https://docs.hyperlane.xyz/docs/reference/developer-tools/cli).
+
+<PrerequisitesPartial />
+
+<Info>
+  If you followed the [Deploy a Warp
+  Route](/docs/guides/quickstart/deploy-warp-route) guide, you may have deployed
+  a warp route with the owner set to the single private key. In production, it
+  is advisable to use a multisig.
+</Info>
+
+To confirm using the Hyperlane CLI, locate your token symbol and the chain it is deployed on:
+
+<WarpReadSymbolChainPartial />
+
+You should be able to select the warp route that you wish to update the ownership for.
+
+After running `warp read`, you should see a similar config with `owner` set to private key's address:
+
+```yaml {3}
+yourchain:
+  mailbox: "0x979Ca5202784112f4738403dBec5D0F3B9daabB9"
+  owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  ...
+```
+
+By default, `warp read` will save the output to `CURRENT_DIR/configs/warp-route-deployment.yaml`. Follow these steps using the CLI to transfer the existing ownership to another address.
+
+## Step 1: Configuration
+
+Update `owner` address in the `warp-route-deployment.yaml`
+
+```diff title="warp-route-deployment.yaml"
+yourchain:
+  mailbox: '0x979Ca5202784112f4738403dBec5D0F3B9daabB9'
+- owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
++ owner: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+  interchainSecurityModule:
+    address: '0xd54d32cD6a62482497252D59E6cCC1445fF0b92d'
+    type: staticAggregationIsm
+    modules:
+      - owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+        address: '0xcE512189fF1BD41186E9eDda02BF321Fb1FC6eAc'
+        type: defaultFallbackRoutingIsm
+        domains: {}
+    threshold: 1
+  name: Ether
+  symbol: ETH
+  decimals: 18
+  totalSupply: 0
+  type: native
+
+```
+
+## Step 2: Apply
+
+Using the CLI, execute by providing the token symbol and warp route config:
+
+<WarpApplySymbolConfigDefaultPartial />
+
+You should see a batch of transactions executed on chain, and a final message indicating that the warp config has been updated.
+
+## Step 3: Confirm
+
+To confirm that the owner was successfully updated using the Hyperlane CLI, run the following command with your token symbol and the chain it is deployed on:
+
+<WarpReadSymbolChainPartial />
+
+After running `warp read`, you should see a similar config with the now updated `owner`:
+
+```yaml {3}
+yourchain:
+  mailbox: "0x979Ca5202784112f4738403dBec5D0F3B9daabB9"
+  owner: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+  interchainSecurityModule:
+    address: "0x8af9445d8A3FbFBd1D5dF185B8a4533Ab060Cf36"
+    type: staticAggregationIsm
+    modules:
+      - owner: "0xe738d6e51aad88F6F4ce6aB8827279cffFb94876"
+        address: "0xBe0232d5d45f9aD8322C2C4F84c39e64302Cd996"
+        type: defaultFallbackRoutingIsm
+        domains: {}
+    threshold: 1
+  name: Ether
+  symbol: ETH
+  decimals: 18
+  totalSupply: 0
+  type: native
+```
+
+By completing these steps, you have successfully transferred and verified ownership of your Warp Route to a new address.

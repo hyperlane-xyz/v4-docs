@@ -1,0 +1,39 @@
+---
+title: "Protocol Overview"
+description: "An overview of Hyperlane's cross-chain messaging protocol and core components"
+---
+
+Hyperlane is the first layer that allows smart contract developers to send arbitrary data between blockchains.
+
+Developers can use Hyperlane to move tokens, execute function calls, and many other things that allow for the creation of interchain applications, apps that can be accessed by users on any blockchain.
+
+Users interface with the Hyperlane protocol via [Mailbox](/docs/protocol/core/mailbox) smart contracts, which provide an on-chain messaging interface to send and receive interchain messages.
+
+Hyperlane takes a modular approach to security, allowing applications to configure and choose from a selection of [Interchain Security Modules](/docs/protocol/ISM/modular-security) (ISMs). Applications may specify an ISM to customize the security model that secures their integration with the Hyperlane messaging interface.
+
+```mermaid
+flowchart TB
+    subgraph Origin
+      Sender
+      M_O[(Mailbox)]
+
+      Sender -- "1.dispatch(destination,<br>recipient, body)" --> M_O
+    end
+
+    M_O -. "2.emit dispatch(sender,<br>destination, recipient,<br>body)" .-> Relayer
+
+    subgraph Destination
+      Recipient
+      M_D[(Mailbox)]
+      ISM[InterchainSecurityModule]
+
+      M_D -. "4.interchainSecurityModule()" .-> Recipient
+      M_D -- "5.verify(metadata,<br>message)" --> ISM
+      M_D -- "6.handle(origin, sender,<br>body)" --> Recipient
+    end
+
+    Relayer((Relayer)) -- "3.process(metadata,<br>message)" --> M_D
+
+    style Sender fill:#efab17
+    style Recipient fill:#efab17
+```

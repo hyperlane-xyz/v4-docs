@@ -1,0 +1,94 @@
+---
+title: "Receive a message"
+description: "How to handle and verify incoming interchain messages with Hyperlane's Mailbox contract"
+---
+
+To deliver interchain messages, the [relayer](/docs/operate/relayer/run-relayer.mdx) calls `Mailbox.process()`.
+
+This function takes as parameters the message to deliver, as well as arbitrary metadata that can be specified by the relayer.
+
+The `Mailbox` will pass the message and metadata to the recipient's Interchain Security Module (ISM) for verification. If the ISM successfully verifies the message, the `Mailbox` delivers the message to the recipient by calling `recipient.handle()`.
+
+<Info>
+  See
+  [`Message.sol`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/libs/Message.sol)
+  for more details on Hyperlane message encoding
+</Info>
+
+## Handle
+
+This function is called by the `Mailbox` contract when a message is received.
+
+<Warning>
+  To ensure only valid interchain messages are accepted, it is important to
+  restrict [access control](#access-control) to the Mailbox address.
+</Warning>
+
+### Solidity
+
+```solidity
+function handle(
+    uint32 _origin,
+    bytes32 _sender,
+    bytes calldata _messageBody
+) external;
+```
+
+**Parameters**
+
+- `origin`: Domain of origin chain
+- `sender`: Address of sender on origin chain as bytes32
+- `messageBody`: Raw bytes content of message body
+
+<Info>
+Sender addresses are left-padded to `bytes32` for compatibility with virtual machines that are addressed differently. The following utility is provided in the [`TypeCasts` library](/docs/reference/developer-tools/libraries/typecasts.mdx) for convenience.
+
+```solidity
+function bytes32ToAddress(bytes32 _bytes32) internal pure returns (address) {
+    return address(uint160(uint256(_bytes32)));
+}
+```
+
+</Info>
+
+### Access Control
+
+The `handle` function should be restricted to the Mailbox address if the contract should only accept calls from interchain messages.
+
+The following utility is provided in the [`MailboxClient` library](/docs/reference/developer-tools/libraries/mailbox-client) for convenience.
+
+```solidity
+modifier onlyMailbox() {
+    require(
+        msg.sender == address(mailbox),
+        "MailboxClient: sender not mailbox"
+    );
+    _;
+}
+```
+
+### Examples
+
+```solidity
+function handle(
+    uint32 _origin,
+    bytes32 _sender,
+    bytes calldata _messageBody
+) external override onlyMailbox {
+    lastSender = _sender;
+    lastData = _messageBody;
+    emit ReceivedMessage(_origin, _sender, _messageBody);
+}
+```
+
+## Verify
+
+When a message is received, the Mailbox will verify security with an [Interchain Security Module](../ISM/specify-your-ISM.mdx) before calling the message recipient's `handle`.
+
+### Default Security
+
+To query the default ISM address, you can call the `defaultIsm` function.
+
+### Modular Security
+
+To leverage Hyperlane's modular security, message recipients can specify a custom Interchain Security Module to **verify anything** about incoming messages. The Mailbox will defer to this ISM when specified.

@@ -1,0 +1,166 @@
+---
+title: "Quickstart with Docker Compose and AWS"
+---
+
+Using Docker Compose provides a structured way to manage validator deployments while maintaining the flexibility of raw Docker. You can find the full specification of the format in the [Docker docs](https://docs.Docker.com/compose/compose-file/).
+
+## 1. Setup validator key
+
+Follow the guide [here](/docs/operate/set-up-agent-keys#2-aws-kms) for creating agent keys with AWS KMS.
+
+## 2. Create S3 bucket for signatures
+
+Follow the guide [here](/docs/operate/validators/validator-signatures-aws) for creating and configuring an S3 bucket for your validator to write signatures to.
+
+## 3. (AVS Operators Only) Register with Hyperlane AVS[​](#3-avs-operators-only-register-with-hyperlane-avs "Direct link to 3. (AVS Operators Only) Register with Hyperlane AVS")
+
+If you are an AVS operator, follow the guide [here](/docs/operate/guides/avs-operator-guide#4-register-your-operator) to register with the Hyperlane AVS.
+
+## 4. Setup validator environment
+
+### Create config files
+
+In this example, we will run three chains.
+
+```bash
+mkdir -p ethereum/hyperlane_db optimism/hyperlane_db base/hyperlane_db && \
+touch ethereum/config.json optimism/config.json base/config.json docker-compose.yml .env.ethereum .env.optimism .env.base
+```
+
+### Edit each config.json
+
+You can read more about Agent Configs [here](/docs/operate/config/agent-config).
+
+| Parameter                 | Description                                                                                                                                                                |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `customRpcUrls`           | A comma-separated list of performant RPC endpoints for the chain you wish to support. We recommend using paid providers to avoid rate limiting.                            |
+| `chains.ethereum`         | Should be changed to `chains.base` in the base/config.json, and `chains.optimism` in optimism/config.json.                                                                 |
+| `signer.region`           | Should be adjusted to your AWS region.                                                                                                                                     |
+| `validator.region`        | Should be adjusted to your AWS region.                                                                                                                                     |
+| `signer.id`               | Should be adjusted to your AWS KMS id you configured in step 3, prefixed with `alias/`.                                                                                    |
+| `validator.id`            | Should be adjusted to your AWS KMS id you configured in step 3, prefixed with `alias/`.                                                                                    |
+| `originChainName`         | Should be the chain you are validating.                                                                                                                                    |
+| `checkpointSyncer.bucket` | Should reflect the name of the S3 bucket.                                                                                                                                  |
+| `checkpointSyncer.folder` | The name of the folder the validator will use within the bucket. You may use the same bucket for multiple validators, but ensure each folder name is unique per validator. |
+| `reorgPeriod`             | May be different for each chain. [Find the reorgPeriods](https://github.com/hyperlane-xyz/hyperlane-registry/tree/main/chains).                                            |
+
+Here is an example agent config.
+
+```json
+{
+  "chains": {
+    "ethereum": {
+      "customRpcUrls": "https://eth.llamarpc.com,https://rpc.mevblocker.io",
+      "signer": {
+        "region": "us-east-1",
+        "type": "aws",
+        "id": "alias/hyperlane-validator-signer"
+      }
+    }
+  },
+  "originChainName": "ethereum",
+  "db": "/mnt/hyperlane_db",
+  "validator": {
+    "id": "alias/hyperlane-validator",
+    "type": "aws",
+    "region": "us-east-1"
+  },
+  "checkpointSyncer": {
+    "bucket": "hyperlane-validator-signatures",
+    "region": "us-east-1",
+    "type": "s3",
+    "folder": "ethereum"
+  },
+  "reorgPeriod": 14,
+  "metricsPort": "9090"
+}
+```
+
+### Edit each .env file
+
+You should change the service name, AWS credentials for each chain.
+
+```bash
+AWS_ACCESS_KEY_ID=<Your AWS access key ID>
+AWS_SECRET_ACCESS_KEY=<Your AWS secret access key>
+SERVICE_NAME=ethereum
+```
+
+## 5. Configure Docker Compose (docker-compose.yml)
+
+```yaml
+x-common-attributes: &common-validator
+  image: gcr.io/abacus-labs-dev/hyperlane-agent:agents-v1.4.0
+  command: ./validator
+  container_name: ${SERVICE_NAME}-validator
+  environment:
+    CONFIG_FILES: /config.json
+    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+  volumes:
+    - ./${SERVICE_NAME}/hyperlane_db:/mnt/hyperlane_db
+    - ./${SERVICE_NAME}/config.json:/config.json
+  restart: unless-stopped
+
+services:
+  ethereum-validator:
+    <<: *common-validator
+    ports:
+      - "9091:9090/tcp"
+
+  optimism-validator:
+    <<: *common-validator
+    ports:
+      - "9092:9090/tcp"
+
+  base-validator:
+    <<: *common-validator
+    ports:
+      - "9093:9090/tcp"
+```
+
+Your directory structure should look similar to this:
+
+```bash
+.
+├── base
+│   ├── config.json
+│   └── hyperlane_db
+├── docker-compose.yml
+├── ethereum
+│   ├── config.json
+│   └── hyperlane_db
+├── .env.base
+├── .env.ethereum
+├── .env.optimism
+└── optimism
+    ├── config.json
+    └── hyperlane_db
+```
+
+## 6. Run the Hyperlane Validators
+
+Bring the containers up:
+
+Remember to fund your validator address so the validator can announce.
+
+```bash
+docker compose --env-file .env.ethereum up ethereum-validator -d
+docker compose --env-file .env.optimism up optimism-validator -d
+docker compose --env-file .env.base up base-validator -d
+```
+
+Ensure there are no errors:
+
+```bash
+docker logs -f ethereum-validator
+docker logs -f optimism-validator
+docker logs -f base-validator
+```
+
+<Tip>
+  **Running Multiple Validators**: Running multiple validators improves
+  reliability and ensures message validation continues even if one fails. Learn
+  more about the setup and requirements
+  [here](/docs/operate/validators/run-validators#running-multiple-validators).
+</Tip>

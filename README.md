@@ -1,32 +1,49 @@
-# Mintlify Starter Kit
+# Hyperlane Documentation
 
-Click on `Use this template` to copy the Mintlify starter kit. The starter kit contains examples including
+Developer documentation for the Hyperlane Protocol.
 
-- Guide pages
-- Navigation
-- Customizations
-- API Reference pages
-- Use of popular components
+This documentation provides comprehensive guides, API references, and examples for building cross-chain applications with Hyperlane.
 
-### Development
+## What You'll Find Here
 
-Install the [Mintlify CLI](https://www.npmjs.com/package/mintlify) to preview the documentation changes locally. To install, use the following command
+- **Protocol Overview** - Understanding Hyperlane's architecture and core concepts
+- **Developer Guides** - Step-by-step tutorials for building interchain applications
+- **Smart Contract References** - Complete API documentation for Hyperlane contracts
+- **SDK Documentation** - TypeScript/JavaScript library references
+- **Security Modules** - Configuring and deploying custom security models
+- **Deployment Guides** - Production deployment best practices
 
-```
+## Local Development
+
+Install the [Mintlify CLI](https://www.npmjs.com/package/mintlify) to preview documentation changes locally:
+
+```bash
 npm i -g mintlify
 ```
 
-Run the following command at the root of your documentation (where docs.json is)
+Run the development server at the root of the documentation directory:
 
-```
+```bash
 mintlify dev
 ```
 
-### Publishing Changes
+## Contributing
 
-Install our Github App to auto propagate changes from your repo to your deployment. Changes will be deployed to production automatically after pushing to the default branch. Find the link to install on your dashboard. 
+This documentation is open source and contributions are welcome. To contribute:
 
-#### Troubleshooting
+1. Fork this repository
+2. Make your changes locally using `mintlify dev`
+3. Submit a pull request
 
-- Mintlify dev isn't running - Run `mintlify install` it'll re-install dependencies.
-- Page loads as a 404 - Make sure you are running in a folder with `docs.json`
+## Support
+
+For questions about Hyperlane:
+
+- [Discord Community](https://discord.gg/hyperlane)
+- [GitHub Discussions](https://github.com/hyperlane-xyz/hyperlane-monorepo/discussions)
+
+## Troubleshooting
+
+- **Mintlify dev isn't running**: Run `mintlify install` to re-install dependencies
+- **Page loads as 404**: Ensure you're running in a folder with `mint.json`
+- **Build errors**: Check that all referenced files exist and paths are correct

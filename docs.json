@@ -1,102 +1,398 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "name": "Hyperlane Docs",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#3578e5",
+    "light": "#6e9eff",
+    "dark": "#0e4baa"
   },
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Home",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "Overview",
             "pages": [
               "index",
-              "quickstart",
-              "development"
+              "docs/intro",
+              {
+                "group": "Deployments",
+                "pages": [
+                  {
+                    "group": "Contract Addresses",
+                    "pages": [
+                      {
+                        "group": "Mainnet",
+                        "pages": [
+                          "docs/reference/addresses/deployments/mainnet/mailbox",
+                          "docs/reference/addresses/deployments/mainnet/interchainGasPaymaster",
+                          "docs/reference/addresses/deployments/mainnet/storageGasOracle",
+                          "docs/reference/addresses/deployments/mainnet/merkleTreeHook",
+                          "docs/reference/addresses/deployments/mainnet/validatorAnnounce",
+                          "docs/reference/addresses/deployments/mainnet/proxyAdmin",
+                          "docs/reference/addresses/deployments/mainnet/testRecipient",
+                          "docs/reference/addresses/deployments/mainnet/interchainAccountRouter"
+                        ]
+                      },
+                      {
+                        "group": "Testnet",
+                        "pages": [
+                          "docs/reference/addresses/deployments/testnet/mailbox",
+                          "docs/reference/addresses/deployments/testnet/interchainGasPaymaster",
+                          "docs/reference/addresses/deployments/testnet/storageGasOracle",
+                          "docs/reference/addresses/deployments/testnet/merkleTreeHook",
+                          "docs/reference/addresses/deployments/testnet/validatorAnnounce",
+                          "docs/reference/addresses/deployments/testnet/proxyAdmin",
+                          "docs/reference/addresses/deployments/testnet/testRecipient",
+                          "docs/reference/addresses/deployments/testnet/interchainAccountRouter"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "group": "Default ISM Validators",
+                    "pages": [
+                      {
+                        "group": "Mainnet",
+                        "pages": [
+                          "docs/reference/addresses/validators/mainnet/default-ism-validators"
+                        ]
+                      },
+                      {
+                        "group": "Testnet",
+                        "pages": [
+                          "docs/reference/addresses/validators/testnet/default-ism-validators"
+                        ]
+                      }
+                    ]
+                  },
+                  "docs/reference/domains",
+                  "docs/reference/registries"
+                ]
+              }
             ]
           },
           {
-            "group": "Essentials",
+            "group": "Quickstart",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
+              "docs/guides/quickstart/deploy-warp-route",
+              "docs/guides/quickstart/local-testnet-setup"
+            ]
+          },
+          {
+            "group": "Applications",
+            "pages": [
+              {
+                "group": "Warp Routes",
+                "pages": [
+                  "docs/applications/warp-routes/overview",
+                  "docs/applications/warp-routes/interface",
+                  "docs/applications/warp-routes/types",
+                  "docs/applications/warp-routes/example-usage"
+                ]
+              },
+              "docs/applications/interchain-account"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              {
+                "group": "Setup Hyperlane on your Chain",
+                "pages": [
+                  "docs/guides/chains/deploy-hyperlane",
+                  "docs/guides/chains/deploy-hyperlane-with-local-agents"
+                ]
+              },
+              {
+                "group": "Warp Routes",
+                "pages": [
+                  {
+                    "group": "EVM Warp Routes",
+                    "pages": [
+                      "docs/guides/warp-routes/evm/deploy-yield-routes",
+                      "docs/guides/warp-routes/evm/fast-native-transfer-via-gas-token",
+                      "docs/guides/warp-routes/evm/extending-warp-routes",
+                      "docs/guides/warp-routes/evm/xerc20-warp-route",
+                      "docs/guides/warp-routes/evm/managing-warp-route-limits",
+                      "docs/guides/warp-routes/evm/deploy-multi-collateral-warp-routes",
+                      "docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing",
+                      "docs/guides/warp-routes/evm/transfer-and-call-pattern"
+                    ]
+                  },
+                  {
+                    "group": "SVM Warp Routes",
+                    "pages": [
+                      "docs/guides/warp-routes/svm/svm-warp-route-guide"
+                    ]
+                  },
+                  "docs/guides/warp-routes/evm-svm-warp-route-guide",
+                  "docs/guides/warp-routes/bridge-ui-guide"
+                ]
+              },
+              {
+                "group": "Go to Production",
+                "pages": [
+                  "docs/guides/production/prod-overview",
+                  {
+                    "group": "Core Deployment",
+                    "pages": [
+                      "docs/guides/production/core-deployment/update-mailbox-default-ism",
+                      "docs/guides/production/core-deployment/transfer-mailbox-ownership"
+                    ]
+                  },
+                  {
+                    "group": "Warp Route Deployment",
+                    "pages": [
+                      "docs/guides/production/warp-route-deployment/remove-trusted-relayer",
+                      "docs/guides/production/warp-route-deployment/transfer-warp-route-ownership"
+                    ]
+                  }
+                ]
+              },
+              "docs/guides/create-custom-hook-and-ism",
+              "docs/guides/deploy-hyperlane-troubleshooting"
+            ]
+          },
+          {
+            "group": "Developer Tools",
+            "pages": [
+              "docs/reference/developer-tools/cli",
+              {
+                "group": "Libraries",
+                "pages": [
+                  "docs/reference/developer-tools/libraries/mailbox-client",
+                  "docs/reference/developer-tools/libraries/router",
+                  "docs/reference/developer-tools/libraries/typecasts",
+                  "docs/reference/developer-tools/libraries/message",
+                  "docs/reference/developer-tools/libraries/hookmetadata"
+                ]
+              },
+              {
+                "group": "Typescript SDK",
+                "pages": [
+                  "docs/reference/developer-tools/typescript-sdk/overview",
+                  "docs/reference/developer-tools/typescript-sdk/transfer-fee-calculation"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              {
+                "group": "Hyperlane Explorer",
+                "pages": [
+                  "docs/reference/explorer/overview",
+                  "docs/reference/explorer/configuring-pi-chains",
+                  "docs/reference/explorer/graphql-api",
+                  "docs/reference/explorer/explorer-debugging"
+                ]
+              },
+              {
+                "group": "Developer Tips",
+                "pages": ["docs/reference/explorer/overview"]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "Learn",
         "groups": [
           {
-            "group": "API Documentation",
+            "group": "Introduction",
+            "pages": ["docs/protocol/protocol-overview"]
+          },
+          {
+            "group": "HYPER and Protocol Economics",
+            "pages": ["docs/protocol-economics/intro"]
+          },
+          {
+            "group": "Protocol",
             "pages": [
-              "api-reference/introduction"
+              "docs/protocol/core/mailbox",
+              "docs/protocol/core/fees",
+              "docs/protocol/core/interchain-gas-payment",
+              "docs/protocol/core/post-dispatch-hooks-overview",
+              {
+                "group": "Modular Security",
+                "pages": [
+                  "docs/protocol/ISM/modular-security",
+                  "docs/protocol/ISM/sequence-diagram",
+                  "docs/protocol/ISM/custom-ISM",
+                  {
+                    "group": "Standard ISMs",
+                    "pages": [
+                      {
+                        "group": "Multisig ISM",
+                        "pages": [
+                          "docs/protocol/ISM/standard-ISMs/multisig-ISM",
+                          "docs/reference/addresses/validators/latencies"
+                        ]
+                      },
+                      "docs/protocol/ISM/standard-ISMs/routing-ISM",
+                      "docs/protocol/ISM/standard-ISMs/aggregation-ISM",
+                      "docs/protocol/ISM/standard-ISMs/ccip-read-ISM"
+                    ]
+                  },
+                  {
+                    "group": "Economic Security",
+                    "pages": [
+                      "docs/protocol/ISM/economic-security/overview",
+                      "docs/protocol/ISM/economic-security/hyperlane-avs"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "Hyperlane Agents",
+                "pages": [
+                  "docs/protocol/agents/overview",
+                  "docs/protocol/agents/validators",
+                  "docs/protocol/agents/relayer"
+                ]
+              }
             ]
           },
           {
-            "group": "Endpoint Examples",
+            "group": "Reference",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              {
+                "group": "Send & Receive",
+                "pages": [
+                  "docs/reference/messaging/send",
+                  "docs/reference/messaging/receive"
+                ]
+              },
+              {
+                "group": "Hooks",
+                "pages": [
+                  "docs/reference/hooks/interchain-gas",
+                  "docs/reference/hooks/op-stack",
+                  "docs/reference/hooks/arbitrum-L2-to-L1",
+                  "docs/reference/hooks/polygon-pos"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Alt-VM Implementations & Guides",
+            "pages": [
+              "docs/alt-vm-implementations/overview",
+              "docs/alt-vm-implementations/implementation-guide",
+              "docs/alt-vm-implementations/cosmos-sdk"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "docs/resources/message-debugging",
+              "docs/resources/glossary",
+              "docs/resources//faq",
+              "docs/resources/audits"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Agent Operators",
+        "groups": [
+          {
+            "group": "Introduction",
+            "pages": ["docs/operate/overview-agents"]
+          },
+          {
+            "group": "Key Management",
+            "pages": ["docs/operate//set-up-agent-keys"]
+          },
+          {
+            "group": "Validators",
+            "pages": [
+              "docs/operate/validators/run-validators",
+              "docs/operate/validators/validator-signatures-aws",
+              "docs/operate/validators/monitoring-alerting"
+            ]
+          },
+          {
+            "group": "Relayer",
+            "pages": [
+              "docs/operate/relayer/run-relayer",
+              "docs/operate/relayer/message-filtering",
+              "docs/operate/relayer/monitoring-alerting"
+            ]
+          },
+          {
+            "group": "Agent Config",
+            "pages": [
+              "docs/operate/config/agent-config",
+              "docs/operate/config/config-reference"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "docs/operate/guides/docker-quickstart",
+              "docs/operate/guides/deploy-with-terraform",
+              "docs/operate/guides/avs-operator-guide"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Community",
-          "href": "https://mintlify.com/community",
-          "icon": "slack"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
+    ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+      "x": "https://x.com/hyperlane",
+      "github": "https://github.com/hyperlane-xyz",
+      "discord": "https://discord.com/invite/hyperlane"
+    },
+    "links": [
+      {
+        "header": "Developers",
+        "items": [
+          {
+            "label": "Bounties",
+            "href": "hhttps://github.com/search?q=org%3Ahyperlane-xyz+label%3Abounty+is%3Aopen+is%3Aissue&type=issues&s=&o=desc"
+          }
+        ]
+      },
+      {
+        "header": "Company",
+        "items": [
+          {
+            "label": "Careers",
+            "href": "https://jobs.lever.co/Hyperlane"
+          },
+          {
+            "label": "Blog",
+            "href": "https://hyperlane.xyz/blog"
+          }
+        ]
+      },
+      {
+        "header": "Legal",
+        "items": [
+          {
+            "label": "Privacy Policy",
+            "href": "https://hyperlane.xyz/privacy-policy"
+          },
+          {
+            "label": "Terms of Service",
+            "href": "https://hyperlane.xyz/terms-of-service"
+          }
+        ]
+      }
+    ]
+  },
+  "contextual": {
+    "options": ["copy", "view", "chatgpt", "claude"]
   }
 }

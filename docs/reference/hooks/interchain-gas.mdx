@@ -1,0 +1,206 @@
+---
+title: "Post-Dispatch Interchain Gas"
+description: "Configure gas payments for cross-chain message delivery using InterchainGasPaymaster contracts"
+---
+
+During the post-dispatch hook, the `InterchainGasPaymaster` contract will revert if payment is insufficient to cover the relayer's _anticipated_ costs. The gas quote calculated at `dispatch` time must align with the relayer's anticipated costs.
+
+## Gas Limit
+
+The `gasLimit` is set based on the cost of calling `handle` on the destination chain for a given message. This can vary depending on message content and the logic of the handler.
+
+The default `gasLimit` for metering the handle call is a static default of `50_000` gas. This is sufficient for simple operations but may not be enough for more complex `handle` functions.
+
+If your `handle` function performs complex operations or requires more gas, you must override the [default `gasLimit` in metadata](#metadata) to avoid transaction reverts. Benchmark your [`handle` implementations](../messaging/receive.mdx#handle) in unit tests to determine a reasonable `gasLimit` to use.
+
+### Metadata
+
+This hook expects metadata in a **packed encoding** of `StandardHookMetadata`. See the Mailbox [dispatch overloads](../messaging/send.mdx#overriding-default-hook-metadata) for how to pass metadata overrides.
+
+```solidity
+struct StandardHookMetadata {
+    uint16 variant;
+    uint256 msgValue;
+    uint256 gasLimit;
+    address refundAddress;
+}
+```
+
+The `StandardHookMetadata` struct defines the fields required for metadata encoding:
+
+- `variant`: Specifies the metadata format version.
+- `msgValue`: Amount of native token sent with the message.
+- `gasLimit`: Gas limit for the `handle` function on the destination chain. Ensure this matches your simulation results.
+- `refundAddress`: Address to refund unused gas payments.
+
+To encode this metadata, use the `StandardHookMetadata.formatMetadata` library function. Direct encoding of the struct with `abi.encodePacked` is not supported in Solidity.
+
+#### Example Usage
+
+```solidity
+// Example: Encoding metadata using StandardHookMetadata
+bytes memory metadata = StandardHookMetadata.formatMetadata(
+    0,               // ETH message value
+    200000,          // Custom gas limit
+    address(this),   // Refund address
+    bytes("")        // Optional custom metadata
+);
+```
+
+### Determine and Override the Gas Limit
+
+1. **Simulate and Benchmark Gas Usage**:
+
+- Use tools like Tenderly or Foundry to simulate the `handle` function on your message recipient. Ensure the `from` address is set to the Mailbox contract on your chain.
+- If gas usage exceeds `50,000` gas, calculate an appropriate `gasLimit` and update your metadata.
+- Use the [call-to-action in the Hyperlane Explorer](https://github.com/hyperlane-xyz/hyperlane-explorer/blob/03634076049bfce1611b4e41d1aa81910eab2962/src/features/messages/cards/TransactionCard.tsx#L326-L333) to simulate transactions from the message details.
+
+2. **Update Your Metadata**:
+
+- Calculate the required `gasLimit` based on the simulation.
+- Pass the updated `gasLimit` in your metadata to ensure the relayer will deliver your message.
+
+## Destination Gas Config
+
+For each remote domain, the InterchainGasPaymaster sets the domain gas config.
+
+```solidity
+struct DomainGasConfig {
+    IGasOracle gasOracle;
+    uint96 gasOverhead;
+}
+```
+
+### Gas overhead
+
+The gas overhead is set as part of the destination gas configuration. This corresponds to the operational cost of processing a message on the destination chain.
+
+<Info>
+  - You should ensure the `gasOverhead` sufficiently covers the range of ISMs on
+  your destination chain. - As you can configure different ISMs for different
+  message types, you may have different gas overheads for each ISM's `verify`
+  function.
+</Info>
+
+## Gas Oracles
+
+Interchain Gas Payment requirements are calculated using oraclized gas prices and exchange rates between the origin and destination chains.
+
+IGP contracts may be configured with gas oracles, which are responsible for tracking remote token gas prices and exchange rates. Developers should use the [`quoteDispatch`](./overview.mdx#quote-dispatch-fees) function on the Mailbox contract to calculate gas fees. The `quoteDispatch` accounts for system-level overhead and ensures accurate fee calculation for the entire `dispatch` process.
+
+<Info>
+  Exchange rates and gas prices are up to the relayer to decide. A spread may be
+  charged to account for drift and operating costs.
+</Info>
+
+Eventually, a relayer will be able to automatically update their gas oracles in order to ensure that their IGP always quotes a fair price for remote gas.
+
+### `getExchangeRateAndGasPrice`
+
+```solidity
+function getExchangeRateAndGasPrice(
+    uint32 destinationDomain
+) external view returns (uint128 tokenExchangeRate, uint128 gasPrice);
+```
+
+**Parameters**
+
+- `destinationDomain`: The message's destination domain
+
+**Returns**
+
+- `tokenExchangeRate`: The exchange rate between the origin and destination chain's gas tokens
+- `gasPrice`: The gas price for the destination chain
+
+### `quoteGasPayment`
+
+The `quoteGasPayment` function calculates fees for the relayer's anticipated costs.
+
+```solidity
+function quoteGasPayment(
+    uint32 destinationDomain,
+    uint256 gasLimit
+) external view returns (uint256 fee);
+```
+
+**Parameters**
+
+- `destinationDomain`: The message's destination domain
+- `gasLimit`: The gas limit to meter the `handle` call with
+
+**Returns**
+
+- `fee`: The payment required for the `postDispatch` to succeed
+
+<Info>
+The `quoteGasPayment` gives an estimated fee based on the `destinationDomain` and `gasLimit`. However, it does **not** include extra gas costs added by the Interchain Gas Paymaster (IGP) for the Default ISM payment.
+
+To get the full fee, use `quoteDispatch()` from the Mailbox contract. It provides a complete quote that includes these additional costs.
+
+👉 See [Quote Dispatch](/docs/reference/messaging/send#quote-dispatch) for more details.
+
+</Info>
+
+## Retrying
+
+If the `handle` call consumes more gas than quoted, the relayer will not submit a process transaction. This issue often occurs due to insufficient gas payment during the initial `dispatch`.
+
+In this case, additional gas can be paid for with the `payForGas` function.
+
+```solidity
+function payForGas(
+    bytes32 messageId,
+    uint32 destinationDomain,
+    uint256 gasAmount,
+    address refundAddress
+) external payable;
+```
+
+**Parameters**
+
+- `messageId`: The message identifier returned from `dispatch` call
+- `destinationDomain`: The message's destination domain
+- `gasAmount`: The additional gas amount to pay for
+- `refundAddress`: The address to refund excess payment to
+
+## Using the Hyperlane Explorer for Debugging
+
+The Hyperlane Explorer is a powerful tool to debug cross-chain message issues, including gas payments and relayer behavior.
+
+### Key Features
+
+- **Message Status**: View the current status of your message (e.g., "Retry: GasPaymentRequirementNotMet").
+- **Gas Payment Details**: Check the gas amount paid (Origin IGP gas amount) and the amount required by the relayer.
+- **Simulate Calldata**: Use the "View calldata details" option to simulate transactions on tools like Tenderly.
+
+## Troubleshooting
+
+This section covers common issues developers encounter with Interchain Gas Payments, along with potential solutions.
+
+### `GasPaymentRequirementNotMet` Warning
+
+- **Reason:** This occurs when the gas payment provided during `dispatch` does not meet the relayer's calculated requirement.
+
+- **Solution:**
+  - Use `quoteDispatch` to calculate the aggregate fee required for a `dispatch` call to be successful.
+  - Verify that `msg.value` in your metadata covers the relayer's quoted fee.
+  - Check the message status in the Hyperlane Explorer. Look for: `Retry(GasPaymentRequirementNotMet)`.
+
+### Fallback Routing and Overpayment Warning
+
+- **Reason:** `msg.value` exceeds the required gas payment, triggering the fallback routing hook.
+
+- **Solution:**
+  - Verify that your quoting logic (`quoteDispatch`) matches the relayer's anticipated fees.
+  - Avoid overestimating `gasLimit` values without first benchmarking the `handle` function.
+  - Simulate the transaction to confirm appropriate payment.
+
+### Unexpectedly Large Gas Quotes
+
+- **Reason:** A very high `gasLimit` was set, leading to excessively large gas quotes.
+
+- **Solution:**
+
+  - Double-check the `gasLimit` specified in your metadata.
+  - Verify that your quoting logic (`quoteDispatch`) matches the relayer's anticipated fees.
+  - Adjust the `gasLimit` to match the estimated gas consumption of your `handle` function.

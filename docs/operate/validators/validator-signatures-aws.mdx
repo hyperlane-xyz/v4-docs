@@ -1,0 +1,84 @@
+---
+title: "AWS Signatures Bucket Setup"
+description: "Configure your signing key and S3 bucket"
+---
+
+<Note>
+
+These instructions are for a production environment where Validator keys exist in AWS's Key Management Service and Validator signatures are posted publicly in an S3 bucket.
+
+If you're only intending to run a Validator for testing or development purposes, consider following the [local setup guide](/docs/guides/chains/deploy-hyperlane-with-local-agents) instead.
+
+</Note>
+
+### 1. Create an AWS IAM user, and a signing key
+
+Follow the instructions in [Agent Keys](/docs/operate/set-up-agent-keys) to generate an AWS IAM user and either a KMS or a hexadecimal key. You will use this key's credentials in the following steps.
+
+### 2. Create an S3 bucket
+
+<Note>
+  Note that Step 1 (creating the IAM user) is required for setting up the S3
+  bucket, so is required regardless of the type of key used.
+</Note>
+
+Your Validator will post their signatures to this bucket.
+
+1. Go to AWS's S3 in the AWS console.
+
+2. On the right, click the orange "Create Bucket" button
+
+3. Pick an informative bucket name, such as `hyperlane-validator-signatures-${validator_name}-${chain_name}`
+
+4. Consider choosing the same region as the KMS key you created in the previous step.
+
+5. Keep the recommended "ACLs disabled" setting for object ownership.
+
+6. Configure public access settings so that the relayer can read your signatures
+
+   1. Uncheck "Block all public access"
+   2. Check the first two options that block access via access control lists
+   3. Leave the last two options unchecked, we will be granting public read access via a bucket policy
+   4. Acknowledge that these settings may result in public access to your bucket
+
+7. The remaining default settings are fine, click the orange "Create bucket" button on the bottom
+
+### 3. Configure S3 bucket permissions
+
+Your Validator IAM user will need write permissions, and it should be publicly readable by the Relayer.
+
+1. Navigate back to "Identity and Access Management (IAM)" in the AWS console
+2. Under "IAM resources" you should see at least one "User", click into that
+3. Click on the name of the user that you provisioned earlier (e.g. `hyperlane-validator-${chain_name}`)
+4. Copy the "User ARN" to your clipboard, it should look something like `arn:aws:iam::791444913613:user/hyperlane-validator-${chain_name}`
+5. Navigate back to "S3" in the AWS console
+6. Click on the name of the bucket you just created
+7. Just under the name of the bucket, click "Permissions"
+8. Scroll down to "Bucket policy" and click "Edit"
+9. Enter the following contents. The Bucket ARN is shown just above where you enter the policy
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": ["s3:GetObject", "s3:ListBucket"],
+      "Resource": ["${BUCKET_ARN}", "${BUCKET_ARN}/*"]
+    },
+    {
+      "Effect": "Allow",
+      "Principal": { "AWS": "${USER_ARN}" },
+      "Action": ["s3:DeleteObject", "s3:PutObject"],
+      "Resource": "${BUCKET_ARN}/*"
+    }
+  ]
+}
+```
+
+<Tip>
+  Advanced users may consider using the [S3 Terraform
+  module](/docs/operate/guides/deploy-with-terraform#modules) instead to create
+  the S3 bucket with the correct permissions.
+</Tip>

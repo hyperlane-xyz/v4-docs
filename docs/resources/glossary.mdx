@@ -1,0 +1,109 @@
+---
+title: "Glossary"
+---
+
+## Agent[​](#agent "Direct link to Agent")
+
+Hyperlane [agents](/docs/protocol/agents) are off-chain actors that read and write Hyperlane smart contract state.
+
+Example agents include [Validators](/docs/protocol/agents/validators) and the [Relayer](/docs/protocol/agents/relayer).
+
+## Aggregation ISM[​](#aggregation-ism "Direct link to Aggregation ISM")
+
+The [Aggregation ISM](/docs/protocol/ISM/standard-ISMs/aggregation-ISM) is a type of interchain security module that aggregates security from many [ISMs](/docs/resources/glossary#interchain-security-module) by requiring that `m` of `n` ISMs verify a particular interchain message.
+
+## Checkpoint
+
+A checkpoint is a (merkle root, index) tuple, corresponding to the state of the [Mailbox](/docs/resources/glossary#mailbox) incremental merkle tree at a particular point in time.
+
+Checkpoints signatures by [Validators](/docs/resources/glossary#validator) are used in [Multisig ISMs](/docs/resources/glossary#multisig-ism).
+
+## Collateral chain[​](#collateral-chain "Direct link to Collateral chain")
+
+For a [Warp Route](/docs/resources/glossary#warp-route), the chain on which the [collateral token](/docs/resources/glossary#collateral-token) is deposited into the Warp Route.
+
+## Collateral token[​](#collateral-token "Direct link to Collateral token")
+
+For a [Warp Route](/docs/resources/glossary#warp-route), the token which is deposited on the [collateral chain](/docs/resources/glossary#collateral-chain) to create a wrapped token on a remote [synthetic chain](/docs/resources/glossary#synthetic-chain).
+
+## Default ISM[​](#default-ism "Direct link to Default ISM")
+
+The [Interchain Security Module](/docs/resources/glossary#interchain-security-module) that will be used to verify inbound messages if the message recipient has not specified their own ISM.
+
+## Domain[​](#domain "Direct link to Domain")
+
+A unique identifier for a particular chain, used by the Hyperlane protocol to determine message origin and destination.
+
+Maybe the same as the EVM chain ID, but isn't always. See [domains](/docs/reference/domains/) for a list of known Hyperlane domain IDs.
+
+## Interchain accounts (ICA)[​](#interchain-accounts-ica "Direct link to Interchain accounts (ICA)")
+
+A [middleware](/docs/resources/glossary#middleware) smart contract that allows users to make interchain smart contract calls.
+
+For example, DAOs can use interchain accounts to own contracts on remote chains.
+
+See [Interchain Accounts](docs/applications/interchain-account) for more information.
+
+## Interchain gas paymaster[​](#interchain-gas-paymaster "Direct link to Interchain gas paymaster")
+
+A smart contract deployed by a [Relayer](/docs/resources/glossary#relayer) that accepts payments on an origin chain for message delivery on destination chains.
+
+See [interchain gas payments](docs/protocol/core/interchain-gas-payment) for more information
+
+## Interchain queries (IQS)[​](#interchain-queries-iqs "Direct link to Interchain queries (IQS)")
+
+A [middleware](/docs/resources/glossary#middleware) smart contract that allows users to make interchain view calls.
+
+For example, smart contracts can use interchain queries to look up oracle exchange rates or token balances from a remote chain.
+
+## Interchain Security Module (ISM)[​](#interchain-security-module-ism "Direct link to Interchain Security Module (ISM)")
+
+[Interchain Security Module](/docs/protocol/ISM/modular-security) (ISMs) are smart contracts that provide security to Hyperlane's interchain [Mailbox](/docs/protocol/core/mailbox).
+
+ISMs are responsible for verifying that interchain messages being delivered on the destination chain were _actually sent_ on the origin chain.
+
+## Mailbox[​](#mailbox "Direct link to Mailbox")
+
+Arguably the most important Hyperlane smart contract, the [mailbox](docs/protocol/core/interchain-gas-payment) exposes an interface that developers can use to [send](/docs/reference/messaging/send) and [receive](/docs/reference/messaging/receive) interchain messages.
+
+## Middleware[​](#middleware "Direct link to Middleware")
+
+A smart contract that sends and receives messages, and exposes a developer facing API. Developers are expected to use this API instead of interacting directly with the [mailbox](/docs/resources/glossary#mailbox).
+
+Example middlewares include [interchain-accounts-ica](/docs/resources/glossary#interchain-accounts-ica) and [interchain-queries-iqs](/docs/resources/glossary#interchain-queries-iqs).
+
+## Multisig ISM[​](#multisig-ism "Direct link to Multisig ISM")
+
+The [Multisig ISM](/docs/protocol/ISM/standard-ISMs/multisig-ISM) is a type of [Interchain Security Module](/docs/resources/glossary#interchain-security-module) that uses `m` of `n` [Validator](/docs/resources/glossary#validator) signatures in order to verify a particular interchain message.
+
+## Permissionless Interoperability[​](#permissionless-interoperability "Direct link to Permissionless Interoperability")
+
+Hyperlane can be deployed by anyone to any chain, whether it is a layer 1, rollup, or app-chain, allowing that chain to communicate seamlessly. The open design of the Hyperlane protocol is known as Permissionless Interoperability (PI). Chains deployed by institutions other than the Hyperlane core team are referred to as 'PI chains'.
+
+## Relayer[​](#relayer "Direct link to Relayer")
+
+The [Relayer](/docs/protocol/agents/relayer) is a Hyperlane [agent](/docs/resources/glossary#agent) responsible for delivering messages from their origin chain(s) to their destination chain(s).
+
+Relayers are untrusted, and anyone can operate a relayer.
+
+## Routing ISM[​](#routing-ism "Direct link to Routing ISM")
+
+The [Routing ISM](/docs/protocol/ISM/standard-ISMs/routing-ISM) is a type of [Interchain Security Module](/docs/resources/glossary#interchain-security-module) that defers to a different ISM depending on the message being delivered.
+
+For example, a Routing ISM could use a different ISM depending on the origin chain from which the message was sent.
+
+## Synthetic chain[​](#synthetic-chain "Direct link to Synthetic chain")
+
+For a [Warp Route](/docs/resources/glossary#warp-route), a chain on which wrapped tokens are minted. These wrapped tokens are backed by [collateral tokens](/docs/resources/glossary#collateral-token) that have been locked on the [collateral chain](/docs/resources/glossary#collateral-chain).
+
+## Validator[​](#validator "Direct link to Validator")
+
+[Validators](/docs/protocol/agents/validators) are a Hyperlane [agents](/docs/resources/glossary#agent) responsible for attesting to messages sent from an origin chain.
+
+[Multisig ISMs](/docs/resources/glossary#multisig-ism) use validator signatures to provide security for inbound messages.
+
+## Warp Route[​](#warp-route "Direct link to Warp Route")
+
+[Warp Routes](/docs/applications/warp-routes/overview) are Hyperlane's take on the concept of token bridging, allowing you to permissionlessly transfer any ERC20-like asset to any chain via Hyperlane.
+
+Read more about how to [deploy a Warp Route](/docs/guides/quickstart/deploy-warp-route).

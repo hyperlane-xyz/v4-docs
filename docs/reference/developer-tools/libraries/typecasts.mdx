@@ -1,0 +1,26 @@
+---
+title: "Typecasts Library"
+---
+
+The `TypeCasts` library provides simple and efficient functions for converting between `address` and `bytes32` types.
+
+This library is useful for cases where you need to work with `bytes32` types in your smart contracts but still need to convert them back to `address` types or vice versa.
+
+## `TypeCasts` library
+
+```solidity
+// SPDX-License-Identifier: MIT OR Apache-2.0
+pragma solidity >=0.6.11;
+
+library TypeCasts {
+    // alignment preserving cast
+    function addressToBytes32(address _addr) internal pure returns (bytes32) {
+        return bytes32(uint256(uint160(_addr)));
+    }
+
+    // alignment preserving cast
+    function bytes32ToAddress(bytes32 _buf) internal pure returns (address) {
+        return address(uint160(uint256(_buf)));
+    }
+}
+```

@@ -1,0 +1,75 @@
+---
+title: "AVS Operator Guide"
+---
+
+## Overview
+
+Hyperlane validators are light offchain agents responsible for security - they observe messages on an origin chain's [Mailbox](/docs/protocol/core/mailbox) and if needed sign a merkle root that attests the current state of the mailbox.
+
+This signature is stored and made publicly available (e.g. in an S3 bucket), which is then used by the offchain Relayer and Interchain Security Modules onchain. Validators are _not_ networked together and do not need to reach consensus.
+
+As you follow this guide, you'll run a Hyperlane validator on [**any of the chains**](https://github.com/hyperlane-xyz/hyperlane-registry/tree/main/chains) the protocol is live on, including Arbitrum, Optimism, BSC, Base, Blast, Linea, Mode, and Polygon. After that you'll link your validator with your EigenLayer Operator by interacting with the AVS contract on Ethereum Mainnet or Holesky. This process, like the entire Hyperlane framework, is open source and permissionless - no whitelisting or staking minimums needed.
+
+## 1. Install CLI
+
+Install the latest version of the `@hyperlane-xyz/cli` package with `npm install -g @hyperlane-xyz/cli`. Detailed CLI install instructions are available [here](/docs/reference/developer-tools/cli).
+
+## 2. Run the validator
+
+Operators that want to quickly deploy a production ready environment using Docker Compose and AWS may wish to use the [Docker Compose quickstart guide](/docs/operate/guides/docker-quickstart).
+
+Follow the validator guide [here](/docs/operate/validators/run-validators) with the AWS setup to run the validator on [any chain](https://github.com/hyperlane-xyz/hyperlane-registry/tree/main/chains) within the Hyperlane network. You can also easily generalize for other storage providers like [GCP](https://github.com/hyperlane-xyz/hyperlane-monorepo/pull/3156) and Azure, or other key management solutions.
+
+Ensure that your KMS key has funds on that chain to announce itself.
+
+### Monitoring
+
+You can monitor EigenLayer specific endpoints via the `--metrics` port you specified in the validator configuration. Read more about the example endpoints and what should be expected [here](https://docs.eigenlayer.xyz/eigenlayer/avs-guides/spec/api/).
+
+The supported endpoints are:
+
+| Endpoint                     | Description                                |
+| ---------------------------- | ------------------------------------------ |
+| **GET /eigen/node**          | for node info                              |
+| **GET /eigen/node/health**   | for node health                            |
+| **GET /eigen/node/services** | for a list of services the node is running |
+
+You'll need the validator address (address of the signing key) for the next step.
+
+## 3. Set up keys
+
+There is a distinction between the operator key and the AVS signing key. The operator key is meant for just interacting with the AVS contracts whereas the AVS signing key is used for active operations, which in our case will be signing checkpoints with a Hyperlane validator.
+
+## 4. Register your operator
+
+First, make sure you're registered with your operator key [as an EigenLayer operator](https://docs.eigenlayer.xyz/eigenlayer/operator-guides/operator-installation#operator-configuration-and-registration) on Mainnet or Holesky. You'll only need the ECDSA key.
+
+Next, to register your operator to Hyperlane AVS, you can use the Hyperlane CLI. Register your operator key (generated via the EigenLayer CLI) by creating an ECDSA signature and submitting it along with the AVS signing key, which is your Hyperlane validator address from above (not a private key).
+
+```bash
+ hyperlane avs register --operatorKeyPath <PATH_TO_OPERATOR_KEY> \
+    --chain <AVS_NETWORK> \
+    --avsSigningKeyAddress <AVS_SIGNING_ADDRESS>
+```
+
+The `AVS_NETWORK` is the network you're registering on, which can be `Ethereum` or `Holesky`.
+
+Your AVS signing key can be reused across multiple validators and doesn't require additional registration for each. If you use different AVS signing keys for each validator, you'll need to register each as an operator.
+
+### Confirming registration
+
+To confirm you are registered on mainnet, run `hyperlane avs check --chain ethereum --operatorAddress <EIGENLAYER_OPERATOR_ADDRESS>` using the Hyperlane CLI and see if your validator address is there. This query may take a few minutes to complete.
+
+Additionally, you can search your address under the `operatorRegistry` function [on Etherscan](https://etherscan.io/address/0x272CF0BB70D3B4f79414E0823B426d2EaFd48910#readProxyContract#F12) or check on EigenLayer's UI for [Ethereum](https://app.eigenlayer.xyz/avs/0xe8e59c6c8b56f2c178f63bcfc4ce5e5e2359c8fc) or [Holesky](https://holesky.eigenlayer.xyz/avs/0xc76e477437065093d353b7d56c81ff54d167b0ab).
+
+<Check>
+
+Congrats on registering with the Hyperlane AVS!
+
+Now any Hyperlane message receiver can leverage your validator signatures, helping secure rollup interop.
+
+</Check>
+
+## Learn more
+
+- You can read more about the AVS protocol design [here](/docs/protocol/ISM/economic-security/hyperlane-avs).
