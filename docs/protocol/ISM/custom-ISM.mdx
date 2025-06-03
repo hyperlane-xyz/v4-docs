@@ -11,13 +11,13 @@ Developers can specify or override the default ISM by implementing the `ISpecifi
 
 ## ISM Interface
 
-ISMs must implement the `IInterchainSecurityModule` interface. This implementation can be configured, composed, and customized according to the needs of their application.
+ISMs must implement the `InterchainSecurityModule` interface. This implementation can be configured, composed, and customized according to the needs of their application.
 
 Specifically, this interface must be implemented in the same smart contract that implements `handle()`.
 
 The interface consists of two functions: `verify` and `moduleType`.
 
-<Accordion title="IInterchainSecurityModule Interface">
+<Accordion title="InterchainSecurityModule Interface">
 
 ```solidity Solidity
 // SPDX-License-Identifier: MIT OR Apache-2.0
@@ -37,7 +37,7 @@ POLYGON_POS,
 OP_STACK
 }
 
-interface IInterchainSecurityModule {
+interface InterchainSecurityModule {
 /\*\*
 _ @notice Returns an enum that represents the type of security model
 _ encoded by this ISM.

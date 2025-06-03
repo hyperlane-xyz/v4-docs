@@ -86,7 +86,7 @@ The gas overhead is set as part of the destination gas configuration. This corre
 
 Interchain Gas Payment requirements are calculated using oraclized gas prices and exchange rates between the origin and destination chains.
 
-IGP contracts may be configured with gas oracles, which are responsible for tracking remote token gas prices and exchange rates. Developers should use the [`quoteDispatch`](./overview.mdx#quote-dispatch-fees) function on the Mailbox contract to calculate gas fees. The `quoteDispatch` accounts for system-level overhead and ensures accurate fee calculation for the entire `dispatch` process.
+IGP contracts may be configured with gas oracles, which are responsible for tracking remote token gas prices and exchange rates. Developers should use the [`quoteDispatch`](/docs/protocol/core/post-dispatch-hooks-overview#quote-dispatch-fees) function on the Mailbox contract to calculate gas fees. The `quoteDispatch` accounts for system-level overhead and ensures accurate fee calculation for the entire `dispatch` process.
 
 <Info>
   Exchange rates and gas prices are up to the relayer to decide. A spread may be

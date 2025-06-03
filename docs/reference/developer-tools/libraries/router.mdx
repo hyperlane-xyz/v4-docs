@@ -30,7 +30,7 @@ graph BT
     R_G -. "routers()" .- R_E
 ```
 
-Developers using this pattern can inherit from the `Router` mix-in contract. `Router` is a [`MailboxClient`](./mailboxclient) that tracks the addresses of other `Router` contract addresses on remote chains. This allows `Routers` to send messages directly to others without having to specify addresses. It also allows `Routers` to reject messages sent from other untrusted senders.
+Developers using this pattern can inherit from the `Router` mix-in contract. `Router` is a [`MailboxClient`](./mailbox-client) that tracks the addresses of other `Router` contract addresses on remote chains. This allows `Routers` to send messages directly to others without having to specify addresses. It also allows `Routers` to reject messages sent from other untrusted senders.
 
 ## Router Library
 

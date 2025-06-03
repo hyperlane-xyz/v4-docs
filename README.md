@@ -45,5 +45,4 @@ For questions about Hyperlane:
 ## Troubleshooting
 
 - **Mintlify dev isn't running**: Run `mintlify install` to re-install dependencies
-- **Page loads as 404**: Ensure you're running in a folder with `mint.json`
 - **Build errors**: Check that all referenced files exist and paths are correct
