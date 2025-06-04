@@ -219,10 +219,15 @@
           {
             "group": "Protocol",
             "pages": [
-              "docs/protocol/core/mailbox",
-              "docs/protocol/core/fees",
-              "docs/protocol/core/interchain-gas-payment",
-              "docs/protocol/core/post-dispatch-hooks-overview",
+              {
+                "group": "General Message Passing",
+                "pages": [
+                  "docs/protocol/core/mailbox",
+                  "docs/protocol/core/fees",
+                  "docs/protocol/core/interchain-gas-payment",
+                  "docs/protocol/core/post-dispatch-hooks-overview"
+                ]
+              },
               {
                 "group": "Modular Security",
                 "pages": [
@@ -360,21 +365,29 @@
         "header": "Developers",
         "items": [
           {
-            "label": "Bounties",
-            "href": "hhttps://github.com/search?q=org%3Ahyperlane-xyz+label%3Abounty+is%3Aopen+is%3Aissue&type=issues&s=&o=desc"
-          }
-        ]
-      },
-      {
-        "header": "Company",
-        "items": [
-          {
             "label": "Careers",
             "href": "https://jobs.lever.co/Hyperlane"
           },
           {
+            "label": "Bounties",
+            "href": "https://github.com/search?q=org%3Ahyperlane-xyz+label%3Abounty+is%3Aopen+is%3Aissue&type=issues&s=&o=desc"
+          },
+          {
             "label": "Blog",
             "href": "https://hyperlane.xyz/blog"
+          }
+        ]
+      },
+      {
+        "header": "Community",
+        "items": [
+          {
+            "label": "Discord",
+            "href": "https://discord.com/invite/VK9ZUy3aTV"
+          },
+          {
+            "label": "Twitter",
+            "href": "https://x.com/hyperlane"
           }
         ]
       },
