@@ -59,8 +59,8 @@ Hyperlane Validators and Relayers can use **multiple RPC URLs** to improve relia
   <Tab title="EVM Chains">
     EVM-based chains support configuring multiple RPC endpoints for redundancy and can specify how they are used.
 
-    - **Configure multiple RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chainschain_namecustomrpcurls).
-    - **RPC Selection Mode ([`rpcConsensusType`](/docs/operate/config/config-reference#chainschain_namerpcconsensustype))**:
+    - **Configure multiple RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
+    - **RPC Selection Mode ([`rpcConsensusType`](/docs/operate/config/config-reference#chains-<chain-name>-rpcconsensustype))**:
       - **Fallback**: The agent tries the first URL and switches to the next if needed.
       - **Quorum**: Requires a majority of the URLs to agree with the exception of submitting transactions.
 
@@ -69,7 +69,7 @@ Hyperlane Validators and Relayers can use **multiple RPC URLs** to improve relia
   <Tab title="Cosmos Chains">
     Cosmos-based chains require both **RPC and gRPC endpoints** for proper operation.
 
-    - **Configure multiple RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chainschain_namecustomrpcurls).
+    - **Configure multiple RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
     - **Configure gRPC endpoints:** Use [`customGrpcUrls`].
     - **Fallback Mechanism:** Cosmos agents always use **fallback mode**.
 
@@ -78,7 +78,7 @@ Hyperlane Validators and Relayers can use **multiple RPC URLs** to improve relia
   <Tab title="SVM Chains">
     SVM-based chains support configuring multiple RPC endpoints, but **only a single RPC is used**.
 
-    - **Configure RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chainschain_namecustomrpcurls).
+    - **Configure RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
 
     <Warning>
       For **SVM chains**, only a **single RPC URL** is used. There is no fallback or quorum-based selection mechanism.

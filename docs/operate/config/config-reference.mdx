@@ -529,7 +529,7 @@ export HYP_CHAINS_ARBITRUM_PROTOCOL="ethereum"
 
 **The consensus type currently only applies to EVM chains.**
 
-Connections to non-EVM chains only support a single RPC url. If more than one RPC url is specified in [rpcUrls](#chainschain_namerpcurls), only the first one will be used.
+Connections to non-EVM chains only support a single RPC url. If more than one RPC url is specified in [rpcUrls](#chains-<chain-name>-rpcurls), only the first one will be used.
 
 </Info>
 
@@ -580,7 +580,7 @@ Connections to non-EVM chains only support a single RPC url. If more than one RP
 
 </Info>
 
-**Description:** Comma-separated URLs to connect the provider to. The difference between `customRpcUrls` and [rpcUrls](#chainschain_namerpcurls) is that `customRpcUrls` allows for more user friendly inputs from the CLI or environment variables (comma-separated vs array).
+**Description:** Comma-separated URLs to connect the provider to. The difference between `customRpcUrls` and [rpcUrls](#chains-<chain-name>-rpcurls) is that `customRpcUrls` allows for more user friendly inputs from the CLI or environment variables (comma-separated vs array).
 
 **Type:** `string` (comma separated list of urls without spaces)
 
@@ -614,7 +614,7 @@ Connections to non-EVM chains only support a single RPC url. If more than one RP
 
 </Info>
 
-**Description:** URLs to connect the provider to. The first one is initially used, and on failure the other ones are tried. See [rpcConsensusType](#chainschain_namerpcconsensustype) for more information.
+**Description:** URLs to connect the provider to. The first one is initially used, and on failure the other ones are tried. See [rpcConsensusType](#chains-<chain-name>-rpcconsensustypee) for more information.
 
 **Requires:**
 
@@ -686,7 +686,7 @@ Connections to Cosmos chains require **both** RPC and gRPC URLs. There is **no `
 
 </Info>
 
-**Description:** Comma-separated gRPC URLs used to connect to the provider. Similar to [`customRpcUrls`](#chainschain_namecustomrpcurls).
+**Description:** Comma-separated gRPC URLs used to connect to the provider. Similar to [`customRpcUrls`](#chains-<chain-name>-customrpcurls).
 
 **Type:** `string` (comma-separated list of URLs without spaces)
 
