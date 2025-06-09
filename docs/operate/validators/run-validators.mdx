@@ -11,31 +11,31 @@ As you follow this guide, you can run a Hyperlane validator on any of the existi
 
 ## Requirements
 
-### Secure Signing Key
+- **Secure Signing Key**
 
-Validators use this key to sign the `Mailbox`'s latest merkle root. Securing this key is important. If it is compromised, attackers can attempt to falsify messages, causing the Validator to be slashed.
+  - Validators use this key to sign the `Mailbox`'s latest merkle root. Securing this key is important. If it is compromised, attackers can attempt to falsify messages, causing the Validator to be slashed.
 
-The Hyperlane Validator agent currently supports signing with AWS KMS keys that are accessed via API keys/secrets as well as hexadecimal plaintext keys. See more under [agent keys](/docs/operate/set-up-agent-keys).
+  - The Hyperlane Validator agent currently supports signing with AWS KMS keys that are accessed via API keys/secrets as well as hexadecimal plaintext keys. See more under [agent keys](/docs/operate/set-up-agent-keys).
 
-### Publicly Readable Storage
+- **Publicly Readable Storage**
 
-Validators write their signatures off-chain to publicly accessible, highly available, storage, so that they can be aggregated by the [Relayer](/docs/protocol/agents/relayer).
+  - Validators write their signatures off-chain to publicly accessible, highly available, storage, so that they can be aggregated by the [Relayer](/docs/protocol/agents/relayer).
 
-The Hyperlane Validator agent currently supports storing signatures on AWS S3 using the same AWS API key above, as well as storing signatures in the local filesystem for testing.
+  - The Hyperlane Validator agent currently supports storing signatures on AWS S3 using the same AWS API key above, as well as storing signatures in the local filesystem for testing.
 
-The design is [open source](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/56be527d691a11a1ff2de4a390fd0dae8bb77347/typescript/infra/src/agents) and generalizable to other storage and key solutions. There is a community-submitted work-in-progress [PR for GCS](https://github.com/hyperlane-xyz/hyperlane-monorepo/pull/3156).
+  - The design is [open source](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/56be527d691a11a1ff2de4a390fd0dae8bb77347/typescript/infra/src/agents) and generalizable to other storage and key solutions. There is a community-submitted work-in-progress [PR for GCS](https://github.com/hyperlane-xyz/hyperlane-monorepo/pull/3156).
 
-### Machine Requirements
+- **Machine Requirements**
 
-Validators can compile the Rust binary themselves or run a Docker image provided by Abacus Works. The binary can be run using your favorite cloud service. You can even run multiple instances of them in different regions for high availability, as Hyperlane has no notion of "double signing."
+  - Validators can compile the Rust binary themselves or run a Docker image provided by Abacus Works. The binary can be run using your favorite cloud service. You can even run multiple instances of them in different regions for high availability, as Hyperlane has no notion of "double signing."
 
-Hardware requirements & costs are minimal - validators often start with a 2-Core / 2GB RAM / 4GB Storage setup with typical costs around $75/mo
+  - Hardware requirements & costs are minimal - validators often start with a 2-Core / 2GB RAM / 4GB Storage setup with typical costs around $75/mo
 
-### RPC Node
+- **RPC Node**
 
-Validators make simple view calls to read merkle roots from the [Mailbox](/docs/protocol/core/mailbox) contract on the chain they are validating for. You must use your own RPC urls not any public ones.
+  - Validators make simple view calls to read merkle roots from the [Mailbox](/docs/protocol/core/mailbox) contract on the chain they are validating for. You must use your own RPC urls not any public ones.
 
-Validators should configure multiple RPC URLs for redundancy and reliability. Different chains have different configurations—check the Configuration section for details.
+  - Validators should configure multiple RPC URLs for redundancy and reliability. Different chains have different configurations—check the Configuration section for details.
 
 <Warning>
   Operating a Validator for Polygon mainnet requires access to an archive node.
@@ -54,14 +54,14 @@ As a recap - before running a production Validator you need to have:
 
 ### Configuration
 
-<Info>
+<Tip>
   Experienced operators may prefer to [deploy agents with
   Terraform](/docs/operate/guides/deploy-with-terraform) or a
   community-submitted [Ansible playbook](https://github.com/polkachu/hyperlane)
   instead. This process will automatically create agent keys, Validator buckets,
   permissions and any other auxiliary setup required to run a Validator cluster
   on AWS.
-</Info>
+</Tip>
 
 #### RPC Configuration
 
