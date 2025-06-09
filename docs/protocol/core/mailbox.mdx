@@ -3,9 +3,13 @@ title: "Mailbox"
 description: "Core smart contract interface for sending and receiving cross-chain messages in Hyperlane"
 ---
 
-The Hyperlane smart contracts expose an on-chain API for sending and receiving interchain messages. There is a contract deployed on every chain Hyperlane supports.
+import SimpleMessagingDiagram from "/snippets/core/simple-messaging-diagram.mdx";
+
+The Hyperlane `Mailbox` smart contracts expose an on-chain API for sending and receiving interchain messages. There is a `Mailbox` contract deployed on every chain Hyperlane supports.
 
 The network of `Mailboxes` facilitates the connective tissue between blockchains that developers leverage to create interchain applications, and add interchain functionality to their existing applications.
+
+<SimpleMessagingDiagram />
 
 - To [**send**](/docs/reference/messaging/send) interchain messages, call the `dispatch` function.
 - To [**receive**](/docs/reference/messaging/receive) interchain messages, implement the `handle` function.

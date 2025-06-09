@@ -213,10 +213,6 @@
             "pages": ["docs/protocol/protocol-overview"]
           },
           {
-            "group": "HYPER and Protocol Economics",
-            "pages": ["docs/protocol-economics/intro"]
-          },
-          {
             "group": "Protocol",
             "pages": [
               {
@@ -224,8 +220,7 @@
                 "pages": [
                   "docs/protocol/core/mailbox",
                   "docs/protocol/core/fees",
-                  "docs/protocol/core/interchain-gas-payment",
-                  "docs/protocol/core/post-dispatch-hooks-overview"
+                  "docs/protocol/core/interchain-gas-payment"
                 ]
               },
               {
@@ -269,6 +264,10 @@
             ]
           },
           {
+            "group": "HYPER and Protocol Economics",
+            "pages": ["docs/protocol-economics/intro"]
+          },
+          {
             "group": "Reference",
             "pages": [
               {
@@ -279,8 +278,9 @@
                 ]
               },
               {
-                "group": "Hooks",
+                "group": "Post-Dispatch Hooks",
                 "pages": [
+                  "docs/protocol/core/post-dispatch-hooks-overview",
                   "docs/reference/hooks/interchain-gas",
                   "docs/reference/hooks/op-stack",
                   "docs/reference/hooks/arbitrum-L2-to-L1",
