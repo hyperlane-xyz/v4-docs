@@ -1,9 +1,6 @@
 ---
 title: "Relayer"
-description: "Learn how Hyperlane relayers deliver cross-chain messages and handle metadata for secure message transport"
 ---
-
-### Core Function
 
 The relayer runs the transport layer of the Hyperlane protocol by delivering messages from origin to destination chains. Depending on the [Interchain Security Module (ISM)](/docs/protocol/ISM/modular-security) specified by the recipient, metadata may be required to prove the security of the message, such as Validator signatures for the [Multisig ISM](/docs/protocol/ISM/standard-ISMs/multisig-ISM), merkle proofs, zero-knowledge proofs, and more. So before attempting to deliver, the relayer gathers any ISM-specific metadata.
 

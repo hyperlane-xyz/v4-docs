@@ -1,6 +1,5 @@
 ---
 title: "Validators"
-description: "Learn how Hyperlane validators secure cross-chain messages"
 ---
 
 Validators run as part of the [Multisig ISM](/docs/protocol/ISM/standard-ISMs/multisig-ISM) or the [Economic Security Module](/docs/protocol/ISM/economic-security/overview), fulfilling the security layer of the Hyperlane protocol. If using a different ISM, validators are not required. They are responsible for attesting to messages by signing a merkle root (also referred to as a checkpoint) when new dispatches happen in the [Mailbox](/docs/protocol/core/mailbox). Signatures must be made available for anyone (typically the Relayer) to fetch and submit alongside the message to the destination chain.

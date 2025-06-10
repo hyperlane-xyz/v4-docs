@@ -230,6 +230,7 @@
                       "docs/protocol/ISM/standard-ISMs/ccip-read-ISM"
                     ]
                   },
+                  "docs/protocol/ISM/community-ISMs/overview",
                   {
                     "group": "Economic Security",
                     "pages": [
