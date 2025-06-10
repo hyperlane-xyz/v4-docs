@@ -412,5 +412,10 @@
   },
   "contextual": {
     "options": ["copy", "view", "chatgpt", "claude"]
+  },
+  "seo": {
+    "metatags": {
+      "og:image": "/images/hero-light.png"
+    }
   }
 }
