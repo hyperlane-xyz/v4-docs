@@ -18,14 +18,44 @@ Hyperlane can be deployed to any chain by anyone, this open access is called Per
 
 **A minimal example in JSON:**
 
-```
-{  "chainId": 11155111,  "name": "sepolia",  "protocol": "ethereum",  "rpcUrls": [{ "http": "https://foobar.com" }]}
+```json
+{
+  "chainId": 11155111,
+  "name": "sepolia",
+  "protocol": "ethereum",
+  "rpcUrls": [{ "http": "https://foobar.com" }]
+}
 ```
 
 **A more detailed example in YAML:**
 
-```
-# Yaml metadata exampleblockExplorers:  - apiUrl: https://api-sepolia.etherscan.io/api    family: etherscan    name: Etherscan    url: https://sepolia.etherscan.ioblocks:  confirmations: 1  estimateBlockTime: 13  reorgPeriod: 2chainId: 11155111deployer:  name: Abacus Works  url: https://www.hyperlane.xyzdisplayName: SepoliadomainId: 11155111isTestnet: truename: sepolianativeToken:  decimals: 18  name: Ether  symbol: ETHprotocol: ethereumrpcUrls:  - http: https://ethereum-sepolia.publicnode.com  - http: https://ethereum-sepolia.blockpi.network/v1/rpc/public
+```yaml
+# Yaml metadata example
+blockExplorers:
+  - apiUrl: https://api-sepolia.etherscan.io/api
+    family: etherscan
+    name: Etherscan
+    url: https://sepolia.etherscan.io
+blocks:
+  confirmations: 1
+  estimateBlockTime: 13
+  reorgPeriod: 2
+chainId: 11155111
+deployer:
+  name: Abacus Works
+  url: https://www.hyperlane.xyz
+displayName: Sepolia
+domainId: 11155111
+isTestnet: true
+name: sepolia
+nativeToken:
+  decimals: 18
+  name: Ether
+  symbol: ETH
+protocol: ethereum
+rpcUrls:
+  - http: https://ethereum-sepolia.publicnode.com
+  - http: https://ethereum-sepolia.blockpi.network/v1/rpc/public
 ```
 
 <Note>

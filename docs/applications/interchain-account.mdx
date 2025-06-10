@@ -1,14 +1,46 @@
 ---
-title: "Interchain Accounts"
+title: "Interchain Account Interface"
 ---
 
-Interchain Accounts (ICAs) enable a contract on the origin chain to make authenticated calls to contracts on a remote chain. Unlike general message passing, which requires the recipient to implement a specific interface, ICAs allow interaction with contract on the destination chain.
+Interchain Accounts (ICAs) enable a contract on the origin chain to make authenticated calls to contracts on a remote chain. Unlike general message passing, which requires the recipient to implement a specific interface, ICAs allow interaction with _any_ contract on the destination chain.
 
 Developers can use ICAs for cross-chain execution, enabling contracts to trigger function calls on remote chains. Each ICA on a destination chain corresponds to a unique sender on the origin chain, and the account is deterministic based on `(origin, sender, router, ISM)`. This means that for every contract making interchain calls, there is a corresponding account on the destination chain that executes those calls.
 
 ICA is currently supported only on EVM chains.
 
-## Overview[​](#overview "Direct link to Overview")
+## Overview
+
+```mermaid
+flowchart TB
+    subgraph Origin chain
+    direction TB
+      Sender
+      A_O[InterchainAccountRouter]
+      M_O[(Mailbox)]
+    end
+
+    subgraph Destination chain
+    direction TB
+      M_D[(Mailbox)]
+      A_D[InterchainAccountRouter]
+      SenderAccount
+      Recipient
+    end
+
+    Sender -- "callRemote(destination, recipient, call)" --> A_O
+    A_O -- "dispatch(destination, router, <br>[sender, recipient, call])" --> M_O
+    M_O -. "relay" .- M_D
+    M_D -- "handle(origin, router, <br>[sender, recipient, call])" --> A_D
+    A_D == "interchainAccount(origin, sender)" ==> SenderAccount
+    SenderAccount -- "call" --> Recipient
+
+    click A_O https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/middleware/InterchainAccountRouter.sol
+    click A_D https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/middleware/InterchainAccountRouter.sol
+
+    style Sender fill:#FF0099
+    style SenderAccount fill:#FF0099
+    style Recipient fill:#FF0099
+```
 
 Interchain Accounts allow you to make a remote call from **Chain A** to **Chain B** using the router (`InterchainAccountRouter`). We use [CREATE2](https://docs.openzeppelin.com/cli/2.8/deploying-with-create2) to compute the deterministic [OwnableMulticall](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/middleware/libs/OwnableMulticall.sol) contract address for you, which serves as a proxy for your cross-chain calls. You can explore this [here](#example-usage).
 
@@ -23,23 +55,38 @@ The Interchain Account interface assigns every `(uint32 origin, address owner, a
 
 For core chains supported by Hyperlane, you are able to use the defaults that are set by the owner of the router contract. See the [#overrides](#overrides) section to see how to make calls to _any_ chain.
 
-### Interface[​](#interface "Direct link to Interface")
+### Interface
 
-```
-// SPDX-License-Identifier: MIT OR Apache-2.0pragma solidity >=0.6.11;import {CallLib} from "../contracts/libs/Call.sol";interface IInterchainAccountRouter {    function callRemote(        uint32 _destinationDomain,        CallLib.Call[] calldata calls    ) external returns (bytes32);    function getRemoteInterchainAccount(uint32 _destination, address _owner)        external        view        returns (address);}
+```solidity
+// SPDX-License-Identifier: MIT OR Apache-2.0
+pragma solidity >=0.6.11;
+
+import {CallLib} from "../contracts/libs/Call.sol";
+
+interface IInterchainAccountRouter {
+    function callRemote(
+        uint32 _destinationDomain,
+        CallLib.Call[] calldata calls
+    ) external returns (bytes32);
+
+    function getRemoteInterchainAccount(uint32 _destination, address _owner)
+        external
+        view
+        returns (address);
+}
 ```
 
-<Check>
-  * Use `InterchainAccountRouter` out of the box - ICA routers have already been
+<Tip>
+  - Use `InterchainAccountRouter` out of the box - ICA routers have already been
   deployed to core chains. Please refer to
   [addresses](/docs/reference/addresses/deployments/mainnet/interchainAccountRouter).
   Try using the `callRemote` method to do a call via your wallet's interchain
   account.
-</Check>
+</Tip>
 
-## Example Usage[​](#example-usage "Direct link to Example Usage")
+## Example Usage
 
-### Encoding[​](#encoding "Direct link to Encoding")
+### Encoding
 
 When calling remote contracts using `callRemote`, the function parameters must be encoded into an array of `Call` structs.
 
@@ -51,33 +98,89 @@ Each `Call` struct contains:
 
 `Call.data` can be easily encoded with the `abi.encodeCall` function.
 
-```
-struct Call {    bytes32 to; // supporting non EVM targets    uint256 value;    bytes data;}interface IUniswapV3Pool {    function swap(        address recipient,        bool zeroForOne,        int256 amountSpecified,        uint160 sqrtPriceLimitX96,        bytes calldata data    ) external returns (int256 amount0, int256 amount1);}IUniswapV3Pool pool = IUniswapV3Pool(...);Call swapCall = Call({    to: TypeCasts.addressToBytes32(address(pool)),    data: abi.encodeCall(pool.swap, (...));    value: 0,});uint32 ethereumDomain = 1;IInterchainAccountRouter(0xabc...).callRemote(ethereumDomain, [swapCall]);
+```solidity
+struct Call {
+    bytes32 to; // supporting non EVM targets
+    uint256 value;
+    bytes data;
+}
+
+interface IUniswapV3Pool {
+    function swap(
+        address recipient,
+        bool zeroForOne,
+        int256 amountSpecified,
+        uint160 sqrtPriceLimitX96,
+        bytes calldata data
+    ) external returns (int256 amount0, int256 amount1);
+}
+
+IUniswapV3Pool pool = IUniswapV3Pool(...);
+Call swapCall = Call({
+    to: TypeCasts.addressToBytes32(address(pool)),
+    data: abi.encodeCall(pool.swap, (...));
+    value: 0,
+});
+uint32 ethereumDomain = 1;
+IInterchainAccountRouter(0xabc...).callRemote(ethereumDomain, [swapCall]);
 ```
 
-### Typescript Usage[​](#typescript-usage "Direct link to Typescript Usage")
+### Typescript Usage
 
 We also have Typescript tooling to easily deploy ICA accounts and call `callRemote` on the origin chain:
 
+```typescript
+const localChain = 'ethereum';
+const signer = <YOUR_SIGNER>;
+const localRouter: InterchainAccountRouter = InterchainAccountRouter__factory.connect(<ICA_ROUTER_ADDRESS>, signer);
+const recipientAddress = <EXAMPLE_ADDRESS>; // use your own address here
+const recipientF = new TestRecipient__factory.connect(recipientAddress, signer); // use your own contract here
+const fooMessage = "Test";
+const data = recipient.interface.encodeFunctionData("fooBar", [1, fooMessage]);
+
+const call = {
+  to: recipientAddress,
+  data,
+  value: BigNumber.from("0"),
+};
+const quote = await local["quoteGasPayment(uint32)"](
+  multiProvider.getDomainId(remoteChain)
+);
+
+const config: AccountConfig = {
+  origin: localChain,
+  owner: signer.address,
+  localRouter: localRouter.address,
+};
+await localRouter.callRemote(localChain, remoteChain, [call], config);
 ```
-const localChain = 'ethereum';const signer = <YOUR_SIGNER>;const localRouter: InterchainAccountRouter = InterchainAccountRouter__factory.connect(<ICA_ROUTER_ADDRESS>, signer);const recipientAddress = <EXAMPLE_ADDRESS>; // use your own address hereconst recipientF = new TestRecipient__factory.connect(recipientAddress, signer); // use your own contract hereconst fooMessage = "Test";const data = recipient.interface.encodeFunctionData("fooBar", [1, fooMessage]);const call = {  to: recipientAddress,  data,  value: BigNumber.from("0"),};const quote = await local["quoteGasPayment(uint32)"](  multiProvider.getDomainId(remoteChain));const config: AccountConfig = {  origin: localChain,  owner: signer.address,  localRouter: localRouter.address,};await localRouter.callRemote(localChain, remoteChain, [call], config);
+
+### Determine addresses
+
+In some cases, you may need to compute the ICA address on a remote chain before making a call. For example, if your ICA needs funding before executing transactions, you can retrieve its address and transfer assets to it in advance. See the [Transfer and Call Pattern](/docs/guides/transfer-and-call) section for more information.
+
+The `getRemoteInterchainAccount` function can be used to get the address of an ICA given the destination chain and owner address.
+
+An example is included below of a contract precomputing its own Interchain Account address.
+
+```solidity
+address myInterchainAccount = IInterchainAccountRouter(...).getRemoteInterchainAccount(
+    destination,
+    address(this)
+);
 ```
-
-### Determine addresses[​](#determine-addresses "Direct link to Determine addresses")
-
-In some cases, you may need to compute the ICA address on a remote chain before making a call. For example, if your ICA needs funding before executing transactions, you can retrieve its address and transfer assets to it in advance. See the [Transfer and Call Pattern](/docs/guides/warp-routes/evm/transfer-and-call-pattern) section for more information.
-
-````
-The `getRemoteInterchainAccount` function can be used to get the address of an ICA given the destination chain and owner address.An example is included below of a contract precomputing its own Interchain Account address.```solidityaddress myInterchainAccount = IInterchainAccountRouter(...).getRemoteInterchainAccount(    destination,    address(this));
-````
 
 If you are using [#overrides](#overrides) to specify remote chains, pass those overrides when computing the remote ICA address.
 
-```
-address myRemoteIca = IInterchainAccountRouter(...).getRemoteInterchainAccount(    address(this),    remoteRouterOverride,    remoteIsmOverride);
+```solidity
+address myRemoteIca = IInterchainAccountRouter(...).getRemoteInterchainAccount(
+    address(this),
+    remoteRouterOverride,
+    remoteIsmOverride
+);
 ```
 
-## Overrides[​](#overrides "Direct link to Overrides")
+## Overrides
 
 Interchain Accounts allow developers to override the default chains and security models configured in the `InterchainAccountRouter`.
 
@@ -87,7 +190,7 @@ These are useful for:
 - Using different ISM than the defaults configured in the `InterchainAccountRouter`
 - Adjusting the gas limit for IGP payments or setting other parameters.
 
-### Interface[​](#interface-1 "Direct link to Interface")
+### Interface
 
 The `callRemoteWithOverrides` function looks similar to the `callRemote` function, but takes three additional arguments.
 
@@ -95,8 +198,31 @@ First, developers can override `_router`, the address of the `InterchainAccountR
 
 Second, developers can override `_ism`, the address of the remote interchain security module (ISM) used to secure their ICA. This ISM will be used to verify the interchain messages passed between the local and remote `InterchainAccountRouters`. This allows developers to use a custom security model that best suits their needs.
 
-Third, developers can override `_hookMetadata`, the [StandardHookMetadata](/docs/reference/developer-tools/libraries/hookmetadata) metadata passed to the message hooks for each ICA call (for example, overriding the gas limit for the IGP payment).
+Third, developers can override `_hookMetadata`, the [StandardHookMetadata](../libraries/hookmetadata.mdx) metadata passed to the message hooks for each ICA call (for example, overriding the gas limit for the IGP payment).
 
-```
-    /**     * @notice Dispatches a sequence of remote calls to be made by an owner's     * interchain account on the destination domain     * @dev Recommend using CallLib.build to format the interchain calls     * @param _destination The remote domain of the chain to make calls on     * @param _router The remote router address     * @param _ism The remote ISM address     * @param _calls The sequence of calls to make     * @param _hookMetadata The hook metadata to override with for the hook set by the owner     * @return The Hyperlane message ID     */    function callRemoteWithOverrides(        uint32 _destination,        bytes32 _router,        bytes32 _ism,        CallLib.Call[] calldata _calls,        bytes memory _hookMetadata    ) public payable returns (bytes32)    function getRemoteInterchainAccount(        address _owner,        address _router,        address _ism    ) public view returns (address)
+```solidity
+    /**
+     * @notice Dispatches a sequence of remote calls to be made by an owner's
+     * interchain account on the destination domain
+     * @dev Recommend using CallLib.build to format the interchain calls
+     * @param _destination The remote domain of the chain to make calls on
+     * @param _router The remote router address
+     * @param _ism The remote ISM address
+     * @param _calls The sequence of calls to make
+     * @param _hookMetadata The hook metadata to override with for the hook set by the owner
+     * @return The Hyperlane message ID
+     */
+    function callRemoteWithOverrides(
+        uint32 _destination,
+        bytes32 _router,
+        bytes32 _ism,
+        CallLib.Call[] calldata _calls,
+        bytes memory _hookMetadata
+    ) public payable returns (bytes32)
+
+    function getRemoteInterchainAccount(
+        address _owner,
+        address _router,
+        address _ism
+    ) public view returns (address)
 ```

@@ -96,7 +96,9 @@
                   "docs/applications/warp-routes/overview",
                   "docs/applications/warp-routes/interface",
                   "docs/applications/warp-routes/types",
-                  "docs/applications/warp-routes/example-usage"
+                  "docs/applications/warp-routes/example-usage",
+                  "docs/applications/warp-routes/multi-collateral-warp-routes",
+                  "docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing"
                 ]
               },
               "docs/applications/interchain-account"
@@ -124,7 +126,6 @@
                       "docs/guides/warp-routes/evm/xerc20-warp-route",
                       "docs/guides/warp-routes/evm/managing-warp-route-limits",
                       "docs/guides/warp-routes/evm/deploy-multi-collateral-warp-routes",
-                      "docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing",
                       "docs/guides/warp-routes/evm/transfer-and-call-pattern"
                     ]
                   },
@@ -182,6 +183,13 @@
                   "docs/reference/developer-tools/typescript-sdk/overview",
                   "docs/reference/developer-tools/typescript-sdk/transfer-fee-calculation"
                 ]
+              },
+              {
+                "group": "Developer Tips",
+                "pages": [
+                  "docs/reference/developer-tips/unit-testing",
+                  "docs/reference/developer-tips/token-faucets"
+                ]
               }
             ]
           },
@@ -196,10 +204,6 @@
                   "docs/reference/explorer/graphql-api",
                   "docs/reference/explorer/explorer-debugging"
                 ]
-              },
-              {
-                "group": "Developer Tips",
-                "pages": ["docs/reference/explorer/overview"]
               }
             ]
           }
