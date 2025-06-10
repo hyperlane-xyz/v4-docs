@@ -4,6 +4,7 @@ const scripts = [
   "generate-deployments.js",
   "generate-ism-validators.js",
   "generate-latencies.js",
+  "generate-domains.js",
 ];
 
 console.log("🚀 Running all documentation generators...\n");
