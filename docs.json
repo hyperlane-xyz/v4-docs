@@ -28,32 +28,14 @@
                   {
                     "group": "Contract Addresses",
                     "pages": [
-                      {
-                        "group": "Mainnet",
-                        "pages": [
-                          "docs/reference/addresses/deployments/mainnet/mailbox",
-                          "docs/reference/addresses/deployments/mainnet/interchainGasPaymaster",
-                          "docs/reference/addresses/deployments/mainnet/storageGasOracle",
-                          "docs/reference/addresses/deployments/mainnet/merkleTreeHook",
-                          "docs/reference/addresses/deployments/mainnet/validatorAnnounce",
-                          "docs/reference/addresses/deployments/mainnet/proxyAdmin",
-                          "docs/reference/addresses/deployments/mainnet/testRecipient",
-                          "docs/reference/addresses/deployments/mainnet/interchainAccountRouter"
-                        ]
-                      },
-                      {
-                        "group": "Testnet",
-                        "pages": [
-                          "docs/reference/addresses/deployments/testnet/mailbox",
-                          "docs/reference/addresses/deployments/testnet/interchainGasPaymaster",
-                          "docs/reference/addresses/deployments/testnet/storageGasOracle",
-                          "docs/reference/addresses/deployments/testnet/merkleTreeHook",
-                          "docs/reference/addresses/deployments/testnet/validatorAnnounce",
-                          "docs/reference/addresses/deployments/testnet/proxyAdmin",
-                          "docs/reference/addresses/deployments/testnet/testRecipient",
-                          "docs/reference/addresses/deployments/testnet/interchainAccountRouter"
-                        ]
-                      }
+                      "docs/reference/addresses/deployments/mailbox",
+                      "docs/reference/addresses/deployments/interchainGasPaymaster",
+                      "docs/reference/addresses/deployments/storageGasOracle",
+                      "docs/reference/addresses/deployments/merkleTreeHook",
+                      "docs/reference/addresses/deployments/validatorAnnounce",
+                      "docs/reference/addresses/deployments/proxyAdmin",
+                      "docs/reference/addresses/deployments/testRecipient",
+                      "docs/reference/addresses/deployments/interchainAccountRouter"
                     ]
                   },
                   {

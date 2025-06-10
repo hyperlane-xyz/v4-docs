@@ -58,39 +58,40 @@ function generateTableRows(chains, contractKey) {
 
 // Main generator
 async function generateDeploymentDocs() {
-  const environments = [
-    { name: "mainnet", isTestnet: false },
-    { name: "testnet", isTestnet: true },
-  ];
+  // Create the output directory if it doesn't exist
+  fs.mkdirSync(outputBase, { recursive: true });
 
-  for (const env of environments) {
-    const outDir = path.join(outputBase, env.name);
-    fs.mkdirSync(outDir, { recursive: true });
+  const mainnetChains = getChains(false);
+  const testnetChains = getChains(true);
 
-    const chains = getChains(env.isTestnet);
+  for (const key of CONTRACT_KEYS) {
+    const mainnetRows = generateTableRows(mainnetChains, key);
+    const testnetRows = generateTableRows(testnetChains, key);
 
-    for (const key of CONTRACT_KEYS) {
-      const rows = generateTableRows(chains, key);
-      if (!rows) continue;
+    // Skip if no deployments found for either environment
+    if (!mainnetRows && !testnetRows) continue;
 
-      const frontmatter = `---
+    const content = `---
 title: "${capitalize(key)}"
-description: "${capitalize(key)} deployments on ${capitalize(env.name)}"
----`;
+description: "${capitalize(key)} deployments across Mainnet and Testnet"
+---
 
-      const tableHeader = `| Chain | Domain ID | Chain ID | Address | Explorer |
-|-------|-----------|----------|---------|----------|`;
+## Mainnet
 
-      const content = `${frontmatter}
+| Chain | Domain ID | Chain ID | Address | Explorer |
+|-------|-----------|----------|---------|----------|
+${mainnetRows}
 
-${tableHeader}
-${rows}
+## Testnet
+
+| Chain | Domain ID | Chain ID | Address | Explorer |
+|-------|-----------|----------|---------|----------|
+${testnetRows}
 `;
 
-      const filePath = path.join(outDir, `${key}.mdx`);
-      fs.writeFileSync(filePath, content.trim() + "\n", "utf-8");
-      console.log(`✅ Wrote ${key}.mdx to deployments/${env.name}/`);
-    }
+    const filePath = path.join(outputBase, `${key}.mdx`);
+    fs.writeFileSync(filePath, content.trim() + "\n", "utf-8");
+    console.log(`✅ Wrote ${key}.mdx to deployments/`);
   }
 }
 
