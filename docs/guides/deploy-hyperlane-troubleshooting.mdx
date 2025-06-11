@@ -4,25 +4,26 @@ title: "Troubleshooting Guide"
 
 ## General Troubleshooting
 
-### Logging
+<AccordionGroup>
+
+<Accordion title="Logging">
 
 Logging levels and formats can be configured for Hyperlane tooling using the following two environment variables:
 
 - `LOG_LEVEL`: The log level to filter to. Defaults to `info`. Choices: `debug | info | warn | error | off`
 - `LOG_FORMAT`: The format of the log output. Defaults to `pretty`. Choices: `pretty | json`
 
-The [Hyperlane CLI](/docs/reference/developer-tools/cli.mdx) also allows configuring logging via the `--log` and `--verbosity` flags.
+The [Hyperlane CLI](/docs/reference/developer-tools/cli) also allows configuring logging via the `--log` and `--verbosity` flags.
 
-### Chain Configuration
+</Accordion>
+
+<Accordion title="Chain Configuration">
 
 Within your working directory, you may find a `chains/` yaml files organized by chain name. These `metadata.yaml` files describe the information needed to use the chain in Hyperlane deployments and apps.
 
 You can define a full configuration for any new chain in this file. The metadata that can be configured is defined in this [example configuration](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/cli/examples/chain-config.yaml). You can also find the chain metadata schema at [chainMetadataTypes.ts](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/sdk/src/metadata/chainMetadataTypes.ts).
 
 Here's an example configuration for two local anvil chains:
-
-<details>
-<summary>Example: Two Local Anvil Chains</summary>
 
 ```yaml
 anvil1:
@@ -45,8 +46,6 @@ anvil2:
     - http: http://localhost:8555
 ```
 
-</details>
-
 You can also extend a core chain config by providing the fields to be overridden:
 
 ```yaml
@@ -55,12 +54,13 @@ sepolia:
     confirmations: 2
 ```
 
-#### Override RPC URLs
+</Accordion>
+
+<Accordion title="Override RPC URLs">
 
 You can override the RPC urls by extending the core chain config.
 
-<details>
-<summary>Example: Define RPC URLs array and adjust retry settings</summary>
+Example: Define RPC URLs array and adjust retry settings
 
 ```yaml
 demochain:
@@ -78,9 +78,9 @@ sepolia:
         maxRequests: 10
 ```
 
-</details>
+</Accordion>
 
-#### Override transaction settings
+<Accordion title="Override transaction settings">
 
 Transaction overrides are any properties to include when forming transaction requests. For example:
 
@@ -107,9 +107,9 @@ sepolia:
   updating the value on successful transactions.
 </Warning>
 
-### Message Delivery Issues
+</Accordion>
 
-#### Long Message Delivery Times or Timeouts
+<Accordion title="Long Message Delivery Times or Timeouts">
 
 Delays or timeouts in message delivery often result from RPC issues, such as overloaded endpoints, or from chains that produce blocks only on demand.
 
@@ -120,30 +120,36 @@ To address these delays:
 - **Check RPC Health:** Ensure RPC endpoints are responsive.
 - **Configure Chains with On-Demand Blocks:** For these chains, set the reorgPeriod to 0. This ensures that agents always look at the tip of the chain, avoiding delays caused by block finalization processes.
 
+</Accordion>
+
+</AccordionGroup>
+
 ## Agent Troubleshooting
 
-### Validator Troubleshooting
+<AccordionGroup>
 
-- **`Validator has not announced any storage locations` Warning:**
+<Accordion title="Validator has not announced any storage locations Warning">
 
-  - **Reason**: This occurs when the relayer cannot retrieve validator signatures required to process a message.
-  - **Solution**:
-    - Ensure the validators have announced their storage locations. Check validator logs for a message such as:
-      `Validator has announced signature storage location, locations: ["file:///tmp/hyperlane-validator-signatures-local"]`
-    - Verify that each validator has a unique signature storage path (`--checkpointSyncer.path`) to prevent overwriting.
-    - Confirm that the relayer has read access to the storage paths.
+- **Reason**: This occurs when the relayer cannot retrieve validator signatures required to process a message.
+- **Solution**:
+  - Ensure the validators have announced their storage locations. Check validator logs for a message such as:
+    `Validator has announced signature storage location, locations: ["file:///tmp/hyperlane-validator-signatures-local"]`
+  - Verify that each validator has a unique signature storage path (`--checkpointSyncer.path`) to prevent overwriting.
+  - Confirm that the relayer has read access to the storage paths.
 
-- **`No ISM Found for Origin` Error**
+</Accordion>
 
-  - **Reason**: This occurs when the Interchain Security Module (ISM) does not recognize the origin chain.
-  - **Solution**:
-    - Ensure the ISM configuration includes the Validators for the origin chain.
-    - If it doesn't, add validators for the origin chain to your ISM.
-    - Restart the relayer after updating the ISM configuration.
+<Accordion title="No ISM Found for Origin Error">
 
-### Relayer Troubleshooting
+- **Reason**: This occurs when the Interchain Security Module (ISM) does not recognize the origin chain.
+- **Solution**:
+  - Ensure the ISM configuration includes the Validators for the origin chain.
+  - If it doesn't, add validators for the origin chain to your ISM.
+  - Restart the relayer after updating the ISM configuration.
 
-#### Checking Pending Messages in the Queue
+</Accordion>
+
+<Accordion title="Checking Pending Messages in the Queue">
 
 If messages are stuck in the relayer queue or not being processed, use the `list_operations` endpoint to inspect the relayer's queue:
 
@@ -153,11 +159,15 @@ curl http://0.0.0.0:9090/list_operations?destination_domain=<destination_domain_
 
 This endpoint provides the status of messages in the queue and can help identify why they are not being delivered.
 
-#### Debugging with Logs
+</Accordion>
+
+<Accordion title="Debugging with Logs">
 
 For detailed insights, enable debug logging and monitor the relayer's activity: `HYP_LOG_LEVEL=debug`. Once logs are captured, you can use them to locate issues with specific message IDs.
 
-#### Retrying Messages
+</Accordion>
+
+<Accordion title="Retrying Messages">
 
 After reviewing the logs, you can trigger an immediate retry of all pending messages using the `message_retry` endpoint:
 
@@ -169,13 +179,21 @@ curl --location 'http://127.0.0.1:9090/message_retry' \
 
 Make sure that you use the most recent version of the relayer and capture all logs for debugging.
 
-#### Relayer Selecting Incorrect ISM
+</Accordion>
+
+<Accordion title="Relayer Selecting Incorrect ISM">
 
 Ensure the Interchain Security Module (ISM) on your chain is configured correctly. An incorrect ISM can result in messages not being processed. Verify the ISM address in your configuration and ensure it matches your deployment setup.
 
+</Accordion>
+
+</AccordionGroup>
+
 ## Advanced Troubleshooting
 
-### `eth_getStorageAt()` Compatibility
+<AccordionGroup>
+
+<Accordion title="eth_getStorageAt() Compatibility">
 
 Some chains do not natively support the [`eth_getStorageAt()`](https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getstorageat) API. If you're deploying on one of these chains and encounter issues, review the changes made to the Hyperlane codebase in this [commit](https://github.com/hyperlane-xyz/hyperlane-monorepo/commit/871df7a4dce203ff5cf23ae654d03743dc00ea61).
 
@@ -185,3 +203,7 @@ To deploy Hyperlane on these chains follow the steps:
 2. Apply the changes in the [commit](https://github.com/hyperlane-xyz/hyperlane-monorepo/commit/871df7a4dce203ff5cf23ae654d03743dc00ea61).
 3. Build the project from the root directory: `yarn build`
 4. Run the Hyperlane CLI from the root directory: `yarn workspace @hyperlane-xyz/cli hyperlane`
+
+</Accordion>
+
+</AccordionGroup>
