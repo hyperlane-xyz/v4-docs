@@ -41,18 +41,8 @@
                   {
                     "group": "Default ISM Validators",
                     "pages": [
-                      {
-                        "group": "Mainnet",
-                        "pages": [
-                          "docs/reference/addresses/validators/mainnet/default-ism-validators"
-                        ]
-                      },
-                      {
-                        "group": "Testnet",
-                        "pages": [
-                          "docs/reference/addresses/validators/testnet/default-ism-validators"
-                        ]
-                      }
+                      "docs/reference/addresses/validators/mainnet-default-ism-validators",
+                      "docs/reference/addresses/validators/testnet-default-ism-validators"
                     ]
                   },
                   "docs/reference/domains",

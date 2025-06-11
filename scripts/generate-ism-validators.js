@@ -9,13 +9,11 @@ import { getAbacusWorksChainNames } from "./registry.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Output folders
+// Output folder
 const validatorsBase = path.join(
   __dirname,
   "../docs/reference/addresses/validators"
 );
-const mainnetOutput = path.join(validatorsBase, "mainnet");
-const testnetOutput = path.join(validatorsBase, "testnet");
 
 // Utility
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
@@ -45,27 +43,27 @@ ${config.validators
 
 // Main generator
 async function generateDefaultIsmDocs() {
-  // Create the output directories if they don't exist
-  fs.mkdirSync(mainnetOutput, { recursive: true });
-  fs.mkdirSync(testnetOutput, { recursive: true });
+  // Create the output directory if it doesn't exist
+  fs.mkdirSync(validatorsBase, { recursive: true });
 
   const environments = [
     {
       name: "mainnet",
       isTestnet: false,
-      outputDir: mainnetOutput,
+      filename: "mainnet-default-ism-validators.mdx",
     },
     {
       name: "testnet",
       isTestnet: true,
-      outputDir: testnetOutput,
+      filename: "testnet-default-ism-validators.mdx",
     },
   ];
 
   for (const env of environments) {
     const chains = getChains(env.isTestnet);
     const content = `---
-title: "Default ISM Validators"
+title: "${capitalize(env.name)}"
+description: "Default ISM validator configurations for ${env.name} chains"
 ---
 
 ${chains
@@ -79,11 +77,9 @@ ${chains
   .join("\n")}
 `;
 
-    const filePath = path.join(env.outputDir, "default-ism-validators.mdx");
+    const filePath = path.join(validatorsBase, env.filename);
     fs.writeFileSync(filePath, content.trim() + "\n", "utf-8");
-    console.log(
-      `✅ Wrote default-ism-validators.mdx to validators/${env.name}/`
-    );
+    console.log(`✅ Wrote ${env.filename} to validators/`);
   }
 }
 
