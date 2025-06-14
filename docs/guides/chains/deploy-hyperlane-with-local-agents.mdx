@@ -255,6 +255,25 @@ To learn more about all the parameters you can change, read the [agent configura
 
 ## 4. Run a relayer
 
+<Tip>
+  - **Single Relayer Recommendation**: A single relayer is generally sufficient
+  and can handle message delivery across 100+ chains efficiently. You don't need
+  to run separate relayers for each network - this approach actually increases
+  operational complexity without providing performance benefits.
+</Tip>
+
+<Warning>
+
+- **Trusted Relayer ISM Key Management**: If you're using a trusted relayer
+  ISM (which is not recommended for production), avoid using the same relayer
+  key across multiple relayer instances as this can cause nonce conflicts and
+  transaction failures. Either run a single relayer or use different keys for
+  each relayer.
+- For production deployments, use a multisig ISM instead of
+  trusted relayer ISM.
+
+</Warning>
+
 Relayers deliver interchain messages sent between the local and remote chains. Learn more about what relayers do [here](/docs/protocol/agents/relayer).
 
 You should already have set the `CONFIG_FILES` environment variable to the path of the agent config generated in the [agent configs](#agent-configs) step. If not, do so now.
