@@ -58,13 +58,13 @@ For chat use cases, consider [XMTP](https://xmtp.org/), [Push](https://push.org/
 
 **Is Hyperlane a token bridge?**
 
-Not exactly. Hyperlane is a general message passing (GMP) protocol that allows communication between blockchains. Token bridges are just one of many types of applications that can be built on top of Hyperlane!
+Not exactly. Hyperlane is a general message passing (GMP) protocol that allows communication between blockchains. Token bridges are just one of many types of applications that can be built on top of Hyperlane\!
 
 ### Deployment
 
 **Where is Hyperlane deployed?**
 
-A list of known deployments can be found on the [contract addresses](/docs/reference/addresses/deployments/mainnet/mailbox) page.
+A list of known deployments can be found on the [contract addresses](/docs/reference/addresses/deployments/mailbox) page.
 
 ### Advanced Topics
 
@@ -88,11 +88,11 @@ Currently, the source chain does not automatically receive a confirmation of exe
 
 Outbound message IDs are stored in the Merkle tree to efficiently track and verify messages. This mechanism ensures validators can accurately detect and sign new messages as they are created.
 
-**Why do validators call `MerkleTreeHook.latestCheckpoint()`?**
+**`Why do validators call MerkleTreeHook.latestCheckpoint()?`**
 
 Validators use the [`MerkleTreeHook.latestCheckpoint()`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/5e9b8ba7ab0f54e92b3cf32806fae95eb23ad0f8/solidity/contracts/hooks/MerkleTreeHook.sol#L49) function to determine when new transactions need to be indexed. This polling mechanism ensures validators can immediately start signing new messages without the need to backfill the entire tree.
 
-## Community & Contributions[​](#community--contributions "Direct link to Community & Contributions")
+## Community & Contributions[​](#community--contributions)
 
 **How can I join the Hyperlane community?**
 
