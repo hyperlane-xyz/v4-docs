@@ -1766,6 +1766,33 @@ export HYP_ALLOWLOCALCHECKPOINTSYNCERS=false
 
 </CodeGroup>
 
+## maxmessageretries
+
+**Description:** The maximum number of retries to attempt before dropping a message from the relayer queues. This prevents messages from being retried indefinitely.
+
+**Optional:** Defaults to a system default value of 66
+
+**Agents:** Relayer
+
+**Type:** `Numeric (string | number)`
+
+<CodeGroup>
+```bash As Arg
+--maxMessageRetries 120
+```
+
+```bash As Env
+export HYP_MAXMESSAGERETRIES="120"
+```
+
+```json As Config
+{
+  "maxmessageretries": "120"
+}
+```
+
+</CodeGroup>
+
 ## AWS_ACCESS_KEY_ID
 
 **Description:** (Env only) The access key ID of your validator's AWS IAM user.
