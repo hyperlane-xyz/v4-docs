@@ -16,17 +16,17 @@ You can combine HWR with a Hyperlane deployment to create economic routes betwee
 
 Like all applications built on top of Hyperlane, HWRs have customizable security via [Interchain Security Modules](../../protocol/ISM/modular-security.mdx).
 
-The deployer of a Warp Route can specify the ISMs that are used to verify interchain transfer messages. This means that each Warp Route may have a unique security configuration. Users transferring interchain tokens should understand the trust assumptions of a Route before using it.
+The deployer of a HWR can specify the ISMs that are used to verify interchain transfer messages. This means that each HWR may have a unique security configuration. Users transferring interchain tokens should understand the trust assumptions of a Route before using it.
 
 <Note>
-  Similarly, Warp frontends should manually curate their Hyperlane Warp Route to
-  avoid supporting insecure ones. See the [Warp UI deployment
+  Similarly, Warp frontends should manually curate their HWR to avoid supporting
+  insecure ones. See the [Warp UI deployment
   docs](/docs/guides/warp-routes/bridge-ui-guide.mdx) details.
 </Note>
 
-## Warp Route Architecture
+## HWR Architecture
 
-HWR let deployers choose how tokens are transferred between chains. Depending on the type of Warp Route, contracts will lock tokens, mint wrapped tokens, burn wrapped tokens, or release original tokens.
+HWR let deployers choose how tokens are transferred between chains. Depending on the type of HWR, contracts will lock tokens, mint wrapped tokens, burn wrapped tokens, or release original tokens.
 
 For example:
 
@@ -34,13 +34,13 @@ For example:
 2. **Native → Synthetic**: Native gas tokens (e.g., ETH) are locked on the origin chain, a message is sent, and synthetic tokens are minted on the destination chain.
 3. **Native → Collateral**: Native tokens are locked on the origin chain, a message is sent, and collateral tokens are released on the destination chain.
 
-Each Warp Route requires a contract deployed on every chain its on that acts as an entry/exists point. These contracts use the [Mailbox](/docs/protocol/core/mailbox) to send interchain messages to one another.
+Each HWR requires a contract deployed on every chain its on that acts as an entry/exists point. These contracts use the [Mailbox](/docs/protocol/core/mailbox) to send interchain messages to one another.
 
-### Warp Route Types
+### HWR Types
 
-This table gives a high-level overview of Warp Route types. For detailed explanations, see: [Warp Route Types.](./types)
+This table gives a high-level overview of HWR types. For detailed explanations, see: [HWR Types.](./types)
 
-| **Warp Route Type**       | **Description**                                                                                  |
+| **HWR Type**              | **Description**                                                                                  |
 | ------------------------- | ------------------------------------------------------------------------------------------------ |
 | Native Token HWRs         | Enables direct transfers of native gas tokens (e.g., ETH) across chains without wrapping.        |
 | Collateral-Backed ERC20   | Locks ERC20 tokens as collateral on the source chain for cross-chain transfers.                  |
@@ -50,11 +50,11 @@ This table gives a high-level overview of Warp Route types. For detailed explana
 
 ### Example Architecture
 
-Let’s walk through a **Collateral** to **Synthetic** Warp Route using the lock-and-mint model to transfer ERC20 tokens between two chains:
+Let’s walk through a **Collateral** to **Synthetic** HWR using the lock-and-mint model to transfer ERC20 tokens between two chains:
 
-1. The user locks their tokens on the collateral chain (e.g., Ethereum) in the Warp Route contract.
+1. The user locks their tokens on the collateral chain (e.g., Ethereum) in the HWR contract.
 2. A message is sent through Hyperlane’s Mailbox and relayed to the synthetic chain (e.g., Base).
-3. On the destination chain, the Warp Route contract mints wrapped tokens to the user.
+3. On the destination chain, the HWR contract mints wrapped tokens to the user.
 
 In the diagram below, the ISM is a [Multisig ISM](/docs/protocol/ISM/standard-ISMs/multisig-ISM), which uses a set of validators to approve messages. (Note: Not all ISMs require validators, this depends on the chosen security model.)
 
@@ -66,14 +66,14 @@ Here’s a simplified view of the flow:
 
 HWR can be deployed between any set of chains that have Hyperlane deployments.
 
-To deploy a Warp Route, head over to the following guides:
+To deploy a HWR, head over to the following guides:
 
 - [EVM-based HWR](/docs/guides/quickstart/deploy-warp-route)
 - [SVM-based HWR](/docs/guides/warp-routes/svm/svm-warp-route-guide)
 - [EVM-SVM HWR](/docs/guides/warp-routes/evm-svm-warp-route-guide)
 
 <Tip>
-  If you would like to create a Warp Route that includes a chain that Hyperlane
-  is not currently deployed on, feel free to [deploy
+  If you would like to create a HWR that includes a chain that Hyperlane is not
+  currently deployed on, feel free to [deploy
   Hyperlane](/docs/guides/chains/deploy-hyperlane.mdx) yourself!
 </Tip>
