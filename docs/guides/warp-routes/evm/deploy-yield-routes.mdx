@@ -9,7 +9,7 @@ The goal of this guide is to illustrate how you can use Hyperlane Warp Routes (H
 To complete the following walkthrough, you should have the following available:
 
 1. An origin and destination network of choice, between which you’d like to deploy the yield route.
-2. The address of an [ERC-4626 vault](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/) on the origin network from which you want yield to be generated. This vault’s underlying asset will be set as the collateral for the warp route (e.g. if vault is USDC funded, the warp route will also support USDC transfer).
+2. The address of an [ERC-4626 vault](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/) on the origin network from which you want yield to be generated. This vault’s underlying asset will be set as the collateral for the HWR (e.g. if vault is USDC funded, the HWR will also support USDC transfer).
 3. An installed instance of the [Hyperlane CLI](https://docs.hyperlane.xyz/docs/reference/developer-tools/cli) and a wallet private key set as the `HYP_KEY` env var funded on your origin and destination networks.
 
 ## Walkthrough
@@ -17,7 +17,7 @@ To complete the following walkthrough, you should have the following available:
 ### Concepts
 
 - **ERC-4626 Vault**: The Ethereum standard for tokenized yield-bearing vaults. Upon deposit, share tokens are minted representing ownership of the underlying asset.
-- **Yield Route (EvmHypOwnerCollateral & EvmHypSynthetic)**: The Hyperlane representation of a yield-bearing EVM collateral token. Note that the yield route’s vault’s deposited asset address is used as the Hyperlane Warp Routes collateral token.
+- **Yield Route (EvmHypOwnerCollateral & EvmHypSynthetic)**: The Hyperlane representation of a yield-bearing EVM collateral token. Note that the yield route’s vault’s deposited asset address is used as the HWRs collateral token.
   - This specific yield route variant distributes vault yields to the **owner**. There is an alternative setup where yields are distributed to the users (EvmHypCollateral & EvmHypSyntheticRebase). For most of this guide, we will refer to the former variants. The concepts remain the same.
 
 <Info>
@@ -60,7 +60,7 @@ When Alice wants to bridge back to Ethereum, the reverse happens. The yield rout
 
 Using the Hyperlane CLI, deploy a USDC EvmHypOwnerCollateral and EvmHypSynthetic tokens on Ethereum and yourchain, respectively:
 
-#### 1. Run `hyperlane warp init` to generate a warp route config:
+#### 1. Run `hyperlane warp init` to generate a HWR config:
 
 1.  Select `yourchain` and `Ethereum` using space, and hit enter.
 2.  For Ethereum, select `collateralVault`, accept the mailbox, and enter the USDC vault address on yourchain.
@@ -69,7 +69,7 @@ Using the Hyperlane CLI, deploy a USDC EvmHypOwnerCollateral and EvmHypSynthetic
 
     - If you selected `collateralVaultRebase`, you must pair it with a `syntheticRebase`
 
-#### 2. Run `hyperlane warp deploy` to deploy the warp route.
+#### 2. Run `hyperlane warp deploy` to deploy the HWR.
 
 ### Claiming Yield
 
@@ -77,7 +77,7 @@ Depending on the yield route variant, yield can be claimed by either calling `Hy
 
 <Check>
   🎉 Congrats! You have now created a new yield route with your vault. Bridged
-  user assets can now earn passive yield while present in the origin warp route.
+  user assets can now earn passive yield while present in the origin HWR.
 </Check>
 
 <Warning>

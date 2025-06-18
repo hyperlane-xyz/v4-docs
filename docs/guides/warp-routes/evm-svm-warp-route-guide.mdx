@@ -67,7 +67,7 @@ Ensure you have the following installed and configured:
 
       - Manually set `foreignDeployment: <SVM address>` for the SVM chain, as shown in the config example below.
       - Set `interchainSecurityModule: "0x0000000000000000000000000000000000000000"` to use the default ISM set in the destination chain Mailbox
-      - Set the `gas` to a ceiling of the compute units you expect the SVM message delivery transaction to take. For instance, Hyperlane HWRs have gas set to `300`. It's important for this to be an upper limit - the relayer will not deliver HWR transfer messages otherwise, because senders would pay an insufficient amount to have them delivered.
+      - Set the `gas` to a ceiling of the compute units you expect the SVM message delivery transaction to take. For instance, HWRs have gas set to `300`. It's important for this to be an upper limit - the relayer will not deliver HWR transfer messages otherwise, because senders would pay an insufficient amount to have them delivered.
 
       ```json
       ethereum:

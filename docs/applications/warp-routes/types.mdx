@@ -2,9 +2,9 @@
 title: "HWR Types"
 ---
 
-Hyperlane Warp Routes (HWR) are Hyperlane's implementation of token bridging, allowing for permissionless transfer of native, ERC20, and synthetic (newly deployed ERC20) assets across any chain via Hyperlane. This document provides details on all warp route types.
+Hyperlane Warp Routes (HWR) are Hyperlane's implementation of token bridging, allowing for permissionless transfer of native, ERC20, and synthetic (newly deployed ERC20) assets across any chain via Hyperlane. This document provides details on all HWR types.
 
-| **Warp Route Type**       | **Description**                                                                                  |
+| **HWR Types**             | **Description**                                                                                  |
 | ------------------------- | ------------------------------------------------------------------------------------------------ |
 | Native Token HWR          | Enables direct transfers of native gas tokens (e.g., ETH) across chains without wrapping.        |
 | Collateral-Backed ERC20   | Locks ERC20 tokens as collateral on the source chain for cross-chain transfers.                  |
@@ -14,11 +14,11 @@ Hyperlane Warp Routes (HWR) are Hyperlane's implementation of token bridging, al
 
 _Please note that this document does not include ERC721 HWR._
 
-## Core Warp Route Types
+## Core HWR Types
 
 ### Native Token HWR
 
-Implemented in `HypNative.sol`, native HWR handle the transfer of native gas tokens (e.g. ETH on Ethereum or Arbitrum, MNT on Mantle) across different chains.
+Implemented in `HypNative.sol`, native HWRs handle the transfer of native gas tokens (e.g. ETH on Ethereum or Arbitrum, MNT on Mantle) across different chains.
 
 #### Features
 
@@ -44,7 +44,7 @@ See [the implementation](https://github.com/hyperlane-xyz/hyperlane-monorepo/blo
 
 ### Synthetic ERC20 HWRs
 
-Implemented in `HypERC20.sol`, synthetic HWR mint new tokens on the destination chain that represent the original tokens from the source chain. The original tokens are not transferred but remain locked.
+Implemented in `HypERC20.sol`, synthetic HWRs mint new tokens on the destination chain that represent the original tokens from the source chain. The original tokens are not transferred but remain locked.
 
 #### Features
 
@@ -59,7 +59,7 @@ See [the implementation](https://github.com/hyperlane-xyz/hyperlane-monorepo/blo
 
 ### TokenRouter Functionality
 
-All HWR extend the `TokenRouter` contract, which provides the core functionality for warp route token transfers.
+All HWR extend the `TokenRouter` contract, which provides the core functionality for HWR token transfers.
 
 #### Features
 
@@ -76,7 +76,7 @@ All HWR extend the `TokenRouter` contract, which provides the core functionality
 [32 bytes for recipient][32 bytes for amount][remaining bytes for metadata]
 ```
 
-This standardized format ensures consistent handling across different warp route implementations while allowing for extensibility through metadata.
+This standardized format ensures consistent handling across different HWR implementations while allowing for extensibility through metadata.
 
 See [the implementation](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/libs/TokenRouter.sol) for more details.
 
@@ -92,7 +92,7 @@ Implemented in `FastTokenRouter.sol`, this router extends TokenRouter and provid
 
 See [the implementation](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/libs/FastTokenRouter.sol) for more details.
 
-## Specialized Warp Route Extensions
+## Specialized HWR Extensions
 
 ### 1. Fast Collateral Transfers (FastHypERC20Collateral)
 
@@ -121,4 +121,4 @@ See [the implementation](https://github.com/hyperlane-xyz/hyperlane-monorepo/blo
 
 ## References
 
-For setup examples & use cases, check out [Hyperlane Warp Routes: Example Usage](./example-usage.mdx).
+For setup examples & use cases, check out [HWRs: Example Usage](./example-usage.mdx).

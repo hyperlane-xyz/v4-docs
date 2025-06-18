@@ -102,7 +102,7 @@ This will allow you to test the warp UI locally or for a quick demo without need
 
 ### Return gas
 
-A common problem with token bridges like Hyperlane HWRs is that a user may transfer a token like USDC to a new chain, but only afterwards realize that they do not have the native gas token to move those tokens anywhere including back.
+A common problem with token bridges like HWRs is that a user may transfer a token like USDC to a new chain, but only afterwards realize that they do not have the native gas token to move those tokens anywhere including back.
 
 To improve the user experience, you could provide some native gas tokens via a faucet, in addition to UI warnings. To create a faucet, modify the HWR contracts to hold a balance of the native token to share with recipients.
 
@@ -120,13 +120,13 @@ To improve the user experience, you could provide some native gas tokens via a f
 
 Getting a managed Superbridge for your HWR is a hassle-free approach to operating your bridge. A few of their most popular Hyperlane powered bridges are [Renzo's ezETH bridge](https://renzo.superbridge.app) and [Elixir's deUSD bridge](https://elixir.superbridge.app). With a managed bridge instance, Superbridge will handle hosting, theming, upgrades & user support requests for your HWR.
 
-They've also built a handy feature that allows for self-service testing of recently deployed Hyperlane HWRs.
+They've also built a handy feature that allows for self-service testing of recently deployed HWRs.
 
 ### Testing your HWR
 
 1. Navigate to the [Superbridge Hyperlane Playground](https://hyperlane.superbridge.app)
 2. Click the settings cog and then click Customize ![](/images/docs/guides/deploy-warp-ui/superbridge-settings.png)
-3. Paste in the YAML file you generated when deploying your Hyperlane HWRs ![](/images/docs/guides/deploy-warp-ui/superbridge-paste-yaml.png)
+3. Paste in the YAML file you generated when deploying your HWRs ![](/images/docs/guides/deploy-warp-ui/superbridge-paste-yaml.png)
 4. The specified tokens and networks will now be available for bridging.
 
 <Tip>
