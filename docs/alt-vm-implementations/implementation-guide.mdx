@@ -378,7 +378,7 @@ See this [end-to-end test on the Rust codebase ](https://github.com/hyperlane-xy
 
 ## 3. Applications
 
-### Warp Routes
+### Hyperlane Warp Routes
 
 Token router application that routes tokens between domains on demand.
 
@@ -396,7 +396,7 @@ function transferRemote(    // The Domain of the destination chain.    uint32  d
 
 #### Transfer Message
 
-To be interoperable with Warp Routes on other chains, the `body` of a transfer message must be a byte packed `TransferMessage` struct.
+To be interoperable with Hyperlane Warp Routes on other chains, the `body` of a transfer message must be a byte packed `TransferMessage` struct.
 
 ```
 struct TransferMessage {    // The recipient of the remote transfer    bytes32 recipient;    // An amount of tokens or a token identifier to be transferred    uint256 amountOrId;    // Optional metadata e.g. NFT URI information    bytes   metadata;}

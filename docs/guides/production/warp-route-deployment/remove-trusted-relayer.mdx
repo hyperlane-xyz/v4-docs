@@ -6,11 +6,11 @@ import PrerequisitesPartial from "/snippets/warp-routes/prerequisites-config-sym
 import WarpReadSymbolChainPartial from "/snippets/warp-routes/warp-read-symbol-chain.mdx";
 import WarpApplySymbolConfigDefaultPartial from "/snippets/warp-routes/warp-apply-symbol-config-default.mdx";
 
-This guide explains how to remove the default Trusted Relayer ISM from your Warp Route using the Hyperlane CLI. Removing the Trusted Relayer ISM is a crucial step when preparing your Warp Route for production.
+This guide explains how to remove the default Trusted Relayer ISM from your Hyperlane Warp Route (HWR) using the Hyperlane CLI. Removing the Trusted Relayer ISM is a crucial step when preparing your HWR for production.
 
 ## Using the Hyperlane CLI
 
-When first deploying with the CLI, new warp routes use a Trusted Relayer ISM out of the box so you don't need to run a relayer or validator.
+When first deploying with the CLI, new HWR use a Trusted Relayer ISM out of the box so you don't need to run a relayer or validator.
 
 In order to go to production, you'll need to remove this ISM with the [Hyperlane CLI](/docs/reference/developer-tools/cli).
 
@@ -19,14 +19,14 @@ In order to go to production, you'll need to remove this ISM with the [Hyperlane
 <Note>
   If you followed the [Deploy a Warp
   Route](/docs/guides/quickstart/deploy-warp-route) guide, you most likely have
-  deployed a warp route with a trusted relayer set to a signer address.
+  deployed a HWR with a trusted relayer set to a signer address.
 </Note>
 
 To confirm using the Hyperlane CLI, locate your token symbol and the chain on which it is deployed:
 
 <WarpReadSymbolChainPartial />
 
-You can then choose the warp route for which you're removing the trusted relayer.
+You can then choose the HWR for which you're removing the trusted relayer.
 
 After running `warp read`, you should see a similar config under `interchainSecurityModule` containing a `trustedRelayerIsm`:
 
@@ -49,7 +49,7 @@ yourchain:
 
 This particular config has a `trustedRelayerIsm` as part of the `staticAggregationIsm`.
 
-This means that the `relayer` address will be allowed to call the Warp Route's `handle()` function. In other words, the `relayer` can execute arbitrary messages on the Warp Route. This may be undesirable in cases outside of the self-relaying feature.
+This means that the `relayer` address will be allowed to call the HWR's `handle()` function. In other words, the `relayer` can execute arbitrary messages on the HWR. This may be undesirable in cases outside of the self-relaying feature.
 
 By default, `warp read` will save the output to `CURRENT_DIR/configs/warp-route-deployment.yaml`. Follow these steps using the CLI to transfer the existing ownership to another address.
 
@@ -95,7 +95,7 @@ To confirm that the trusted relayer was successfully removed using the Hyperlane
 
 <WarpReadSymbolChainPartial />
 
-After running `warp read`, confirm that the trusted relayer ISM has been removed from your warp route (In this example, it should only contain the remaining `defaultFallbackRoutingIsm`). You should see a similar config under `interchainSecurityModule`:
+After running `warp read`, confirm that the trusted relayer ISM has been removed from your HWR (In this example, it should only contain the remaining `defaultFallbackRoutingIsm`). You should see a similar config under `interchainSecurityModule`:
 
 ```yaml {8-11}
 yourchain:
@@ -117,4 +117,4 @@ yourchain:
   type: "native"
 ```
 
-By completing these steps, you've successfully removed the trusted relayer ISM from your Warp Route and enhanced the security of your warp route setup. Your warp route is now ready for production use.
+By completing these steps, you've successfully removed the trusted relayer ISM from your HWR and enhanced the security of your HWR setup. Your HWR is now ready for production use.

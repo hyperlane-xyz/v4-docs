@@ -44,7 +44,7 @@ A Relayer's job is to deliver the message on the destination chain. To fulfill t
 - It checks the [Interchain Security Module (ISM)](/docs/protocol/ISM/modular-security) specified by the recipient to gather the necessary metadata to secure the message. For example, it may retrieve Multisig ISM signatures from Validator checkpoint storage.
 - After assembling the security metadata, the Relayer then sends the message to the recipient on the destination chain.
 
-If the message delivery fails (e.g. due to a lack of liquidity to transfer out of a Warp Route contract), the Relayer retries the delivery with an exponential backoff mechanism until successful.
+If the message delivery fails (e.g. due to a lack of liquidity to transfer out of a Hyperlane Warp Route contract), the Relayer retries the delivery with an exponential backoff mechanism until successful.
 
 A Relayer has no special permissions in Hyperlane. If Relayer keys are compromised, only the tokens held by those keys are at risk.
 

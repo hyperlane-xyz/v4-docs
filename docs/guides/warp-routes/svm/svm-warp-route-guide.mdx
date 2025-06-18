@@ -1,38 +1,38 @@
 ---
-title: "Deploy an SVM Warp Route"
+title: "Deploy an SVM HWR"
 ---
 
 ## Outcomes
 
-You will be deploying a Warp Route for an asset of your choice, between two SVM chains with an existing Hyperlane core deployment. At the time of writing this document, supported SVM chains are Solana and Eclipse, but you can find an up-to-date list [here](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/rust/sealevel/environments/mainnet3) (all chain directory names with a `core` subdirectory).
+You will be deploying a Hyperlane Warp Route (HWR) for an asset of your choice, between two SVM chains with an existing Hyperlane core deployment. At the time of writing this document, supported SVM chains are Solana and Eclipse, but you can find an up-to-date list [here](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/rust/sealevel/environments/mainnet3) (all chain directory names with a `core` subdirectory).
 
 <Info>
   **If you want your SVM rollup supported as a core Hyperlane deployment, or are
-  looking to set up an EVM to SVM Warp Route, [get in
+  looking to set up an EVM to SVM HWR, [get in
   touch](https://forms.gle/KyRTaWvo4XNmNvrq6)!**
 </Info>
 
-## Warp Route Types
+## HWR Types
 
-The type of token used determines the Warp Route type, so it's important to understand the different Warp Route contracts available:
+The type of token used determines the HWR type, so it's important to understand the different HWR contracts available:
 
 - [Native](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-types#native-token-warp-routes): Handles the transfer of native gas tokens (e.g. SOL on Solana, ETH on Eclipse).
 - [Collateral](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-types#collateral-backed-erc20-warp-routes): Handles the transfer of existing [Token-2022](https://spl.solana.com/token-2022) or [Token](https://spl.solana.com/token) tokens (the ERC20 equivalent on SVM).
-- [Synthetic](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-types#synthetic-erc20-warp-routes): Handles synthetic tokens that are minted and burned as transfers occur through the Warp Route, to represent tokens from their origin chain. The tooling in this guide deploys a new Token-2022 token in this case, whose authority is set to the deployer key.
+- [Synthetic](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-types#synthetic-erc20-warp-routes): Handles synthetic tokens that are minted and burned as transfers occur through the HWR, to represent tokens from their origin chain. The tooling in this guide deploys a new Token-2022 token in this case, whose authority is set to the deployer key.
 
-Here are the common Warp Route setups (you can find more details [here](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-example-usage)):
+Here are the common HWR setups (you can find more details [here](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-example-usage)):
 
-- **Native to Synthetic**: Lock Native tokens on the origin chain to mint Synthetic ones on the destination. When transferring back, the Synthetic is burned. An example of this is a SOL Warp Route between Solana and Eclipse.
-- **Collateral to Synthetic**: Lock Collateral tokens on the origin chain to mint Synthetic ones on the destination. When transferring back, the Synthetic is burned. An example of this is a USDC Warp Route between Solana and Eclipse.
+- **Native to Synthetic**: Lock Native tokens on the origin chain to mint Synthetic ones on the destination. When transferring back, the Synthetic is burned. An example of this is a SOL HWR between Solana and Eclipse.
+- **Collateral to Synthetic**: Lock Collateral tokens on the origin chain to mint Synthetic ones on the destination. When transferring back, the Synthetic is burned. An example of this is a USDC HWR between Solana and Eclipse.
 - Other: **Native to Native** (such as ETH between Optimism and Arbitrum), as well as **Collateral to Collateral**, are also possible if the token already exists on both origin and destination chains. Rebalancing liquidity is an important consideration in this case.
 
 ## Before You Start
 
-Deploying a Warp Route requires there to be a core Hyperlane deployment that is connected (i.e. actively relayed and secured) to the rest of the Hyperlane ecosystem. The core Hyperlane deployments used in this guide are Solana ([core artifacts](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/rust/sealevel/environments/mainnet3/solanamainnet/core/program-ids.json)) and Eclipse ([core artifacts](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/rust/sealevel/environments/mainnet3/eclipsemainnet/core/program-ids.json)). You may need to refer to these core artifacts throughout the guide.
+Deploying a HWR requires there to be a core Hyperlane deployment that is connected (i.e. actively relayed and secured) to the rest of the Hyperlane ecosystem. The core Hyperlane deployments used in this guide are Solana ([core artifacts](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/rust/sealevel/environments/mainnet3/solanamainnet/core/program-ids.json)) and Eclipse ([core artifacts](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/rust/sealevel/environments/mainnet3/eclipsemainnet/core/program-ids.json)). You may need to refer to these core artifacts throughout the guide.
 
-## Walkthrough: Deploy a Sealevel Warp Route
+## Walkthrough: Deploy a Sealevel HWR
 
-### Step 1: Build the Warp Route Programs
+### Step 1: Build the HWR Programs
 
 1. Clone the [hyperlane-monorepo](https://github.com/hyperlane-xyz/hyperlane-monorepo)
 
@@ -41,13 +41,13 @@ Deploying a Warp Route requires there to be a core Hyperlane deployment that is 
    cd hyperlane-monorepo/rust/sealevel/programs
    ```
 
-2. Build the Warp Route programs on your machine.
+2. Build the HWR programs on your machine.
 
    <Note>
-     `solana-cli 1.14.20` is required for building Warp Route programs, but it
-     is not required to manually install it. The `./build-programs.sh` script
-     will handle switching to this version automatically and revert to your
-     previous version (1.18.18) after building.
+     `solana-cli 1.14.20` is required for building HWR programs, but it is not
+     required to manually install it. The `./build-programs.sh` script will
+     handle switching to this version automatically and revert to your previous
+     version (1.18.18) after building.
    </Note>
 
    ```bash
@@ -92,21 +92,21 @@ Deploying a Warp Route requires there to be a core Hyperlane deployment that is 
      solana balance --keypair ./warp-route-deployer-key.json
      ```
 
-### Step 3: Configure the Warp Route
+### Step 3: Configure the HWR
 
-1. Create a directory for your Warp Route in `rust/sealevel/environments/mainnet3/warp-routes` with the name you want your Warp Route deployment to have.
+1. Create a directory for your HWR in `rust/sealevel/environments/mainnet3/warp-routes` with the name you want your HWR deployment to have.
 
    ```bash
    mkdir -p rust/sealevel/environments/mainnet3/warp-routes/<YOUR-WARP-ROUTE-NAME>
    ```
 
-   For example, the existing SOL Warp Route between Solana and Eclipse lives in `rust/sealevel/environments/mainnet3/warp-routes/eclipsesol`.
+   For example, the existing SOL HWR between Solana and Eclipse lives in `rust/sealevel/environments/mainnet3/warp-routes/eclipsesol`.
 
 2. Inside the directory you just created, create a configuration file named `token-config.json`.
 
-   Configure the parameters of your Warp Route based on the `serde_json` serialization of the [TokenConfig](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/a5afd20f3ae69ccb3289d845d44b99dbdcde2c62/rust/sealevel/client/src/warp_route.rs#L114) Rust struct. The value to set for the `interchainGasPaymaster`, can be found in the [core deployment artifacts](#before-you-start).
+   Configure the parameters of your HWR based on the `serde_json` serialization of the [TokenConfig](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/a5afd20f3ae69ccb3289d845d44b99dbdcde2c62/rust/sealevel/client/src/warp_route.rs#L114) Rust struct. The value to set for the `interchainGasPaymaster`, can be found in the [core deployment artifacts](#before-you-start).
 
-   The example below shows a testnet **Native to Synthetic Warp Route** that transfers SOL from Solana and mints synthetic SOL on Eclipse. You can also check [this configuration](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/a5afd20f3ae69ccb3289d845d44b99dbdcde2c62/rust/sealevel/environments/mainnet3/warp-routes/eclipsesol/token-config.json) of a production SOL Warp Route.
+   The example below shows a testnet **Native to Synthetic HWR** that transfers SOL from Solana and mints synthetic SOL on Eclipse. You can also check [this configuration](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/a5afd20f3ae69ccb3289d845d44b99dbdcde2c62/rust/sealevel/environments/mainnet3/warp-routes/eclipsesol/token-config.json) of a production SOL HWR.
 
    ```json
    {
@@ -126,17 +126,17 @@ Deploying a Warp Route requires there to be a core Hyperlane deployment that is 
    }
    ```
 
-3. (Optional) If your warp route creates a Synthetic token, you can open a PR to the `hyperlane-registry` with metadata to associate with this token (example PR [here](https://github.com/hyperlane-xyz/hyperlane-registry/pull/142)). The `hyperlane-registry` also gives your Warp Route visibility within the Hyperlane ecosystem.
+3. (Optional) If your HWR creates a Synthetic token, you can open a PR to the `hyperlane-registry` with metadata to associate with this token (example PR [here](https://github.com/hyperlane-xyz/hyperlane-registry/pull/142)). The `hyperlane-registry` also gives your HWR visibility within the Hyperlane ecosystem.
 
-### Step 4: Deploy the Warp Route
+### Step 4: Deploy the HWR
 
-1. Fund the new keypair on both networks the Warp Route is being deployed to.
+1. Fund the new keypair on both networks the HWR is being deployed to.
 
    - The public key should be the same across SVM networks, but double check with the wallets recommended by each chain, by loading the private key into them.
 
-   - The funding should be enough to cover rent for all accounts related to the Warp Route, pay for transaction fees, and fund the [ATA](https://www.alchemy.com/overviews/associated-token-account) payer accounts (more on this below). For reference, the observed rent from one Hyperlane Warp Route account is `2.35 SOL` on Solana and `0.025 ETH` on Eclipse, so it's a good idea to fund the key with at least `5 SOL` / `0.05 ETH`.
+   - The funding should be enough to cover rent for all accounts related to the HWR, pay for transaction fees, and fund the [ATA](https://www.alchemy.com/overviews/associated-token-account) payer accounts (more on this below). For reference, the observed rent from one HWR account is `2.35 SOL` on Solana and `0.025 ETH` on Eclipse, so it's a good idea to fund the key with at least `5 SOL` / `0.05 ETH`.
 
-2. Deploy the warp route using the `warp-route deploy` subcommand from the `rust/sealevel/client` directory:
+2. Deploy the HWR using the `warp-route deploy` subcommand from the `rust/sealevel/client` directory:
 
    Example usage:
 
@@ -153,20 +153,20 @@ Deploying a Warp Route requires there to be a core Hyperlane deployment that is 
    ```
 
 <Warning>
-  Please choose a reasonable amount to fund the Warp Route ATA payer accounts.
-  The recommended initial funding amount is `alert_threshold * 2`, with the
+  Please choose a reasonable amount to fund the HWR ATA payer accounts. The
+  recommended initial funding amount is `alert_threshold * 2`, with the
   threshold value found
   [here](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/infra/src/warp/helm.ts).
 </Warning>
 
 - Overview of CLI flags:
-  - `--warp-route-name`: should match the directory name picked for the Warp Route earlier
+  - `--warp-route-name`: should match the directory name picked for the HWR earlier
   - `--environment`: keep as `mainnet3`
   - `--environments-dir ../environments`: keep as `../environments`
-  - `--built-so-dir`: keep as `../../target/deploy`, as it points to the compilation output directory of Warp Route programs
+  - `--built-so-dir`: keep as `../../target/deploy`, as it points to the compilation output directory of HWR programs
   - `--token-config-file`: point this to the `token-config.json` file created earlier
   - `--registry`: path to your local clone of the hyperlane-registry
-  - `--ata-payer-funding-amount`: this flag specifies by how much to fund the Warp Route [ATA](https://www.alchemy.com/overviews/associated-token-account) payer accounts on both chains the deployment happens on. It's expressed in the lowest currency denomination, which means that it's interpreted as Lamports on Solana and Gwei on Eclipse (since it uses ETH as its native currency). In the command below, the value `1000000` works out to `0.001` ETH and `0.001` SOL, which is enough for an initial deployment, but not for production usage. ATA payers can always be topped up later. For reference, every Warp Route transfer costs the ATA payer `0.000000001 SOL` (on Solana) and `0.000021 ETH` (on Eclipse) on the destination chain.
+  - `--ata-payer-funding-amount`: this flag specifies by how much to fund the HWR [ATA](https://www.alchemy.com/overviews/associated-token-account) payer accounts on both chains the deployment happens on. It's expressed in the lowest currency denomination, which means that it's interpreted as Lamports on Solana and Gwei on Eclipse (since it uses ETH as its native currency). In the command below, the value `1000000` works out to `0.001` ETH and `0.001` SOL, which is enough for an initial deployment, but not for production usage. ATA payers can always be topped up later. For reference, every HWR transfer costs the ATA payer `0.000000001 SOL` (on Solana) and `0.000021 ETH` (on Eclipse) on the destination chain.
 
 <Info>
   Note that since our goal was to make this tooling accessible to developers as
@@ -208,9 +208,9 @@ Deploying a Warp Route requires there to be a core Hyperlane deployment that is 
    --ata-payer-funding-amount 10000000
   ```
 
-## Interacting with the Warp Route
+## Interacting with the HWR
 
-1.  **Query the Warp Route Program**
+1.  **Query the HWR Program**
 
     You can check the program details like Mint Account, Mint Authority, and ATA payer account using the following command:
 
@@ -233,7 +233,7 @@ Deploying a Warp Route requires there to be a core Hyperlane deployment that is 
     solana account <MINT_AUTHORITY> --url <CHAIN_RPC_URL>
     ```
 
-2.  **Transfer Tokens Through the Warp Route**
+2.  **Transfer Tokens Through the HWR**
 
     To test token transfers across chains, run the following command:
 
@@ -259,12 +259,12 @@ Deploying a Warp Route requires there to be a core Hyperlane deployment that is 
     -u <DESTINATION_CHAIN_RPC_URL> <MINT_ACCOUNT_ADDRESS>
     ```
 
-    - The final parameter here is the SPL token ID. So if this is a synthetic warp route you want to check the balance of, you need to use the Mint address from a prior query you made a few steps ago.
+    - The final parameter here is the SPL token ID. So if this is a synthetic HWR you want to check the balance of, you need to use the Mint address from a prior query you made a few steps ago.
     - You can also check out the last tx made to the recipient account in the explorer
 
 4.  **Explore Additional CLI Commands**
 
-    This guide has made heavy use of the `hyperlane-sealevel-client` CLI from `hyperlane-monorepo`. You may find its various commands useful for configuring the Warp Route, making state queries, sending transfers, and more. Check out the other utilities it provides, in particular those under the `token` subcommand.
+    This guide has made heavy use of the `hyperlane-sealevel-client` CLI from `hyperlane-monorepo`. You may find its various commands useful for configuring the HWR, making state queries, sending transfers, and more. Check out the other utilities it provides, in particular those under the `token` subcommand.
 
     ```bash
     # run from `rust/sealevel/client`

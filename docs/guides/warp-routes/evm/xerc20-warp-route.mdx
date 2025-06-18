@@ -2,19 +2,19 @@
 title: "Create your xERC20 Token Bridge"
 ---
 
-This guide walks you through deploying an xERC20 Warp Route between two networks of your choice. We'll use Ethereum as an example for the origin chain; however, you can select any supported network as the origin and destination.
+This guide walks you through deploying an xERC20 Hyperlane Warp Route (HWR) between two networks of your choice. We'll use Ethereum as an example for the origin chain; however, you can select any supported network as the origin and destination.
 
 ## Prerequisites
 
 To complete this walkthrough, you should have:
 
-1. **An origin and destination network of choice**, between which you’d like to deploy the xERC20 warp route.
+1. **An origin and destination network of choice**, between which you’d like to deploy the xERC20 HWR.
 2. **The address of an xERC20 or xERC20Lockbox** on the origin and destination chain.
 3. **Hyperlane CLI installed** and a **wallet private key set as the `HYP_KEY` environment variable**, funded on both origin and destination networks.
 
-### Step 1: Initialize a New Warp Route
+### Step 1: Initialize a New HWR
 
-Run the following command to generate a warp route configuration:
+Run the following command to generate a HWR configuration:
 
 ```bash
 hyperlane warp init
@@ -34,9 +34,9 @@ If you're unsure, review your token’s contract structure or deployment history
 
 </Info>
 
-### Step 2: Deploy the xERC20 Warp Route
+### Step 2: Deploy the xERC20 HWR
 
-Run the following command to deploy the warp route:
+Run the following command to deploy the HWR:
 
 ```bash
 hyperlane warp deploy
@@ -51,9 +51,9 @@ _The CLI does not deploy non-Hyperlane contracts (e.g., existing xERC20 contract
 
 ### Step 3: Configure Minting Permissions
 
-Once the xERC20 warp route contracts are deployed, you must configure minting permissions for the destination token.
+Once the xERC20 HWR contracts are deployed, you must configure minting permissions for the destination token.
 
-Set the mint limit for the newly deployed warp route using the [`setLimits` function](https://github.com/defi-wonderland/xERC20/blob/main/solidity/contracts/XERC20.sol#L85) in your xERC20 contract.
+Set the mint limit for the newly deployed HWR using the [`setLimits` function](https://github.com/defi-wonderland/xERC20/blob/main/solidity/contracts/XERC20.sol#L85) in your xERC20 contract.
 By default, these limits are found in the Registry, located at `~/.hyperlane` locally.
 
 ### Step 4: Test Cross-Chain Transfers
@@ -69,7 +69,7 @@ hyperlane warp send --symbol <token_symbol> --amount <amount>
 
 ###
 
-🎉 Congrats! You have successfully created an **xERC20 Warp Route**. Your xERC20 tokens can now move across chains!
+🎉 Congrats! You have successfully created an **xERC20 HWR**. Your xERC20 tokens can now move across chains!
 
 <Warning>
   Please note that cross-chain operations rely on **Interchain Security Modules
@@ -78,7 +78,7 @@ hyperlane warp send --symbol <token_symbol> --amount <amount>
 
 ## Resources
 
-For more resources on deploying xERC20 warp routes, check out:
+For more resources on deploying xERC20 HWRs, check out:
 
 - [xERC20 Token Standard](https://github.com/defi-wonderland/xERC20/blob/main/solidity/contracts/XERC20.sol)
 - [xERC20 Token transfer limits](./managing-warp-route-limits)

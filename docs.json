@@ -63,7 +63,7 @@
             "group": "Applications",
             "pages": [
               {
-                "group": "Warp Routes",
+                "group": "Hyperlane Warp Routes",
                 "pages": [
                   "docs/applications/warp-routes/overview",
                   "docs/applications/warp-routes/interface",
@@ -87,10 +87,10 @@
                 ]
               },
               {
-                "group": "Warp Routes",
+                "group": "Hyperlane Warp Routes (HWR)",
                 "pages": [
                   {
-                    "group": "EVM Warp Routes",
+                    "group": "EVM HWR",
                     "pages": [
                       "docs/guides/warp-routes/evm/deploy-yield-routes",
                       "docs/guides/warp-routes/evm/fast-native-transfer-via-gas-token",
@@ -102,7 +102,7 @@
                     ]
                   },
                   {
-                    "group": "SVM Warp Routes",
+                    "group": "SVM HWR",
                     "pages": [
                       "docs/guides/warp-routes/svm/svm-warp-route-guide"
                     ]
@@ -123,7 +123,7 @@
                     ]
                   },
                   {
-                    "group": "Warp Route Deployment",
+                    "group": "HWR Deployment",
                     "pages": [
                       "docs/guides/production/warp-route-deployment/remove-trusted-relayer",
                       "docs/guides/production/warp-route-deployment/transfer-warp-route-ownership"

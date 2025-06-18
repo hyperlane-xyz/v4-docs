@@ -1,27 +1,27 @@
 ---
-title: "Deploy Multi-Collateral Warp Routes"
+title: "Deploy HWR 2.0"
 ---
 
-This guide walks you through how to use Hyperlane Warp Routes to create multi-collateral token bridges, allowing assets to be sourced from multiple chains instead of a single origin.
+This guide walks you through how to use Hyperlane Warp Routes 2.0 to create multi-collateral token bridges, allowing assets to be sourced from multiple chains instead of a single origin.
 
 <Info>
-  - For a primer on Multi-collateral warp routes head over to: [Multi-collateral
-  Warp Routes](/docs/applications/warp-routes/multi-collateral-warp-routes)
+  - For a primer on Hyperlane Warp Routes 2.0 head over to: [Hyperlane Warp
+  Routes 2.0](/docs/applications/warp-routes/multi-collateral-warp-routes)
 </Info>
 
 ## Prerequisites
 
 To complete this walkthrough, you should have the following:
 
-1. Two collateral chains and one synthetic chain of your choice, between which you’d like to deploy the multi-collateral warp route. Make sure to have some funds on the chains to cover deployment gas fees.
+1. Two collateral chains and one synthetic chain of your choice, between which you’d like to deploy the Hyperlane Warp Route 2.0. Make sure to have some funds on the chains to cover deployment gas fees.
 2. The token(s) to be used as collateral.
 3. An installed instance of the [Hyperlane CLI](https://docs.hyperlane.xyz/docs/reference/developer-tools/cli) and a wallet private key set as the `HYP_KEY` env var funded on your origin and destination networks.
 
-## Deploy your Multi-Collateral Warp Routes
+## Deploy your Hyperlane Warp Route 2.0
 
-### 1. Create your Warp Route Config
+### 1. Create your Hyperlane Warp Route Config
 
-1. Use the Hyperlane CLI to initialize a Warp Route deployment file:
+1. Use the Hyperlane CLI to initialize a Hyperlane Warp Route deployment file:
 
 `hyperlane warp init`
 
@@ -32,11 +32,11 @@ Here's how your setup should look like:
 - Select three networks: choose `collateral` for the two source networks, and `synthetic` for the destination network.
 - Input the token address, proxy admin contracts and select if you'd like to use a trusted ISMs.
 
-Once you've made the selection, the CLI will generate a Warp Route config file at `./configs/warp-route-deployment.yaml`.
+Once you've made the selection, the CLI will generate a Hyperlane Warp Route config file at `./configs/warp-route-deployment.yaml`.
 
-### 2. Deploy your Warp Route
+### 2. Deploy your Hyperlane Warp Routes 2.0
 
-Once your configuration is ready, you can initiate the Warp Route deployment with:
+Once your configuration is ready, you can initiate the Hyperlane Warp Route deployment with:
 
 `hyperlane warp deploy`
 
@@ -50,7 +50,7 @@ You can initiate a test transfer with the following command:
 
 The CLI will prompt you to:
 
-- Select a matching Warp Route
+- Select a matching Hyperlane Warp Route
 - Choose the origin and destination chains
 
 <Info>
@@ -67,7 +67,7 @@ It’ll run checks and send the message. You’ll get:
 - Confirmation once processed
 
 <Success>
-  🎉 **Congrats!** You have successfully deployed a Multi-Collateral Warp Route.
+  🎉 **Congrats!** You have successfully deployed a Hyperlane Warp Route 2.0.
   Your users can now bridge assets from multiple chains!
 </Success>
 

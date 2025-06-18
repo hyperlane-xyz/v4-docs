@@ -9,7 +9,7 @@ While Hyperlane already supports Cosmos chains via [CosmWasm](https://github.com
 ## Key Features
 
 - **Hyperlane Compatibility:** This module fully implements the Hyperlane messaging protocol, enabling seamless cross-chain functionality across all Hyperlane-compatible chains.
-- **Warp Routes:** Leveraging the core functionality, tokens can be created and transferred across all Hyperlane-compatible chains.
+- **Hyperlane Warp Routes (HWR):** Leveraging the core functionality, tokens can be created and transferred across all Hyperlane-compatible chains.
 - **End-to-End Interop Solution**: Implements messaging, transport, and security modules of the Hyperlane cross-chain interoperability framework for Cosmos SDK-based chains.
 - **Permissionless & Open-Source**: Anyone can deploy and configure the module to fit their needs without relying on intermediaries.
 - **Built by KYVE**: Developed by the [KYVE](https://www.kyve.network/) team to extend Cosmos interoperability beyond IBC.
@@ -113,7 +113,7 @@ type PostDispatchHook interface {	HookType() uint8	SupportsMetadata(metadata any
 
 ![/img/cosmos-sdk-implementation/hyperlane-cosmos (5).svg](/images/docs/reference/alt-vm-implementations/hyperlane-cosmos_5-4d9d437b2c602154b2c863f61c0c772a.svg)
 
-## Warp Route - Remote Transfer Lifecycle[​](#warp-route---remote-transfer-lifecycle "Direct link to Warp Route - Remote Transfer Lifecycle")
+## HWR - Remote Transfer Lifecycle
 
 #### `Dispatch()`
 
@@ -135,7 +135,6 @@ type PostDispatchHook interface {	HookType() uint8	SupportsMetadata(metadata any
 
 <Note>
   Support for the native Cosmos SDK module is under development for Hyperlane
-  agents and CLI. Deploying a Warp Route requires manually setting up all
-  necessary components (Mailbox, ISM, IGP, Token, etc.) with the correct
-  transactions.
+  agents and CLI. Deploying a HWR requires manually setting up all necessary
+  components (Mailbox, ISM, IGP, Token, etc.) with the correct transactions.
 </Note>

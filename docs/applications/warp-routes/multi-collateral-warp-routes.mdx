@@ -1,19 +1,19 @@
 ---
-title: "Multi-Collateral Warp Routes"
+title: "Hyperlane Warp Routes 2.0"
 ---
 
-Multi-collateral Warp Routes are a type of Hyperlane Warp Route that allows liquidity to be sourced from multiple collateral chains.
+Hyperlane Warp Routes 2.0 are a type of Hyperlane Warp Route (HWR) that allows liquidity to be sourced from multiple collateral chains.
 
 ## Overview
 
-In a single-collateral Warp Route, tokens are locked on one source chain.
+In a single-collateral HWR, tokens are locked on one source chain.
 
 Example:
 
 - Lock 100 USDC on Ethereum
 - Mint 100 USDC on NewChain
 
-A Multi-Collateral Warp Route, on the other hand, allows users to bridge from multiple collateral chains.
+Hyperlane Warp Routes 2.0, on the other hand, allows users to bridge from multiple collateral chains.
 
 Example:
 
@@ -29,14 +29,14 @@ This setup allows a destination chain to receive assets from multiple sources, m
 flowchart
     subgraph base
     BU((User))
-    BWR[USDC Collateral Warp Route]
+    BWR[USDC Collateral HWR]
     end
     subgraph arbitrum
     AU((User))
-    AWR[USDC Collateral Warp Route]
+    AWR[USDC Collateral HWR]
     end
     subgraph newchain
-    NWR[USDC Synthetic Warp Route]
+    NWR[USDC Synthetic HWR]
     Recipient((Recipient))
     end
     BU -- "transferRemote(newchain,<br>recipient, amount)" --> BWR
@@ -54,4 +54,4 @@ flowchart
 
 ## Guides
 
-- To deploy Multi-collateral warp routes head over to [Deploy Multi-Collateral Warp Routes](/docs/guides/warp-routes/evm/deploy-multi-collateral-warp-routes)
+- To deploy Hyperlane Warp Routes 2.0 head over to [Deploy a Hyperlane Warp Route 2.0](/docs/guides/warp-routes/evm/deploy-multi-collateral-warp-routes)

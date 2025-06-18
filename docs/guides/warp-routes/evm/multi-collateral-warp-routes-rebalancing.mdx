@@ -1,25 +1,25 @@
 ---
-title: "Multicollateral Warp Route Rebalancing"
+title: "HWR 2.0 Rebalancing"
 ---
 
-A **Multicollateral Warp Route** is a way to bridge multiple existing tokens across different chains while maintaining liquidity. Instead of introducing a new synthetic asset for every transfer, it allows chains to leverage existing token liquidity in a structured manner.
+A **Hyperlane Warp Route (HWR) 2.0** is a way to bridge multiple existing tokens across different chains while maintaining liquidity. Instead of introducing a new synthetic asset for every transfer, it allows chains to leverage existing token liquidity in a structured manner.
 
-This is useful when expanding to new chains, ensuring users have access to assets that already exist in the ecosystem. The diagram below shows a setup where canonical USDC exists on Base and Arbitrum, with a synthetic warp route created on a new chain.
+This is useful when expanding to new chains, ensuring users have access to assets that already exist in the ecosystem. The diagram below shows a setup where canonical USDC exists on Base and Arbitrum, with a synthetic HWR created on a new chain.
 
 ```mermaid
 flowchart
     subgraph base
     BU((User))
-    BWR[USDC Collateral Warp Route]
+    BWR[USDC Collateral HWR]
     end
 
     subgraph arbitrum
     AU((User))
-    AWR[USDC Collateral Warp Route]
+    AWR[USDC Collateral HWR]
     end
 
     subgraph newchain
-    NWR[USDC Synthetic Warp Route]
+    NWR[USDC Synthetic HWR]
     Recipient((Recipient))
     end
 
@@ -37,15 +37,15 @@ If more funds flow in one direction, one of the chains in the route can run out 
 ```mermaid
 flowchart
 	subgraph base
-		BWR[USDC Collateral Warp Route]
+		BWR[USDC Collateral HWR]
 	end
 
 	subgraph arbitrum
-		AWR[USDC Collateral Warp Route]
+		AWR[USDC Collateral HWR]
 	end
 
 	subgraph newchain
-		NWR[USDC Synthetic Warp Route]
+		NWR[USDC Synthetic HWR]
 		NU((Recipient))
 	end
 
@@ -57,14 +57,14 @@ To fix this and maintain a good user experience, we must perform _collateral reb
 
 ## Liquidity Provider
 
-Currently, Warp Routes don’t have an explicit liquidity provider interface that enables local deposits/withdrawals. However, LPs can manually manage liquidity using the [Hyperlane CLI](https://www.npmjs.com/package/@hyperlane-xyz/cli) or the UI to interact with the Warp Routes in the [Hyperlane registry](https://github.com/hyperlane-xyz/hyperlane-registry).
+Currently, Hyperlane Warp Routes 2.0 don’t have an explicit liquidity provider interface that enables local deposits/withdrawals. However, LPs can manually manage liquidity using the [Hyperlane CLI](https://www.npmjs.com/package/@hyperlane-xyz/cli) or the UI to interact with the HWRs in the [Hyperlane registry](https://github.com/hyperlane-xyz/hyperlane-registry).
 
 <Warning>
   The stopgap procedure defined below requires at least one synthetic chain to
-  exist within the warp route topology.
+  exist within the HWR topology.
 </Warning>
 
-- To inspect a Warp Route’s topology, use the `warp read` command:
+- To inspect a HWRs topology, use the `warp read` command:
 
 ```
 hyperlane warp read --symbol ETH
@@ -80,7 +80,7 @@ bsc:
     ...
 ```
 
-- To send a transfer (`transferRemote`) on a Warp Route, use the `warp send` command:
+- To send a transfer (`transferRemote`) on a HWR, use the `warp send` command:
 
 ```
 hyperlane warp send \
@@ -95,7 +95,7 @@ hyperlane warp send \
 
 LPs can deposit collateral via a `transferRemote` where:
 
-- `destination` domain is a chain where the warp route has a `synthetic` type
+- `destination` domain is a chain where the HWRs has a `synthetic` type
 - `recipient` address is controlled by the LP
 - `amount` is liquidity denominated in the `origin` chains `collateral` token
 
@@ -104,12 +104,12 @@ flowchart
 	LP((Liquidity Provider))
 
 	subgraph arbitrum
-		AWR[USDC Collateral Warp Route]
+		AWR[USDC Collateral HWR]
 		AUSDC[USDC]
 	end
 
 	subgraph mychain
-		MWR[USDC Synthetic Warp Route]
+		MWR[USDC Synthetic HWR]
 	end
 
 	AWR -- "transferFrom(LP, amount)" --> AUSDC
@@ -126,7 +126,7 @@ This can be done by providing liquidity on many collateral chains and representi
 
 LPs can withdraw via a `transferRemote` where
 
-- `destination` domain is a chain where the warp route is a `collateral` type
+- `destination` domain is a chain where the HWR is a `collateral` type
 - `recipient` address is controlled by the LP
 - `amount` is denominated in the `destination` chains `collateral` token
 
@@ -135,12 +135,12 @@ flowchart
 	LP((Liquidity Provider))
 
 	subgraph arbitrum
-		AWR[USDC Collateral Warp Route]
+		AWR[USDC Collateral HWR]
 		AUSDC[USDC]
 	end
 
 	subgraph mychain
-		MWR[USDC Synthetic Warp Route]
+		MWR[USDC Synthetic HWR]
 	end
 
 	LP -- "transferRemote(arbitrum,<br>LP, amount)" --> MWR

@@ -48,7 +48,7 @@ requiredHook:
 
 The output is saved to `CURRENT_DIR/configs/core-config.yaml`.
 
-This particular config has a `trustedRelayerIsm`. This means contracts (e.g., warp routes) that fallback to the mailbox's `defaultIsm` will give permission to `relayer` address to execute arbitrary messages. This may be undesirable in cases outside of the self-relaying feature.
+This particular config has a `trustedRelayerIsm`. This means contracts (e.g., Hyperlane Warp Route) that fallback to the mailbox's `defaultIsm` will give permission to `relayer` address to execute arbitrary messages. This may be undesirable in cases outside of the self-relaying feature.
 
 Follow these steps using the CLI to update the existing default Ism to a different configuration.
 
