@@ -4,9 +4,9 @@ title: "Transfer and Call Pattern"
 
 ## Overview
 
-The **Transfer and Call Pattern** enables a contract to both bridge assets via [Hyperlane Warp Routes](/docs/protocol/warp-routes/warp-routes-overview) and execute an action on the destination chain after the assets arrive. This pattern is useful for cases where an action depends on token balances after bridging.
+The **Transfer and Call Pattern** enables a contract to both bridge assets via [Hyperlane Warp Route (HWR)](/docs/protocol/warp-routes/warp-routes-overview) and execute an action on the destination chain after the assets arrive. This pattern is useful for cases where an action depends on token balances after bridging.
 
-While Warp Routes handle cross-chain token transfers, this pattern extends their capabilities by using [Interchain Accounts (ICA)](docs/applications/interchain-account) to execute arbitrary logic on the destination chain.
+While HWR handle cross-chain token transfers, this pattern extends their capabilities by using [Interchain Accounts (ICA)](docs/applications/interchain-account) to execute arbitrary logic on the destination chain.
 
 ### Use Cases
 
@@ -25,14 +25,14 @@ flowchart TB
       Sender
       Contract
       ICA_Router_O[Interchain Account Router]
-      Warp_Route_O[Warp Route]
+      Warp_Route_O[HWR]
       Mailbox_O[(Mailbox)]
     end
 
     subgraph Destination chain
     direction TB
       Mailbox_D[(Mailbox)]
-      Warp_Route_D[Warp Route]
+      Warp_Route_D[HWR]
       ICA_Router_D[Interchain Account Router]
       ICA[Interchain Account]
       Recipient
@@ -68,7 +68,7 @@ flowchart TB
 
 1. Tokens are transferred from the sender to the contract.
 2. An [Interchain Account (ICA)](docs/applications/interchain-account) is derived for the contract on the destination chain.
-3. The Warp Route transfer is initiated, sending the tokens crosschain to the interchain account.
+3. The HWR transfer is initiated, sending the tokens crosschain to the interchain account.
 4. A remote contract call is executed on the destination chain from the interchain account after the tokens arrive.
 
 The Solidity function below demonstrates this pattern:
@@ -90,10 +90,10 @@ function transferAndCall(
         .getRemoteInterchainAccount(destination, address(this))
         .addressToBytes32();
 
-    // Quote the gas fee for the warp route payment
+    // Quote the gas fee for the HWR payment
     uint256 warpFee = warpRoute.quoteGasPayment(destination);
 
-    // Initiate the warp route transfer to send tokens cross-chain
+    // Initiate the HWR transfer to send tokens cross-chain
     warpRoute.transferRemote{value: warpFee}(destination, self, amount);
 
     // Execute the specified interchain calls using the remaining gas funds

@@ -2,7 +2,7 @@
 title: "Deploy Yield Routes"
 ---
 
-The goal of this guide is to illustrate how you can use Hyperlane warp routes to create yield-generating bridges, ensuring idle bridged assets are productive by compounding yield over time. Depending on the variant (more details below), yields are distributed to the yield route owner or users.
+The goal of this guide is to illustrate how you can use Hyperlane Warp Routes (HWR) to create yield-generating bridges, ensuring idle bridged assets are productive by compounding yield over time. Depending on the variant (more details below), yields are distributed to the yield route owner or users.
 
 ## Pre-Requisites
 
@@ -17,7 +17,7 @@ To complete the following walkthrough, you should have the following available:
 ### Concepts
 
 - **ERC-4626 Vault**: The Ethereum standard for tokenized yield-bearing vaults. Upon deposit, share tokens are minted representing ownership of the underlying asset.
-- **Yield Route (EvmHypOwnerCollateral & EvmHypSynthetic)**: The Hyperlane representation of a yield-bearing EVM collateral token. Note that the yield route’s vault’s deposited asset address is used as the warp routes collateral token.
+- **Yield Route (EvmHypOwnerCollateral & EvmHypSynthetic)**: The Hyperlane representation of a yield-bearing EVM collateral token. Note that the yield route’s vault’s deposited asset address is used as the Hyperlane Warp Routes collateral token.
   - This specific yield route variant distributes vault yields to the **owner**. There is an alternative setup where yields are distributed to the users (EvmHypCollateral & EvmHypSyntheticRebase). For most of this guide, we will refer to the former variants. The concepts remain the same.
 
 <Info>

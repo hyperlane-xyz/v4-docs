@@ -6,16 +6,16 @@ import PrerequisitesPartial from "/snippets/prerequisites-config-symbol.mdx";
 import WarpReadSymbolChainPartial from "/snippets/warp-read-symbol-chain.mdx";
 import WarpApplySymbolConfigDefaultPartial from "/snippets/warp-apply-symbol-config-default.mdx";
 
-This guide provides a step-by-step guide to transferring ownership of your Hyperlane Warp Route. It also explains the responsibilities, security considerations, and configuration options that come with owning a Warp Route.
+This guide provides a step-by-step guide to transferring ownership of your Hyperlane Warp Route (HWR). It also explains the responsibilities, security considerations, and configuration options that come with owning a HWR.
 
-## Warp Route Ownership Overview
+## HWR Ownership Overview
 
-Before transferring ownership of your Warp Route, it's important to understand what this ownership entails. Ownership grants control over configuration settings, such as the Interchain Security Module (ISM), Validator options, and other parameters critical to security.
+Before transferring ownership of your HWR, it's important to understand what this ownership entails. Ownership grants control over configuration settings, such as the Interchain Security Module (ISM), Validator options, and other parameters critical to security.
 
 <Note>
-  Once a mailbox is set up on the chain, anyone can deploy a Warp Route. Warp
-  Routes are commonly deployed by a few different groups - the Abacus Works
-  team, the asset issuer, the chain team, or the application team.
+  Once a mailbox is set up on the chain, anyone can deploy a HWR. HWRs are
+  commonly deployed by a few different groups - the Abacus Works team, the asset
+  issuer, the chain team, or the application team.
 </Note>
 
 ### Overview of Ownership
@@ -25,32 +25,32 @@ Before transferring ownership of your Warp Route, it's important to understand w
 
 ### ISM, Validator, and Relayer Options
 
-When configuring or transferring a Warp Route, owners have flexibility in managing ISM, Validator, and Relayer settings:
+When configuring or transferring a HWR, owners have flexibility in managing ISM, Validator, and Relayer settings:
 
-- **ISM Customization**: Each Warp Route may require a tailored ISM configuration depending on security needs. Owners can set up a custom ISM or use Hyperlane's default setup.
+- **ISM Customization**: Each HWR may require a tailored ISM configuration depending on security needs. Owners can set up a custom ISM or use Hyperlane's default setup.
 - **Validator Options**: Ownership allows you to choose or manage your Validator set. Hyperlane can handle Validator responsibilities by default, making it optional to run your own.
 - **Relayer Support**: Hyperlane provides Relayer services by default, but teams can operate their own Relayers for more control over security, reliability, and costs. This customization enables teams to tailor message handling to fit specific performance, compliance, or operational requirements.
 
-## Warp Route Ownership Transfer Guide
+## HWR Ownership Transfer Guide
 
 ### Using the Hyperlane CLI
 
-One of the quickest way to transfer a warp route ownership is by using the [Hyperlane CLI](https://docs.hyperlane.xyz/docs/reference/developer-tools/cli).
+One of the quickest way to transfer a HWR ownership is by using the [Hyperlane CLI](https://docs.hyperlane.xyz/docs/reference/developer-tools/cli).
 
 <PrerequisitesPartial />
 
 <Info>
   If you followed the [Deploy a Warp
   Route](/docs/guides/quickstart/deploy-warp-route) guide, you may have deployed
-  a warp route with the owner set to the single private key. In production, it
-  is advisable to use a multisig.
+  a HWR with the owner set to the single private key. In production, it is
+  advisable to use a multisig.
 </Info>
 
 To confirm using the Hyperlane CLI, locate your token symbol and the chain it is deployed on:
 
 <WarpReadSymbolChainPartial />
 
-You should be able to select the warp route that you wish to update the ownership for.
+You should be able to select the HWR that you wish to update the ownership for.
 
 After running `warp read`, you should see a similar config with `owner` set to private key's address:
 
@@ -91,7 +91,7 @@ yourchain:
 
 ## Step 2: Apply
 
-Using the CLI, execute by providing the token symbol and warp route config:
+Using the CLI, execute by providing the token symbol and HWR config:
 
 <WarpApplySymbolConfigDefaultPartial />
 
@@ -125,4 +125,4 @@ yourchain:
   type: native
 ```
 
-By completing these steps, you have successfully transferred and verified ownership of your Warp Route to a new address.
+By completing these steps, you have successfully transferred and verified ownership of your HWR to a new address.

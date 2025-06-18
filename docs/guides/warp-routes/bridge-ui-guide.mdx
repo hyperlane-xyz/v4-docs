@@ -1,8 +1,8 @@
 ---
-title: "Deploying a Bridge UI for Hyperlane Warp Routes"
+title: "Deploying a Bridge UI for your HWR"
 ---
 
-After you've successfully [deployed a Warp Route](/docs/guides/quickstart/deploy-warp-route.mdx), you have two out-of-the-box options for setting up a frontend UI to support interchain token transfers:
+After you've successfully [deployed a Hyperlane Warp Route (HWR)](/docs/guides/quickstart/deploy-warp-route.mdx), you have two out-of-the-box options for setting up a frontend UI to support interchain token transfers:
 
 1. **[Fork, customize, and deploy the Hyperlane Warp UI template](#fork--customize-the-ui)**
 2. **[Use a managed Superbridge instance](#superbridge)**
@@ -18,9 +18,9 @@ The [Hyperlane Warp UI template](https://github.com/hyperlane-xyz/hyperlane-warp
 
 By default, the app will use the canonical Hyperlane registry published on NPM. To use a different registry, you can set a URL using the `NEXT_PUBLIC_REGISTRY_URL` environment variable.
 
-### Warp Route Config Example
+### HWR Config Example
 
-Here's an example config for a Warp Route that connects USDC on Sepolia to Alfajores. You can use Typescript or YAML for your route configs.
+Here's an example config for a HWR that connects USDC on Sepolia to Alfajores. You can use Typescript or YAML for your route configs.
 
 ```typescript
 {
@@ -90,7 +90,7 @@ Since the UI is a Next.js app, you can use your favorite hosting service to host
 And that's it! Now you and your users can use the UI to send tokens from the collateral chain to remote chains, from one remote chain to another, and from any remote chain back to the collateral chain.
 
 <Tip>
-If there is no production relayer running for these chains, you can run a lightweight CLI relayer that delivers only for your warp route in the background with:
+If there is no production relayer running for these chains, you can run a lightweight CLI relayer that delivers only for your HWR in the background with:
 
 ```bash
 hyperlane relayer --symbol TOKEN
@@ -102,9 +102,9 @@ This will allow you to test the warp UI locally or for a quick demo without need
 
 ### Return gas
 
-A common problem with token bridges like Warp Routes is that a user may transfer a token like USDC to a new chain, but only afterwards realize that they do not have the native gas token to move those tokens anywhere including back.
+A common problem with token bridges like Hyperlane HWRs is that a user may transfer a token like USDC to a new chain, but only afterwards realize that they do not have the native gas token to move those tokens anywhere including back.
 
-To improve the user experience, you could provide some native gas tokens via a faucet, in addition to UI warnings. To create a faucet, modify the Warp Route contracts to hold a balance of the native token to share with recipients.
+To improve the user experience, you could provide some native gas tokens via a faucet, in addition to UI warnings. To create a faucet, modify the HWR contracts to hold a balance of the native token to share with recipients.
 
 <Tip>
   For developers looking to further customize the Warp UI for their own projects
@@ -118,15 +118,15 @@ To improve the user experience, you could provide some native gas tokens via a f
 
 [Superbridge](https://superbridge.app) is a custom bridge provider, they manage bridge frontends for hundreds of rollups, various tokens and different ecosystems.
 
-Getting a managed Superbridge for your warp route is a hassle-free approach to operating your bridge. A few of their most popular Hyperlane powered bridges are [Renzo's ezETH bridge](https://renzo.superbridge.app) and [Elixir's deUSD bridge](https://elixir.superbridge.app). With a managed bridge instance, Superbridge will handle hosting, theming, upgrades & user support requests for your warp route.
+Getting a managed Superbridge for your HWR is a hassle-free approach to operating your bridge. A few of their most popular Hyperlane powered bridges are [Renzo's ezETH bridge](https://renzo.superbridge.app) and [Elixir's deUSD bridge](https://elixir.superbridge.app). With a managed bridge instance, Superbridge will handle hosting, theming, upgrades & user support requests for your HWR.
 
-They've also built a handy feature that allows for self-service testing of recently deployed warp routes.
+They've also built a handy feature that allows for self-service testing of recently deployed Hyperlane HWRs.
 
-### Testing your warp route
+### Testing your HWR
 
 1. Navigate to the [Superbridge Hyperlane Playground](https://hyperlane.superbridge.app)
 2. Click the settings cog and then click Customize ![](/images/docs/guides/deploy-warp-ui/superbridge-settings.png)
-3. Paste in the YAML file you generated when deploying your warp routes ![](/images/docs/guides/deploy-warp-ui/superbridge-paste-yaml.png)
+3. Paste in the YAML file you generated when deploying your Hyperlane HWRs ![](/images/docs/guides/deploy-warp-ui/superbridge-paste-yaml.png)
 4. The specified tokens and networks will now be available for bridging.
 
 <Tip>
@@ -142,4 +142,4 @@ In addition to the hosted UI, Superbridge offers a bridging widget, so you can e
 
 ### Go to Production
 
-To bring your warp route to production with Superbridge, [reach out to the Superbridge team](mailto:alex@superbridge.app). They can typically get a frontend up and running in about a day.
+To bring your HWR to production with Superbridge, [reach out to the Superbridge team](mailto:alex@superbridge.app). They can typically get a frontend up and running in about a day.
