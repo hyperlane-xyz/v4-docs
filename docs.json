@@ -201,6 +201,7 @@
                 "pages": [
                   "docs/protocol/ISM/modular-security",
                   "docs/protocol/ISM/sequence-diagram",
+                  "docs/protocol/ISM/ism-marketplace",
                   "docs/protocol/ISM/custom-ISM",
                   {
                     "group": "Standard ISMs",

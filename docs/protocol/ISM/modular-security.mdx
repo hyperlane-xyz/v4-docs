@@ -4,7 +4,7 @@ title: "ISM Overview"
 
 import IsmDiagram from "/snippets/messaging-isms.mdx";
 
-Hyperlane is secured by (ISMs). ISMs are smart contracts that are responsible for verifying that interchain messages being delivered on the destination chain were on the origin chain.
+Hyperlane is secured by Interchain Security Modules (ISMs). ISMs are smart contracts that are responsible for verifying that interchain messages being delivered on the destination chain were on the origin chain.
 
 <IsmDiagram />
 
@@ -45,28 +45,3 @@ ISMs are fully customizable. Developers can write their own ISMs, tailoring them
 For example, application developers can build ISMs that adjust security models based on message content. High value and infrequent messages (e.g. governance) could be verified by a security model that prioritizes safety over latency and gas costs. Lower value and more frequent messages could be verified by a security model that prioritizes latency and gas costs over safety.
 
 <Tip>Learn how to [Create your own ISM](/docs/protocol/ISM/custom-ISM)</Tip>
-
-## Available ISMs
-
-### Standard ISMs
-
-Standard ISMs are pre-built modules developed by the AW team.
-
-| ISM Type            | Description                                                                    | Type     |
-| ------------------- | ------------------------------------------------------------------------------ | -------- |
-| **Multisig ISM**    | Verifies messages through validator consensus                                  | Standard |
-| **Routing ISM**     | Routes verification to different ISMs based on origin chain or message content | Standard |
-| **Aggregation ISM** | Combines multiple ISMs to require verification from several sources            | Standard |
-| **CCIP-Read ISM**   | Verifies messages using off-chain data sources                                 | Standard |
-
-### Community ISMs
-
-Community ISMs are developed and maintained by the community to extend ISM capabilities.
-
-| ISM Type              | Description                                                                                                 | Type      |
-| --------------------- | ----------------------------------------------------------------------------------------------------------- | --------- |
-| Wormhole ISM          | Verifies messages using attestations from Wormhole's guardian network                                       | Community |
-| Polygon PoS ISM       | Uses Polygon's state sync mechanism for secure message passing between Ethereum ↔ Polygon PoS               | Community |
-| Optimistic ISM        | Implements an optimistic verification model with a fraud window where watchers can flag fraudulent messages | Community |
-| OP Stack ISM          | Uses OP Stack rollup's settlement layer security for messages between Ethereum ↔ OP Stack rollups           | Community |
-| Arbitrum L2 to L1 ISM | Uses Arbitrum rollup's security properties for messages sent from Arbitrum L2 ↔ Ethereum                    | Community |
