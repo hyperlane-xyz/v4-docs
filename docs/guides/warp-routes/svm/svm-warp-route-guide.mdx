@@ -61,6 +61,15 @@ Deploying a HWR requires there to be a core Hyperlane deployment that is connect
 
    To verify the build output, check the target/deploy directory for `.so` files in `hyperlane-monorepo/rust/sealevel/target/deploy`
 
+   <Note>
+     During the build process, you may encounter a stack offset error message
+     like `Error: Function [...] Stack offset of 4360 exceeded max offset of xx
+     ..`. This is a known issue that has no impact on the functionality of the
+     programs. The error relates to an unused function in a dependency crate and
+     can be ignored. The programs will build, deploy, and function correctly
+     despite this warning.
+   </Note>
+
 ### Step 2: Prepare for Deployment
 
 1. To deploy the contracts, install `solana-cli 1.18.18`. Note that you **must** use this version, otherwise deployment may fail.

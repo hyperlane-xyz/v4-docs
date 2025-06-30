@@ -91,6 +91,10 @@ Hyperlane Validators and Relayers can use **multiple RPC URLs** to improve relia
       For **SVM chains**, only a **single RPC URL** is used. There is no fallback or quorum-based selection mechanism.
     </Warning>
 
+    <Warning>
+      **SVM Relayer Funding**: When relaying messages to SVM chains, make sure your Relayer key has sufficient funds on the destination chain. The Relayer performs view calls via simulations that require the sender to have funds for successful simulation, even for read operations. Without sufficient funds, you may encounter `No return data from InboxGetRecipientIsm instruction` errors.
+    </Warning>
+
   </Tab>
 </Tabs>
 
