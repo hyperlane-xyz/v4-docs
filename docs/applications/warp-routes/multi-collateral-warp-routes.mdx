@@ -1,8 +1,8 @@
 ---
-title: "Hyperlane Warp Routes 2.0"
+title: "HWR 2.0"
 ---
 
-Hyperlane Warp Routes 2.0 are a type of Hyperlane Warp Route (HWR) that allows liquidity to be sourced from multiple collateral chains.
+Hyperlane Warp Routes 2.0 are a type of Hyperlane Warp Route (HWR) that allows liquidity to be sourced from multiple collateral chains with native rebalancing for supported configurations.
 
 ## Overview
 
@@ -22,6 +22,12 @@ Example:
 - Mint 100 USDC on NewChain
 
 This setup allows a destination chain to receive assets from multiple sources, making it easier for users to onboard liquidity without depending on a single origin.
+
+## Native Rebalancing
+
+If more funds flow in one direction, one of the chains in the route can run out of collateral, creating imbalanced flow that prevents withdrawals. To maintain a smooth user experience, collateral must be balanced across chains. HWR 2.0 addresses this with native rebalancing - collateral is automatically moved between chains to resolve imbalances via the rebalancer.
+
+To learn more about Native Rebalancing, head over to: [HWR 2.0 : Native Rebalancing](/docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing)
 
 ## High-level Flowchart
 
@@ -45,12 +51,6 @@ flowchart
     AWR -. "{recipient, amount}" .-> NWR
     NWR -. "2 \* amount" .-> Recipient
 ```
-
-<Warning>
-  Since liquidity can come from multiple sources, balancing collateral across
-  chains is important to ensure a smooth user experience. Currently, teams must
-  rebalance manually. Automated solutions aim to streamline this.
-</Warning>
 
 ## Guides
 
