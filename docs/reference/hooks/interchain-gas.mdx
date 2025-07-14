@@ -11,11 +11,11 @@ The `gasLimit` is set based on the cost of calling `handle` on the destination c
 
 The default `gasLimit` for metering the handle call is a static default of `50_000` gas. This is sufficient for simple operations but may not be enough for more complex `handle` functions.
 
-If your `handle` function performs complex operations or requires more gas, you must override the [default `gasLimit` in metadata](#metadata) to avoid transaction reverts. Benchmark your [`handle` implementations](../messaging/receive.mdx#handle) in unit tests to determine a reasonable `gasLimit` to use.
+If your `handle` function performs complex operations or requires more gas, you must override the [default `gasLimit` in metadata](#metadata) to avoid transaction reverts. Benchmark your [`handle` implementations](../messaging/receive#handle) in unit tests to determine a reasonable `gasLimit` to use.
 
 ### Metadata
 
-This hook expects metadata in a **packed encoding** of `StandardHookMetadata`. See the Mailbox [dispatch overloads](../messaging/send.mdx#overriding-default-hook-metadata) for how to pass metadata overrides.
+This hook expects metadata in a **packed encoding** of `StandardHookMetadata`. See the Mailbox [dispatch overloads](../messaging/send#overriding-default-hook-metadata) for how to pass metadata overrides.
 
 ```solidity
 struct StandardHookMetadata {
