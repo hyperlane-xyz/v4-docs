@@ -3,7 +3,7 @@ title: "Receive a message"
 description: "How to handle and verify incoming interchain messages with Hyperlane's Mailbox contract"
 ---
 
-To deliver interchain messages, the [relayer](/docs/operate/relayer/run-relayer.mdx) calls `Mailbox.process()`.
+To deliver interchain messages, the [relayer](/docs/operate/relayer/run-relayer) calls `Mailbox.process()`.
 
 This function takes as parameters the message to deliver, as well as arbitrary metadata that can be specified by the relayer.
 
@@ -41,7 +41,7 @@ function handle(
 - `messageBody`: Raw bytes content of message body
 
 <Info>
-Sender addresses are left-padded to `bytes32` for compatibility with virtual machines that are addressed differently. The following utility is provided in the [`TypeCasts` library](/docs/reference/developer-tools/libraries/typecasts.mdx) for convenience.
+Sender addresses are left-padded to `bytes32` for compatibility with virtual machines that are addressed differently. The following utility is provided in the [`TypeCasts` library](/docs/reference/developer-tools/libraries/typecasts) for convenience.
 
 ```solidity
 function bytes32ToAddress(bytes32 _bytes32) internal pure returns (address) {

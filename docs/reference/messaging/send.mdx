@@ -13,8 +13,8 @@ Calling this function dispatches a message to the destination domain and recipie
 
 <Warning>
   Hyperlane can only deliver messages to smart contracts that implement the
-  `handle` function. See the [receive a message](./receive.mdx) documentation
-  for more information.
+  `handle` function. See the [receive a message](./receive) documentation for
+  more information.
 </Warning>
 
 Depending on the [post-`dispatch` hook configuration](#post-dispatch-hook-config), some payment may be required. See the [`quoteDispatch`](#quote-dispatch) section for more information.
@@ -30,7 +30,7 @@ function dispatch(
 ```
 
 <Info>
-Recipient addresses are left-padded to `bytes32` for compatibility with virtual machines that are addressed differently. The following utility is provided in the [`TypeCasts` library](/docs/reference/developer-tools/libraries/typecasts.mdx) for convenience.
+Recipient addresses are left-padded to `bytes32` for compatibility with virtual machines that are addressed differently. The following utility is provided in the [`TypeCasts` library](/docs/reference/developer-tools/libraries/typecasts) for convenience.
 
 ```solidity
 function addressToBytes32(address _address) internal pure returns (bytes32) {
