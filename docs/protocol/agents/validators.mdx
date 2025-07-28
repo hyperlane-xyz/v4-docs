@@ -58,7 +58,7 @@ pub struct Checkpoint {
 }
 ```
 
-The only checkpoint storage that is currently supported by the agent implementation is AWS S3. Google Cloud Storage is integrated with but has an [open issue](https://github.com/hyperlane-xyz/hyperlane-monorepo/issues/4069). The Azure Blob Storage contribution is still [in progress](https://github.com/eigerco/hyperlane-monorepo/pull/2).
+Checkpoint storage that is currently supported by the agent implementation is AWS S3 and Google Cloud Storage. The Azure Blob Storage contribution is still [in progress](https://github.com/hyperlane-xyz/hyperlane-monorepo/issues/2242).
 
 ### Liveness implications
 
@@ -66,4 +66,4 @@ Depending on the threshold configured in the Multisig ISM, Validator downtime ca
 
 ### Default ISM Validators
 
-The number of validators depend on the Interchain Security Module (ISM) configuration. The Default ISM uses a specific validator set, you can view the Validator details such as threshold, operator and addresses [here](/docs/reference/addresses/validators/mainnet/default-ism-validators).
+The number of validators depend on the Interchain Security Module (ISM) configuration. The Default ISM uses a specific validator set, you can view the Validator details such as threshold, operator and addresses [here](/docs/reference/addresses/validators/mainnet-default-ism-validators).
