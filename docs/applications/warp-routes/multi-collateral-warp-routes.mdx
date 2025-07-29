@@ -52,6 +52,27 @@ flowchart
     NWR -. "2 \* amount" .-> Recipient
 ```
 
+## Supported Tokens and Protocols
+
+Native rebalancing is possible when the required conditions are met for a given token on each participating chain in the HWR 2.0.
+
+### USDC
+
+- **Protocol**: [Circle CCTP](https://developers.circle.com/cctp)
+- **Versions**: v1 and v2 supported
+
+### ETH
+
+- **Protocol**: Everclear
+
+### USDT
+
+- 🚧 Native rebalancing support is currently planned
+
+<Note>
+Chain support for native rebalancing depends on protocol availability and token bridging infrastructure. Read more about the [requirements for native rebalancing](/docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing#requirements-for-native-rebalancing)
+</Note>
+
 ## Guides
 
 - To deploy Hyperlane Warp Routes 2.0 head over to [Deploy a Hyperlane Warp Route 2.0](/docs/guides/warp-routes/evm/deploy-multi-collateral-warp-routes)
