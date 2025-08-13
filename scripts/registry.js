@@ -1,9 +1,7 @@
 import { chainAddresses, chainMetadata } from "@hyperlane-xyz/registry";
 
 const ABACUS_WORKS_DEPLOYER_NAME = "abacus works";
-
-// Pre-mainnet chains
-const FILTER_LIST = [];
+const CHAIN_STATUS = "disabled";
 
 // Chains that Abacus Works has deployed (formerly known as 'core' chains)
 export function getAbacusWorksChains(isTestnet = false, requireMailbox = true) {
@@ -12,15 +10,19 @@ export function getAbacusWorksChains(isTestnet = false, requireMailbox = true) {
     const isRightDeployer =
       metadata.deployer?.name.trim().toLowerCase() ===
       ABACUS_WORKS_DEPLOYER_NAME;
+
     // Filter to only mainnets or testnets
     const isRightChainType = !!metadata.isTestnet === isTestnet;
+
     // If required, filter to chains that have a mailbox addresses in the registry
     const hasMailboxAddress =
       !requireMailbox || !!chainAddresses[metadata.name]?.mailbox;
-    // Filter out chains in FILTER_LIST
-    const isFiltered = FILTER_LIST.includes(metadata.name);
+
+    // Filter out chains that have status: disabled
+    const isNotDisabled = metadata.availability?.status !== CHAIN_STATUS;
+
     return (
-      isRightDeployer && isRightChainType && hasMailboxAddress && !isFiltered
+      isRightDeployer && isRightChainType && hasMailboxAddress && isNotDisabled
     );
   });
 }

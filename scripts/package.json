@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@hyperlane-xyz/registry": "latest",
+    "@hyperlane-xyz/registry": "^21.1.0",
     "@hyperlane-xyz/sdk": "latest"
   }
 }
