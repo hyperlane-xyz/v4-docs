@@ -1,10 +1,7 @@
 import { chainAddresses, chainMetadata } from "@hyperlane-xyz/registry";
 
 const ABACUS_WORKS_DEPLOYER_NAME = "abacus works";
-const AVAILABILITY_DISABLED = "disabled";
-
-// Pre-mainnet chains
-const FILTER_LIST = [];
+const CHAIN_STATUS = "disabled";
 
 // Chains that Abacus Works has deployed (formerly known as 'core' chains)
 export function getAbacusWorksChains(isTestnet = false, requireMailbox = true) {
@@ -21,20 +18,11 @@ export function getAbacusWorksChains(isTestnet = false, requireMailbox = true) {
     const hasMailboxAddress =
       !requireMailbox || !!chainAddresses[metadata.name]?.mailbox;
 
-    // Filter to chains that the availability is disabled
-    const isNotAvailable =
-      metadata.availability?.status?.trim().toLowerCase() ===
-      AVAILABILITY_DISABLED;
-
-    // Filter out chains in FILTER_LIST
-    const isFiltered = FILTER_LIST.includes(metadata.name);
+    // Filter out chains that have status: disabled
+    const isNotDisabled = metadata.availability?.status !== CHAIN_STATUS;
 
     return (
-      isRightDeployer &&
-      isRightChainType &&
-      hasMailboxAddress &&
-      !isFiltered &&
-      !isNotAvailable
+      isRightDeployer && isRightChainType && hasMailboxAddress && isNotDisabled
     );
   });
 }
