@@ -65,15 +65,15 @@ The [Relayer](/docs/protocol/agents/relayer) (a permissionless off-chain agent) 
 
 - The second message is the **commitment**. Instead of sending the full swap details, this message only includes a **hash of the swap instruction** (for example, "swap `oUSDT → USDC`).
 - This message is sent through Hyperlane’s Interchain Account Router to be processed by the [Offchain Lookup ISM](/docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM) (a security module that can fetch data from external sources when needed). The ISM stores the hash onchain as a public record of what was committed, while keeping the actual swap parameters hidden.
-- The full swap calldata is not placed on-chain at this stage. Instead, it is stored offchain on a gateway service. Only the relayer that paid gas fees through Hyperlane's **Interchain Gas Payment (IGP)** system can retrieve it, and it must authenticate itself with an **ECDSA signature** before accessing the data. This protects the swap from MEV by keeping swap details hidden until final execution.
+- The full swap calldata is not placed onchain at this stage. Instead, it is stored offchain on a gateway service. Only the relayer that paid gas fees through Hyperlane's **Interchain Gas Payment (IGP)** system can retrieve it, and it must authenticate itself with an **ECDSA signature** before accessing the data. This protects the swap from MEV by keeping swap details hidden until final execution.
 
 <Note> 
 MEV Protection with **Offchain Lookup ISM:** The Offchain Lookup ISM enforces the **commit–reveal scheme** before any ICA instruction is executed.
 
-- First, the swap details are **committed** on-chain as a hash (without revealing the full data).
+- First, the swap details are **committed** onchain as a hash (without revealing the full data).
 - Later, when the reveal call arrives, the ISM:
   - Fetches the full calldata from the offchain gateway
-  - Verifies that the hash of this data matches the earlier on-chain commitment
+  - Verifies that the hash of this data matches the earlier onchain commitment
 - Only if the commit and reveal match, the ICA continues to execution.
 - This process protects the user from MEV by **keeping swap details private** until the moment of execution.
 
@@ -91,7 +91,7 @@ MEV Protection with **Offchain Lookup ISM:** The Offchain Lookup ISM enforces th
 To recap:
 
 1. Hyperlane Warp Route delivers tokens cross-chain.
-2. Commitment Message locks in the swap hash on-chain (but hides details).
+2. Commitment Message locks in the swap hash onchain (but hides details).
 3. Reveal Message fetches the real swap data offchain, verifies it against the hash, and then executes the swap.
 
 #### ICA Architecture Overview
