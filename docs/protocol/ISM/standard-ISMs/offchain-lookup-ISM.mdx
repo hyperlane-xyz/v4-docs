@@ -1,12 +1,12 @@
 ---
-title: "CCIP Read ISM"
+title: "Offchain Lookup ISM"
 ---
 
-Using a `CcipReadIsm` provides developers with a lot of flexibility for verifying interchain messages. Ultimately, every other kind of ISM can be implemented as a CCIP Read ISM, so when building new types of ISM's moving forward it's encouraged to build CCIP Read ISM's as all the relayer integration work has already been done.
+Using a Offchain Lookup ISM provides developers with a lot of flexibility for verifying interchain messages. Ultimately, every other kind of ISM can be implemented as a Offchain Lookup ISM, so when building new types of ISM's moving forward it's encouraged to build Offchain Lookup ISM's as all the relayer integration work has already been done.
 
-One caveat to keep in mind for CCIP Read ISM's is that they do introduce a dependency on an external (to the blockchain), but self hostable, API. If this is a hard blocker for your use case, you may want to consider other message verification techniques.
+One caveat to keep in mind for the Offchain Lookup ISM's is that they do introduce a dependency on an external (to the blockchain), but self hostable, API. If this is a hard blocker for your use case, you may want to consider other message verification techniques.
 
-Before building a CCIP Read ISM it's worth familiarizing yourself with the [CCIP Read specification](https://eips.ethereum.org/EIPS/eip-3668). The specification describes a generalized protocol that allows smart contracts on EVM compatible chains to query and consume offchain data.
+Before building a Offchain Lookup ISM it's worth familiarizing yourself with the [CCIP Read—Secure offchain data retrieval](https://eips.ethereum.org/EIPS/eip-3668). The specification describes a generalized protocol that allows smart contracts on EVM compatible chains to query and consume offchain data.
 
 ## How it works
 
@@ -14,8 +14,9 @@ A relayer will constantly listening to `Dispatch` events emitted from Hyperlane 
 
 <Info>
   The correct `moduleType` variable will need to be set on your ISM so that the
-  relayer knows it's a CCIP Read ISM. To make sure this is configured correctly,
-  you can inherit from the `AbstractCcipReadIsm` in `@hyperlane-xyz/core`.
+  relayer knows it's a Offchain Lookup ISM. To make sure this is configured
+  correctly, you can inherit from the `AbstractCcipReadIsm` in
+  `@hyperlane-xyz/core`.
 </Info>
 
 The relayer will then call the `getOffchainVerifyInfo(bytes)` function on the ISM with the contents of the message being delivered. This function should revert with the `OffchainLookup` error described in the [interface](#interface) section below.
@@ -24,7 +25,7 @@ The relayer will query the endpoint specified in this revert message and pass th
 
 ## Interface
 
-`CcipReadIsm`'s must implement the `ICcipReadIsm` interface and should extend the `AbstractCcipReadIsm`, a convenience contract that sets the `moduleType` correctly.
+The Offchain Lookup ISM must implement the `ICcipReadIsm` interface and should extend the `AbstractCcipReadIsm`, a convenience contract that sets the `moduleType` correctly.
 
 ```solidity
 // SPDX-License-Identifier: MIT OR Apache-2.0
@@ -59,7 +60,7 @@ interface ICcipReadIsm is IInterchainSecurityModule {
 
 ## Configure
 
-A great example for reference while developing CCIP Read ISM's exists as the [ChainlinkISM](https://github.com/AlexBHarley/permissionless-chainlink-feeds). The `ChainlinkISM` is initialized with a set of Chainlink oracles and verifies the price feed data provided has been signed over by some subset of the signers.
+A great example for reference while developing Offchain Lookup ISM's exists as the [ChainlinkISM](https://github.com/AlexBHarley/permissionless-chainlink-feeds). The `ChainlinkISM` is initialized with a set of Chainlink oracles and verifies the price feed data provided has been signed over by some subset of the signers.
 
 ### API
 
@@ -83,7 +84,7 @@ When setting up the ISM, the `getOffchainVerifyInfo` and `verify` functions are 
 
 - `verify` must take the provided `metadata` and assert its legitimacy. Again the [ChainlinkISM implementation](https://github.com/AlexBHarley/permissionless-chainlink-feeds/blob/main/apps/contracts/contracts/ChainlinkAggregator.sol#L114) can be a useful reference point when developing this logic for your own ISM.
 
-Below is the scaffold of what a CCIP Read ISM could look like, where the ISM is also the receiver of the message, as per the Chainlink ISM.
+Below is the scaffold of what a Offchain Lookup ISM could look like, where the ISM is also the receiver of the message, as per the Chainlink ISM.
 
 ```solidity
 pragma solidity ^0.8.13;

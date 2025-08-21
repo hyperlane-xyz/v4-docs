@@ -73,7 +73,11 @@
                   "docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing"
                 ]
               },
-              "docs/applications/interchain-account"
+              "docs/applications/interchain-account",
+              {
+                "group": "Use Cases",
+                "pages": ["docs/applications/use-cases/cross-chain-swaps"]
+              }
             ]
           },
           {
@@ -215,7 +219,7 @@
                       },
                       "docs/protocol/ISM/standard-ISMs/routing-ISM",
                       "docs/protocol/ISM/standard-ISMs/aggregation-ISM",
-                      "docs/protocol/ISM/standard-ISMs/ccip-read-ISM"
+                      "docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM"
                     ]
                   },
                   "docs/protocol/ISM/community-ISMs/overview",
