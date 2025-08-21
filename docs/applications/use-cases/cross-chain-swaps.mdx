@@ -1,0 +1,110 @@
+---
+title: "Superswaps: One-Click Cross-Chain Token Swaps"
+---
+
+This use case explains how [Superswaps](https://velodrome.finance/docs/superswaps) works under the hood using Hyperlane components including [**Interchain Accounts (ICAs)**](/docs/applications/interchain-account), [**Hyperlane Warp Routes (HWR)**](/docs/applications/warp-routes/overview), and the [**Offchain Lookup ISM**](/docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM).
+
+## Overview
+
+**[Superswaps](https://velodrome.finance/docs/superswaps)** is a cross-chain swapping mechanism developed by [Velodrome](https://velodrome.finance/) to enable one-click token swaps across the Superchain ecosystems.
+
+![Warp Route diagram/doodle](/images/docs/applications/superswap-intro.png)
+
+Instead of requiring users to manually bridge assets and perform separate swaps on different chains, Superswaps uses Hyperlane's interoperability stack to provide multiple cross-chain asynchronous composable transactions via a one-click and a MEV-resistant swapping experience.
+
+Before we get into how Superswaps works, let's discuss the challenges there are today.
+
+## Problem
+
+As a user, cross-chain swaps traditionally require multiple steps. Let's say you have Token A on Chain A and want to end up with Token B on Chain B. This typically requires:
+
+1. Swap tokens on Chain A (e.g., OP to USDC on Optimism)
+2. Manually bridge tokens to Chain B (e.g., Base)
+3. Switch to Chain B
+4. Swap again into the desired asset (e.g., USDC to DAI)
+
+**Challenges:**
+
+- **Poor UX**: multiple transactions, wallet interactions, and chain switching
+- **Liquidity fragmentation**: different pools on each chain
+
+## Solution: Superswaps with Hyperlane
+
+Superswaps simplifies this entire process, making it a single click for the user by leveraging Hyperlane's Open Interoperability Framework.
+
+### Key Components
+
+- **[Interchain Accounts (ICAs)](/docs/applications/interchain-account)**: Allow a contract on Chain A to execute arbitrary logic on Chain B
+- **[Hyperlane Warp Routes (HWR)](/docs/applications/warp-routes/overview)**: Bridge assets between chains
+- **[oUSDT](https://docs.openusdt.xyz/)**: Interchain stablecoin used to transfer value between chains
+- **[Offchain Lookup ISM](/docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM)**: Provides a way to verify Hyperlane messages using data that's stored off-chain which can be fetched and verified when needed
+
+### Superswap Flow (Step-by-Step)
+
+Let's say a user wants to swap **OP on Optimism** → **USDC on Base**.
+
+#### Step 1: User initiates Superswap on Optimism (Origin Chain)
+
+- User signs **one transaction** via the Velodrome UI.
+- Behind the scenes, Velodrome:
+  - Swaps user's `OP → oUSDT` (on Optimism)
+  - Prepares an **Interchain Account (ICA)** call to execute a swap on Base
+
+#### Step 2: Hyperlane handles bridging and messaging
+
+Once the user has signed the single Superswap transaction, the cross-chain orchestration is handled by Hyperlane's interoperability framework.
+
+The [Relayer](/docs/protocol/agents/relayer) (a permissionless off-chain agent) is responsible for **carrying 3 distinct messages** across the chains. Each message plays a different role in ensuring tokens move, instructions are committed securely, and execution happens only when verified.
+
+**1. oUSDT is bridged via HWR**
+
+- [oUSDT](https://docs.openusdt.xyz/), the intermediary token that powers Superswaps, is bridged from origin chain (Optimism) to destination chain (Base) and delivered into the **user’s Interchain Account (ICA)** on Base.
+- This ensures that the ICA on Base holds the tokens required for the swap.
+
+**2. Commitment Message (hash of swap details)**
+
+- The second message is the **commitment**. Instead of sending the full swap details, this message only includes a **hash of the swap instruction** (for example, "swap `oUSDT → USDC`).
+- This message is sent through Hyperlane’s Interchain Account Router to be processed by the [Offchain Lookup ISM](/docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM) (a security module that can fetch data from external sources when needed). The ISM stores the hash onchain as a public record of what was committed, while keeping the actual swap parameters hidden.
+- The full swap calldata is not placed onchain at this stage. Instead, it is stored offchain on a gateway service. Only the relayer that paid gas fees through Hyperlane's **Interchain Gas Payment (IGP)** system can retrieve it, and it must authenticate itself with an **ECDSA signature** before accessing the data. This protects the swap from MEV by keeping swap details hidden until final execution.
+
+<Note> 
+MEV Protection with **Offchain Lookup ISM:** The Offchain Lookup ISM enforces the **commit–reveal scheme** before any ICA instruction is executed.
+
+- First, the swap details are **committed** onchain as a hash (without revealing the full data).
+- Later, when the reveal call arrives, the ISM:
+  - Fetches the full calldata from the offchain gateway
+  - Verifies that the hash of this data matches the earlier onchain commitment
+- Only if the commit and reveal match, the ICA continues to execution.
+- This process protects the user from MEV by **keeping swap details private** until the moment of execution.
+
+</Note>
+
+**3. Reveal & Execute Message (full swap details)**
+
+- The third message is the **reveal and execute** step. This message is passed into the **Destination ICA Router**, which in turn calls the **Offchain Lookup ISM**.
+- The Reveal message itself doesn't include the full calldata. Instead, it contains a pointer to the offchain gateway plus the relayer's signed proof, which authenticates it as the correct courier.
+- The **Offchain Lookup ISM** then triggers an offchain lookup. This step fetches the swap calldata from the gateway and returns it back. The ISM recomputes the hash of this calldata and checks it against the earlier commitment stored onchain. If the two match, the message is verified.
+- Finally, the **Sender ICA** on the destination chain calls the swap function. With the tokens already in place from the HWR, and the calldata now verified, the ICA executes the swap on the destination chain - converting the `oUSDT` into `USDC`.
+
+#### Putting it Together
+
+To recap:
+
+1. Hyperlane Warp Route delivers tokens cross-chain.
+2. Commitment Message locks in the swap hash onchain (but hides details).
+3. Reveal Message fetches the real swap data offchain, verifies it against the hash, and then executes the swap.
+
+#### ICA Architecture Overview
+
+This diagram shows how ICAs work within Superswaps: the Origin Chain dispatches commitment and execution messages, the Offchain infrastructure (Velodrome Gateway and Relayer) coordinates data retrieval and message passing, and the Destination Chain executes swaps through the ICA.
+
+![Warp Route diagram/doodle](/images/docs/applications/superswap-diagram.png)
+
+### Result: One-Click Cross-Chain Token Swaps
+
+With Superswaps, users receive tokens on the destination chain with a single click
+
+- No need to manually bridge
+- No need to switch networks
+- No need to execute multiple transactions as the user
+- Swap is protected from MEV
