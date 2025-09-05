@@ -28,15 +28,15 @@ Standard ISMs are developed and maintained by Abacus Works.
 | Weighted Message ID Multisig ISM                                                                                                                    | Security    | In Development | A weighted voting system on top of Message ID multisig.                                                                                                                                                             |
 | [Offchain Lookup ISM](/docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM)                                                                         | Security    | In Production  | Functions as an abstraction for building verification logic that leverages external data sources for validation.                                                                                                    |
 | [Chainlink CCIP ISM](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/hook/CCIPIsm.sol)                        | Security    | In Production  | Leverages Chainlink CCIP to validate messages.                                                                                                                                                                      |
-| [Arbitrum L2 to L1 IS](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/hook/ArbL2ToL1Ism.sol)                 | Security    | In Development | Verifies cross-chain messages from Arbitrum L2 to Ethereum L1 using Arbitrum’s native proof system.                                                                                                                 |
+| [Arbitrum L2 to L1 ISM](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/hook/ArbL2ToL1Ism.sol)                | Security    | In Development | Verifies cross-chain messages from Arbitrum L2 to Ethereum L1 using Arbitrum’s native proof system.                                                                                                                 |
 | [OP Stack ISM](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/hook/OPStackIsm.sol)                           | Security    | In Development | Verifies cross-chain messages from OP Stack rollups using the OP Stack native security model.                                                                                                                       |
 | [Noop ISM / Test ISM](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/NoopIsm.sol)                            | Security    | In Production  | ISM for testing purposes.                                                                                                                                                                                           |
 | [Trusted Relayer ISM](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/TrustedRelayerIsm.sol)                  | Security    | In Production  | Relies on a trusted relayer to deliver the message on the Mailbox.                                                                                                                                                  |
 
 <Note>
 
-- Static variant is immutable in bytecode.
-- Storage variant keep module sets and thresholds mutable in state.
+- Static variants are immutable in bytecode.
+- Storage variants keep module sets and thresholds mutable in state.
 
 </Note>
 
