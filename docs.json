@@ -310,7 +310,20 @@
             "group": "Relayer",
             "pages": [
               "docs/operate/relayer/run-relayer",
-              "docs/operate/relayer/api",
+              {
+                "group": "HTTP API",
+                "pages": [
+                  "docs/operate/relayer/api",
+                  "docs/operate/relayer/api/get-messages",
+                  "docs/operate/relayer/api/post-messages",
+                  "docs/operate/relayer/api/get-operations",
+                  "docs/operate/relayer/api/post-retry",
+                  "docs/operate/relayer/api/get-merkle-tree-insertions",
+                  "docs/operate/relayer/api/get-igp-rules",
+                  "docs/operate/relayer/api/post-igp-rules",
+                  "docs/operate/relayer/api/delete-igp-rules"
+                ]
+              },
               "docs/operate/relayer/message-filtering",
               "docs/operate/relayer/monitoring-alerting"
             ]

@@ -1,0 +1,41 @@
+---
+title: 'List Operations'
+api: 'GET http://localhost:8080/operations'
+---
+
+List pending messages in operation queues. Returns current messages being processed by the relayer.
+
+<ResponseField name="success" type="PendingOperation[]">
+  Array of pending operations
+</ResponseField>
+
+<ResponseExample>
+```json Response
+[
+  {
+    "message_id": "0x123...",
+    "status": "pending",
+    "attempts": 1,
+    "last_attempt": "2024-01-01T12:00:00Z"
+  }
+]
+```
+</ResponseExample>
+
+<RequestExample>
+```bash curl
+curl "http://localhost:8080/operations"
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:8080/operations');
+const operations = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get('http://localhost:8080/operations')
+operations = response.json()
+```
+</RequestExample>

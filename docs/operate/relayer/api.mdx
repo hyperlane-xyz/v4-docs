@@ -2,66 +2,45 @@
 title: "Relayer HTTP API"
 ---
 
-The relayer provides a comprehensive HTTP API for inspecting database contents and managing operations. Based on the server module implementation `mod.rs:65-93`, here's the complete API specification:
-
-## Messages API
-
-### GET /messages
-
-Query Parameters:
-
-- `domain_id` (u32): Chain domain ID
-- `nonce_start` (u32): Starting nonce (inclusive)
-- `nonce_end` (u32): Ending nonce (inclusive)
-
-**Response:** Array of HyperlaneMessage objects
-
-**Validation:** Requires `nonce_end > nonce_start`, returns 400 if invalid
-
-### POST /messages
-
-**Body:** Message data for insertion
-
-**Purpose:** Insert new messages into the database
-
-## Operation Queue API
-
-### GET /operations
-
-**Purpose:** List pending messages in operation queues `mod.rs:74-75`
-
-**Response:** Current messages being processed by the relayer
-
-## Message Retry API
-
-### POST /retry
-
-**Purpose:** Trigger retry of failed messages `mod.rs:69-72`
-
-**Body:** Message retry request matching specific patterns
-
-## Merkle Tree API
-
-### GET /merkle-tree-insertions
-
-**Purpose:** Inspect merkle tree insertion events `mod.rs:80`
-
-**Response:** Merkle tree data stored in the database
-
-## IGP (Interchain Gas Payment) Management API
-
-### GET /igp/rules
-
-**Purpose:** List current IGP rules
-
-### POST /igp/rules
-
-**Purpose:** Add new IGP rules
-
-### DELETE /igp/rules
-
-**Purpose:** Remove existing IGP rules
+The relayer provides a comprehensive HTTP API for inspecting database contents and managing operations. Each endpoint below includes an interactive playground where you can test the API directly.
 
 <Note>
-  These endpoints are available when gas enforcers are configured `mod.rs:82-83`.
+Make sure to update the server URL to match your relayer instance before testing endpoints.
 </Note>
+
+## API Endpoints
+
+The following endpoints are available for interacting with the relayer:
+
+### Messages API
+- [Get Messages](/docs/operate/relayer/api/get-messages) - Query messages by domain and nonce range
+- [Insert Messages](/docs/operate/relayer/api/post-messages) - Add new messages to the database
+
+### Operation Management
+- [List Operations](/docs/operate/relayer/api/get-operations) - View pending messages in operation queues
+- [Retry Messages](/docs/operate/relayer/api/post-retry) - Trigger retry of failed messages
+
+### Data Inspection
+- [Get Merkle Tree Insertions](/docs/operate/relayer/api/get-merkle-tree-insertions) - Inspect merkle tree insertion events
+
+### IGP Management
+- [List IGP Rules](/docs/operate/relayer/api/get-igp-rules) - View current gas payment rules
+- [Add IGP Rule](/docs/operate/relayer/api/post-igp-rules) - Create new gas payment rules  
+- [Remove IGP Rules](/docs/operate/relayer/api/delete-igp-rules) - Delete existing gas payment rules
+
+<Note>
+IGP endpoints are only available when gas enforcers are configured (`mod.rs:82-83`).
+</Note>
+
+## Authentication
+
+Most endpoints do not require authentication for read operations. Write operations may require proper API keys or authentication depending on your relayer configuration.
+
+## Base URL
+
+The default base URL for local development is:
+```
+http://localhost:8080
+```
+
+Update this to match your relayer's actual endpoint when deployed.

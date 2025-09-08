@@ -1,0 +1,41 @@
+---
+title: 'Get Merkle Tree Insertions'
+api: 'GET http://localhost:8080/merkle-tree-insertions'
+---
+
+Inspect merkle tree insertion events stored in the database.
+
+<ResponseField name="success" type="MerkleTreeInsertion[]">
+  Array of merkle tree insertion data
+</ResponseField>
+
+<ResponseExample>
+```json Response
+[
+  {
+    "tree_index": 42,
+    "leaf_index": 100,
+    "leaf": "0xabc...",
+    "inserted_at": "2024-01-01T12:00:00Z"
+  }
+]
+```
+</ResponseExample>
+
+<RequestExample>
+```bash curl
+curl "http://localhost:8080/merkle-tree-insertions"
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:8080/merkle-tree-insertions');
+const insertions = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get('http://localhost:8080/merkle-tree-insertions')
+insertions = response.json()
+```
+</RequestExample>
