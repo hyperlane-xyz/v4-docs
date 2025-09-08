@@ -73,7 +73,14 @@
                   "docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing"
                 ]
               },
-              "docs/applications/interchain-account",
+              {
+                "group": "Interchain Accounts ",
+                "pages": [
+                  "docs/applications/interchain-accounts/overview",
+                  "docs/applications/interchain-accounts/example-usage"
+                ]
+              },
+
               {
                 "group": "Use Cases",
                 "pages": ["docs/applications/use-cases/cross-chain-swaps"]
