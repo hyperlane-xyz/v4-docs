@@ -310,6 +310,7 @@
             "group": "Relayer",
             "pages": [
               "docs/operate/relayer/run-relayer",
+              "docs/operate/relayer/api",
               "docs/operate/relayer/message-filtering",
               "docs/operate/relayer/monitoring-alerting"
             ]

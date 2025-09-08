@@ -1,0 +1,66 @@
+---
+title: "Relayer API"
+---
+
+The relayer provides a comprehensive HTTP API for inspecting database contents and managing operations. Based on the server module implementation `mod.rs:65-93`, here's the complete API specification:
+
+## Messages API
+
+### GET /messages
+
+Query Parameters:
+- `domain_id` (u32): Chain domain ID
+- `nonce_start` (u32): Starting nonce (inclusive)  
+- `nonce_end` (u32): Ending nonce (inclusive)
+
+**Response:** Array of HyperlaneMessage objects
+
+**Validation:** Requires `nonce_end > nonce_start`, returns 400 if invalid
+
+### POST /messages
+
+**Body:** Message data for insertion
+
+**Purpose:** Insert new messages into the database
+
+## Operation Queue API
+
+### GET /operations
+
+**Purpose:** List pending messages in operation queues `mod.rs:74-75`
+
+**Response:** Current messages being processed by the relayer
+
+## Message Retry API
+
+### POST /retry
+
+**Purpose:** Trigger retry of failed messages `mod.rs:69-72`
+
+**Body:** Message retry request matching specific patterns
+
+## Merkle Tree API
+
+### GET /merkle-tree-insertions
+
+**Purpose:** Inspect merkle tree insertion events `mod.rs:80`
+
+**Response:** Merkle tree data stored in the database
+
+## IGP (Interchain Gas Payment) Management API
+
+### GET /igp/rules
+
+**Purpose:** List current IGP rules
+
+### POST /igp/rules
+
+**Purpose:** Add new IGP rules
+
+### DELETE /igp/rules
+
+**Purpose:** Remove existing IGP rules
+
+<Note>
+These endpoints are available when gas enforcers are configured `mod.rs:82-83`.
+</Note>
