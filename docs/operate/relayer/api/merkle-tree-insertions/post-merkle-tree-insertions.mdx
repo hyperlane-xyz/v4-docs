@@ -6,19 +6,19 @@ api: 'POST http://localhost:9090/merkle_tree_insertions'
 Insert merkle tree insertion into the relayer database.
 
 <Expandable title="Request Body">
-  <ParamField query="merkle_tree_insertions" type="Object[]" required>
+  <ParamField body="merkle_tree_insertions" type="Object[]" required>
     Array of Merkle Tree Insertions
     <Expandable title="merkle_tree_insertions">
-      <ParamField query="chain" type="u32" required>
+      <ParamField body="chain" type="u32" required>
         Chain of merkle tree insertion
       </ParamField>
-      <ParamField query="insertion_block_number" type="u64" required>
+      <ParamField body="insertion_block_number" type="u64" required>
         Block number of merkle tree insertion
       </ParamField>
-      <ParamField query="leaf_index" type="u32" required>
+      <ParamField body="leaf_index" type="u32" required>
         Leaf index
       </ParamField>
-      <ParamField query="message_id" type="string" required>
+      <ParamField body="message_id" type="string" required>
         Message ID
       </ParamField>
     </Expandable>
