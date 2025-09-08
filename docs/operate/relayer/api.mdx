@@ -1,0 +1,47 @@
+---
+title: "Relayer HTTP API"
+---
+
+The relayer provides a comprehensive HTTP API for inspecting database contents and managing operations. Each endpoint below includes an interactive playground where you can test the API directly.
+
+<Note>
+Make sure to update the server URL to match your relayer instance before testing endpoints.
+</Note>
+
+## API Endpoints
+
+The following endpoints are available for interacting with the relayer:
+
+### Messages API
+- [Get Messages](/docs/operate/relayer/api/messages/get-messages) - Query messages by domain and nonce range in the database
+- [Insert Messages](/docs/operate/relayer/api/messages/post-messages) - Add new messages to the database
+
+### Operation Management
+- [List Operations](/docs/operate/relayer/api/operations/get-operations) - View pending messages in operation queues
+- [Retry Messages](/docs/operate/relayer/api/operations/post-message-retry) - Trigger retry of failed messages
+
+### Data Inspection
+- [Get Merkle Tree Insertions](/docs/operate/relayer/api/merkle-tree-insertions/get-merkle-tree-insertions) - Query merkle tree insertion in the database
+- [Insert Merkle Tree Insertions](/docs/operate/relayer/api/merkle-tree-insertions/post-merkle-tree-insertions) - Insert merkle tree insertion
+
+### IGP Management
+- [List IGP Rules](/docs/operate/relayer/api/igp/get-igp-rules) - View current gas payment rules
+- [Add IGP Rule](/docs/operate/relayer/api/igp/post-igp-rules) - Create new gas payment rules
+- [Remove IGP Rules](/docs/operate/relayer/igp/api/delete-igp-rules) - Delete existing gas payment rules
+
+<Note>
+IGP endpoints are only available when gas enforcers are configured (`mod.rs:82-83`).
+</Note>
+
+## Authentication
+
+Most endpoints do not require authentication for read operations. Write operations may require proper API keys or authentication depending on your relayer configuration.
+
+## Base URL
+
+The default base URL for local development is:
+```
+http://localhost:9090
+```
+
+Update this to match your relayer's actual endpoint when deployed.

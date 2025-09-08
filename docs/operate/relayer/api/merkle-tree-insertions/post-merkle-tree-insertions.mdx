@@ -1,0 +1,96 @@
+---
+title: 'Insert Merkle Tree Insertions'
+api: 'POST http://localhost:9090/merkle_tree_insertions'
+---
+
+Insert merkle tree insertion into the relayer database.
+
+<Expandable title="Request Body">
+  <ParamField body="merkle_tree_insertions" type="Object[]" required>
+    Array of Merkle Tree Insertions
+    <Expandable title="merkle_tree_insertions">
+      <ParamField body="chain" type="u32" required>
+        Chain of merkle tree insertion
+      </ParamField>
+      <ParamField body="insertion_block_number" type="u64" required>
+        Block number of merkle tree insertion
+      </ParamField>
+      <ParamField body="leaf_index" type="u32" required>
+        Leaf index
+      </ParamField>
+      <ParamField body="message_id" type="string" required>
+        Message ID
+      </ParamField>
+    </Expandable>
+  </ParamField>
+</Expandable>
+
+<Expandable title="Response Body">
+  <ResponseField name="count" type="number">
+    Number of merkle tree insertions inserted successfully
+  </ResponseField>
+  <ResponseField name="skipped" type="Object[]">
+    List of merkle tree insertions that were skipped
+  </ResponseField>
+</Expandable>
+
+<RequestExample>
+```bash curl
+curl "http://localhost:9090/merkle_tree_insertions" \
+  -H "Content-Type: application/json" \
+  -d \
+'{
+    "merkle_tree_insertions": [
+        {
+            "chain": 1,
+            "insertion_block_number": 100000,
+            "leaf_index": 5000,
+            "message_id": "0x006ce24a2b5aff423febad6587a68541f2f997a8ba12f0d239748b68f4e0dde5"
+        }
+    ]
+}'
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/igp_rules', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    merkle_tree_insertions: [
+      {
+          chain: 1,
+          insertion_block_number: 100000,
+          leaf_index: 5000,
+          message_id: "0x006ce24a2b5aff423febad6587a68541f2f997a8ba12f0d239748b68f4e0dde5"
+      }
+  ]
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post('http://localhost:9090/igp_rules', json={
+  "merkle_tree_insertions": [
+      {
+          "chain": 1,
+          "insertion_block_number": 100000,
+          "leaf_index": 5000,
+          "message_id": "0x006ce24a2b5aff423febad6587a68541f2f997a8ba12f0d239748b68f4e0dde5"
+      }
+  ]
+})
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "count": 4,
+  "skipped": []
+}
+```
+</ResponseExample>

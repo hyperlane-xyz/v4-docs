@@ -1,0 +1,90 @@
+---
+title: 'Get Messages'
+api: 'GET http://localhost:9090/messages'
+---
+
+Query messages for a specific domain within a nonce range.
+
+<Expandable title="Query Parameters">
+  <ParamField query="domain_id" type="number" required>
+    Chain domain ID (u32)
+  </ParamField>
+  <ParamField query="nonce_start" type="number" required>
+    Starting nonce (inclusive) (u32)
+  </ParamField>
+  <ParamField query="nonce_end" type="number" required>
+    Ending nonce (inclusive) (u32)
+  </ParamField>
+  <Note>
+  Validation: Requires `nonce_end > nonce_start`, returns 400 if invalid
+  </Note>
+</Expandable>
+
+<Expandable title="Response Body">
+  <ResponseField type="HyperlaneMessage[]">
+    Array of HyperlaneMessage objects
+  </ResponseField>
+  <Expandable title="HyperlaneMessage">
+    <ResponseField name="version" type="u8">
+      Hyperlane version number
+    </ResponseField>
+    <ResponseField name="nonce" type="u32">
+      Message nonce
+    </ResponseField>
+    <ResponseField name="origin" type="u32">
+      Message origin
+    </ResponseField>
+    <ResponseField name="destination" type="u32">
+      Message destination
+    </ResponseField>
+    <ResponseField name="sender" type="string">
+      Message sender
+    </ResponseField>
+    <ResponseField name="recipient" type="string">
+      Message recipient
+    </ResponseField>
+    <ResponseField name="body" type="Vec<u8>">
+      Message body
+    </ResponseField>
+  </Expandable>
+</Expandable>
+
+<RequestExample>
+```bash curl
+curl "http://localhost:9090/messages?domain_id=1&nonce_start=100&nonce_end=200"
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/messages?domain_id=1&nonce_start=100&nonce_end=200');
+const { messages } = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get('http://localhost:9090/messages', params={
+    'domain_id': 1,
+    'nonce_start': 100,
+    'nonce_end': 200
+})
+messages = response.json()
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "messages": [
+    {
+      "version": 3,
+      "nonce": 1235,
+      "origin": 1,
+      "destination": 2,
+      "sender": "0xabc...",
+      "recipient": "0xdef...",
+      "body": [0, 3, 0, 23, 43, 65]
+    }
+  ]
+}
+```
+</ResponseExample>
