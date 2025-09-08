@@ -13,7 +13,7 @@ Make sure to update the server URL to match your relayer instance before testing
 The following endpoints are available for interacting with the relayer:
 
 ### Messages API
-- [Get Messages](/docs/operate/relayer/api/get-messages) - Query messages by domain and nonce range
+- [Get Messages](/docs/operate/relayer/api/get-messages) - Query messages by domain and nonce range in the database
 - [Insert Messages](/docs/operate/relayer/api/post-messages) - Add new messages to the database
 
 ### Operation Management
@@ -21,7 +21,8 @@ The following endpoints are available for interacting with the relayer:
 - [Retry Messages](/docs/operate/relayer/api/post-message-retry) - Trigger retry of failed messages
 
 ### Data Inspection
-- [Get Merkle Tree Insertions](/docs/operate/relayer/api/get-merkle-tree-insertions) - Inspect merkle tree insertion events
+- [Get Merkle Tree Insertions](/docs/operate/relayer/api/get-merkle-tree-insertions) - Query merkle tree insertion in the database
+- [Insert Merkle Tree Insertions](/docs/operate/relayer/api/post-merkle-tree-insertions) - Insert merkle tree insertion
 
 ### IGP Management
 - [List IGP Rules](/docs/operate/relayer/api/get-igp-rules) - View current gas payment rules
