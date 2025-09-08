@@ -1,11 +1,11 @@
 ---
 title: 'List Operations'
-api: 'GET http://localhost:8080/operations'
+api: 'GET http://localhost:9090/list_operations'
 ---
 
 List pending messages in operation queues. Returns current messages being processed by the relayer.
 
-<ResponseField name="success" type="PendingOperation[]">
+<ResponseField type="PendingOperation[]">
   Array of pending operations
 </ResponseField>
 
@@ -24,18 +24,18 @@ List pending messages in operation queues. Returns current messages being proces
 
 <RequestExample>
 ```bash curl
-curl "http://localhost:8080/operations"
+curl "http://localhost:9090/list_operations"
 ```
 
 ```javascript JavaScript
-const response = await fetch('http://localhost:8080/operations');
+const response = await fetch('http://localhost:9090/list_operations');
 const operations = await response.json();
 ```
 
 ```python Python
 import requests
 
-response = requests.get('http://localhost:8080/operations')
+response = requests.get('http://localhost:9090/list_operations')
 operations = response.json()
 ```
 </RequestExample>

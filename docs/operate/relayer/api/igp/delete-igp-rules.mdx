@@ -1,0 +1,32 @@
+---
+title: 'Remove IGP Rules'
+api: 'DELETE http://localhost:9090/igp_rules/:index'
+---
+
+Remove existing Interchain Gas Payment (IGP) rules.
+
+<Note>
+This endpoint is only available when gas enforcers are configured.
+</Note>
+
+<ParamField body="index" type="number" required>
+  Index of the IGP rule
+</ParamField>
+
+<RequestExample>
+```bash curl
+curl -X DELETE "http://localhost:9090/igp_rules/1"
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/igp_rules/1', {
+  method: 'DELETE',
+});
+```
+
+```python Python
+import requests
+
+response = requests.delete('http://localhost:9090/igp_rules/1')
+```
+</RequestExample>

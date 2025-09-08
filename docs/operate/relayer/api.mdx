@@ -18,14 +18,14 @@ The following endpoints are available for interacting with the relayer:
 
 ### Operation Management
 - [List Operations](/docs/operate/relayer/api/get-operations) - View pending messages in operation queues
-- [Retry Messages](/docs/operate/relayer/api/post-retry) - Trigger retry of failed messages
+- [Retry Messages](/docs/operate/relayer/api/post-message-retry) - Trigger retry of failed messages
 
 ### Data Inspection
 - [Get Merkle Tree Insertions](/docs/operate/relayer/api/get-merkle-tree-insertions) - Inspect merkle tree insertion events
 
 ### IGP Management
 - [List IGP Rules](/docs/operate/relayer/api/get-igp-rules) - View current gas payment rules
-- [Add IGP Rule](/docs/operate/relayer/api/post-igp-rules) - Create new gas payment rules  
+- [Add IGP Rule](/docs/operate/relayer/api/post-igp-rules) - Create new gas payment rules
 - [Remove IGP Rules](/docs/operate/relayer/api/delete-igp-rules) - Delete existing gas payment rules
 
 <Note>
@@ -40,7 +40,7 @@ Most endpoints do not require authentication for read operations. Write operatio
 
 The default base URL for local development is:
 ```
-http://localhost:8080
+http://localhost:9090
 ```
 
 Update this to match your relayer's actual endpoint when deployed.

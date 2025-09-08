@@ -1,0 +1,57 @@
+---
+title: 'List IGP Rules'
+api: 'GET http://localhost:9090/igp_rules'
+---
+
+Get current Interchain Gas Payment (IGP) rules.
+
+<Note>
+This endpoint is only available when gas enforcers are configured.
+</Note>
+
+<Expandable title="Response Body">
+  <ResponseField name="policies" type="HashMap<String, GasEnforcementResponse[]">
+    Policies
+    <Expandable title="policies">
+      <ResponseField name="policy" type="GasPaymentEnforcementPolicy">
+        Gas payment enforcement policy
+      </ResponseField>
+      <ResponseField name="matching_list" type="String[]">
+        Matching list
+      </ResponseField>
+    </Expandable>
+  </ResponseField>
+</Expandable>
+
+<ResponseExample>
+```json Response
+{
+  "policies": {
+    "subtensor": [
+      {
+        "policy": "None",
+        "matching_list": []
+      }
+    ]
+  }
+}
+```
+</ResponseExample>
+
+<RequestExample>
+```bash curl
+curl "http://localhost:9090/igp_rules"
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/igp_rules');
+const rules = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get('http://localhost:9090/igp_rules')
+rules = response.json()
+```
+</RequestExample>

@@ -1,0 +1,74 @@
+---
+title: 'Add IGP Rule'
+api: 'POST http://localhost:9090/igp_rules'
+---
+
+Add a new Interchain Gas Payment (IGP) rule.
+
+<Note>
+This endpoint is only available when gas enforcers are configured.
+</Note>
+
+<Expandable title="Request Body">
+  <ParamField query="policy" type="GasPaymentEnforcementPolicy">
+    Gas payment enforcement policy
+  </ParamField>
+  <ParamField query="matching_list" type="String[]">
+    Matching list
+  </ParamField>
+</Expandable>
+
+<RequestExample>
+```bash curl
+curl -X POST "http://localhost:9090/igp_rules" \
+  -H "Content-Type: application/json" \
+  -d \
+'{
+  "policy": "None",
+  "matching_list": [
+    {
+        "messageid": "0x03ae9509ddf792965c98729b43f0988d689ae17c79619e87e6c670f61eb1d4bc"
+    }
+  ]
+}'
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/igp_rules', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    policy: "None",
+    matching_list: [
+      {
+          messageid: "0x03ae9509ddf792965c98729b43f0988d689ae17c79619e87e6c670f61eb1d4bc"
+      }
+    ]
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post('http://localhost:9090/igp_rules', json={
+  "policy": "None",
+  "matching_list": [
+    {
+        "messageid": "0x03ae9509ddf792965c98729b43f0988d689ae17c79619e87e6c670f61eb1d4bc"
+    }
+  ]
+})
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "count": 4,
+  "skipped": []
+}
+```
+</ResponseExample>

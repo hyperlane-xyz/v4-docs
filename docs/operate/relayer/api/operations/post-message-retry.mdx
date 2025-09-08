@@ -1,0 +1,78 @@
+---
+title: 'Retry Messages'
+api: 'POST http://localhost:9090/message_retry'
+---
+
+Trigger retry of failed messages matching specific patterns.
+
+<Expandable title="Request Body">
+  <Expandable title="Array of objects">
+    <ParamField body="messageid" type="string">
+      Specific message ID to retry (hex string)
+    </ParamField>
+    <ParamField body="origindomain" type="u32">
+      Message origin domain
+    </ParamField>
+    <ParamField body="destinationdomain" type="u32">
+      Message destination domain
+    </ParamField>
+    <ParamField body="senderaddress" type="string">
+      Sender address
+    </ParamField>
+    <ParamField body="recipientaddress" type="string">
+      Recipient address
+    </ParamField>
+    <ParamField body="bodyregex" type="string">
+      Body regex
+    </ParamField>
+  </Expandable>
+</Expandable>
+
+<Expandable title="Response Body">
+  <ResponseField name="uuid" type="string">
+    UUID of the retry request
+  </ResponseField>
+  <ResponseField name="evaluated" type="usize">
+    How many pending operations were evaluated
+  </ResponseField>
+  <ResponseField name="matched" type="u64">
+    How many of the pending operations matched the retry request pattern
+  </ResponseField>
+</Expandable>
+
+<RequestExample>
+```bash curl
+curl -X POST "http://localhost:9090/message_retry" \
+  -H "Content-Type: application/json" \
+  -d \
+'[
+  {
+    "messageid": "0x123..."
+  }
+]'
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/message_retry', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify([
+    {
+      messageid: "0x123..."
+    }
+  ])
+});
+```
+
+```python Python
+import requests
+
+response = requests.post('http://localhost:9090/message_retry', json=[
+  {
+    'messageid': '0x123...'
+  }
+])
+```
+</RequestExample>

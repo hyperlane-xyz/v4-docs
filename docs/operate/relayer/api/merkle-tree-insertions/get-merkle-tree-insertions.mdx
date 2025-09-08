@@ -1,0 +1,65 @@
+---
+title: 'Get Merkle Tree Insertions'
+api: 'GET http://localhost:9090/merkle_tree_insertions'
+---
+
+Gets merkle tree insertions in the relayetr database
+
+<Expandable title="Query Parameters">
+  <ParamField query="domain_id" type="number" required>
+    Chain domain ID (u32)
+  </ParamField>
+  <ParamField query="leaf_index_start" type="number" required>
+    Starting leaf index (inclusive) (u32)
+  </ParamField>
+  <ParamField query="leaf_index_end" type="number" required>
+    Ending leaf index (inclusive) (u32)
+  </ParamField>
+</Expandable>
+
+<Expandable title="Response Body">
+  <ResponseField name="merkle_tree_insertions" type="MerkleTreeInsertion[]">
+    Array of merkle tree insertion data
+    <Expandable title="merkle_tree_insertions">
+      <ParamField query="insertion_block_number" type="u64" required>
+        Block number of merkle tree insertion
+      </ParamField>
+      <ParamField query="leaf_index" type="u32" required>
+        Leaf index
+      </ParamField>
+      <ParamField query="message_id" type="string" required>
+        Message ID
+      </ParamField>
+    </Expandable>
+  </ResponseField>
+</Expandable>
+
+<ResponseExample>
+```json Response
+[
+  {
+    "insertion_block_number": null,
+    "leaf_index": 100,
+    "message_id": "0xabc...",
+  }
+]
+```
+</ResponseExample>
+
+<RequestExample>
+```bash curl
+curl localhost:9090/merkle_tree_insertions?domain_id=1&leaf_index_start=100&leaf_index_end=200
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/merkle_tree_insertions');
+const insertions = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get('http://localhost:9090/merkle_tree_insertions')
+insertions = response.json()
+```
+</RequestExample>

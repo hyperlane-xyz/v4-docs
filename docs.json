@@ -314,14 +314,15 @@
                 "group": "HTTP API",
                 "pages": [
                   "docs/operate/relayer/api",
-                  "docs/operate/relayer/api/get-messages",
-                  "docs/operate/relayer/api/post-messages",
-                  "docs/operate/relayer/api/get-operations",
-                  "docs/operate/relayer/api/post-retry",
-                  "docs/operate/relayer/api/get-merkle-tree-insertions",
-                  "docs/operate/relayer/api/get-igp-rules",
-                  "docs/operate/relayer/api/post-igp-rules",
-                  "docs/operate/relayer/api/delete-igp-rules"
+                  "docs/operate/relayer/api/operations/get-operations",
+                  "docs/operate/relayer/api/operations/post-message-retry",
+                  "docs/operate/relayer/api/messages/get-messages",
+                  "docs/operate/relayer/api/messages/post-messages",
+                  "docs/operate/relayer/api/merkle-tree-insertions/get-merkle-tree-insertions",
+                  "docs/operate/relayer/api/merkle-tree-insertions/post-merkle-tree-insertions",
+                  "docs/operate/relayer/api/igp/get-igp-rules",
+                  "docs/operate/relayer/api/igp/post-igp-rules",
+                  "docs/operate/relayer/api/igp/delete-igp-rules"
                 ]
               },
               "docs/operate/relayer/message-filtering",
