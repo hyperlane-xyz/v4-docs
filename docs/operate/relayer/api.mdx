@@ -1,5 +1,5 @@
 ---
-title: "Relayer API"
+title: "Relayer HTTP API"
 ---
 
 The relayer provides a comprehensive HTTP API for inspecting database contents and managing operations. Based on the server module implementation `mod.rs:65-93`, here's the complete API specification:
@@ -9,8 +9,9 @@ The relayer provides a comprehensive HTTP API for inspecting database contents a
 ### GET /messages
 
 Query Parameters:
+
 - `domain_id` (u32): Chain domain ID
-- `nonce_start` (u32): Starting nonce (inclusive)  
+- `nonce_start` (u32): Starting nonce (inclusive)
 - `nonce_end` (u32): Ending nonce (inclusive)
 
 **Response:** Array of HyperlaneMessage objects
@@ -62,5 +63,5 @@ Query Parameters:
 **Purpose:** Remove existing IGP rules
 
 <Note>
-These endpoints are available when gas enforcers are configured `mod.rs:82-83`.
+  These endpoints are available when gas enforcers are configured `mod.rs:82-83`.
 </Note>
