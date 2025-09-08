@@ -22,7 +22,7 @@ Query messages for a specific domain within a nonce range.
 
 <Expandable title="Response Body">
   <ResponseField type="HyperlaneMessage[]">
-    Array of HyperlaneMessage
+    Array of HyperlaneMessage objects
   </ResponseField>
   <Expandable title="HyperlaneMessage">
     <ResponseField name="version" type="u8">
@@ -56,7 +56,7 @@ curl "http://localhost:9090/messages?domain_id=1&nonce_start=100&nonce_end=200"
 
 ```javascript JavaScript
 const response = await fetch('http://localhost:9090/messages?domain_id=1&nonce_start=100&nonce_end=200');
-const messages = await response.json();
+const { messages } = await response.json();
 ```
 
 ```python Python
