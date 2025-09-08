@@ -2,65 +2,268 @@
 title: "Relayer API"
 ---
 
-The relayer provides a comprehensive HTTP API for inspecting database contents and managing operations. Based on the server module implementation `mod.rs:65-93`, here's the complete API specification:
+The relayer provides a comprehensive HTTP API for inspecting database
+contents and managing operations.
+Here's the complete API specification.
 
-## Messages API
-
-### GET /messages
-
-Query Parameters:
-- `domain_id` (u32): Chain domain ID
-- `nonce_start` (u32): Starting nonce (inclusive)  
-- `nonce_end` (u32): Ending nonce (inclusive)
-
-**Response:** Array of HyperlaneMessage objects
-
-**Validation:** Requires `nonce_end > nonce_start`, returns 400 if invalid
-
-### POST /messages
-
-**Body:** Message data for insertion
-
-**Purpose:** Insert new messages into the database
 
 ## Operation Queue API
 
-### GET /operations
+### GET /list_operations
 
 **Purpose:** List pending messages in operation queues `mod.rs:74-75`
 
 **Response:** Current messages being processed by the relayer
 
+**Example:**
+```sh
+curl localhost:9090/list_operations?destination_domain=1
+```
+
 ## Message Retry API
 
-### POST /retry
+### POST /message_retry
 
 **Purpose:** Trigger retry of failed messages `mod.rs:69-72`
 
 **Body:** Message retry request matching specific patterns
+```json
+[
+    {
+        "messageid": "...",
+        "origindomain": "...",
+        "senderaddress": "...",
+        "destinationdomain": "...",
+        "recipientaddress": "...",
+        "bodyregex": "..."
+    }
+]
+```
+
+**Example:**
+```sh
+curl -X POST \
+    localhost:9090/message_retry
+    -H 'Content-type: application/json' \
+    -d
+'[
+    {
+        "messageid": "0x03ae9509ddf792965c98729b43f0988d689ae17c79619e87e6c670f61eb1d4bc"
+    }
+]'
+```
+
+## Messages API
+
+### GET /messages
+
+**Purpose:** List messages in the database
+
+Query Parameters:
+```rust
+pub struct QueryParams {
+    // Chain domain ID
+    pub domain_id: u32,
+    // Starting nonce (inclusive)
+    pub nonce_start: u32,
+    // Ending nonce (inclusive)
+    pub nonce_end: u32,
+}
+```
+
+**Response:** Array of HyperlaneMessage objects
+```rust
+pub struct ResponseBody {
+    pub messages: Vec<HyperlaneMessage>,
+}
+```
+
+**Validation:** Requires `nonce_end > nonce_start`, returns 400 if invalid
+
+**Example:**
+```sh
+curl localhost:9090/messages?domain_id=1&nonce_start=100&nonce_end=200
+```
+
+### POST /messages
+
+**Purpose:** Insert new messages into the database
+
+**Body:** Message data for insertion
+```rust
+pub struct RequestBody {
+    pub messages: Vec<Message>,
+}
+
+pub struct Message {
+    pub message: HyperlaneMessage,
+    pub dispatched_block_number: u64,
+}
+```
+
+**Response:** How many messages were inserted and which messages were skipped
+```rust
+pub struct ResponseBody {
+    pub count: u64,
+    pub skipped: Vec<Message>,
+}
+```
+
+**Example:**
+```sh
+curl -X POST \
+    localhost:9090/messages
+    -H 'Content-type: application/json' \
+    -d
+'{
+    "messages": [
+        {
+            "dispatched_block_number": 100000,
+            "message": {
+                "version": 3,
+                "nonce": 100,
+                "origin": 1,
+                "destination": 2,
+                "sender": "0x9AD81058c6C3Bf552C9014CB30E824717A0ee21b",
+                "recipient": "0xeA895A7Ff45d8d3857A04c1E38A362f3bd9a076f",
+                "body": [0, 0, 0]
+            }
+        }
+    ]
+}'
+```
 
 ## Merkle Tree API
 
-### GET /merkle-tree-insertions
+### GET /merkle_tree_insertions
 
-**Purpose:** Inspect merkle tree insertion events `mod.rs:80`
+**Purpose:** Returns merkle tree insertions in the database
+
+Query Parameters:
+```rust
+pub struct QueryParams {
+    pub domain_id: u32,
+    pub leaf_index_start: u32,
+    pub leaf_index_end: u32,
+}
+```
 
 **Response:** Merkle tree data stored in the database
+```rust
+pub struct ResponseBody {
+    pub merkle_tree_insertions: Vec<TreeInsertion>,
+}
+```
 
-## IGP (Interchain Gas Payment) Management API
+**Example:**
+```sh
+curl localhost:9090/merkle_tree_insertions?domain_id=1&leaf_index_start=100&leaf_index_end=200
+```
 
-### GET /igp/rules
+### POST /merkle_tree_insertions
+
+**Purpose:** Overwrites merkle tree insertions in the database
+
+Body:
+```rust
+pub struct RequestBody {
+    pub merkle_tree_insertions: Vec<TreeInsertion>,
+}
+
+pub struct TreeInsertion {
+    pub chain: u32,
+    pub insertion_block_number: u64,
+
+    pub leaf_index: u32,
+    pub message_id: H256,
+}
+```
+
+**Response:** How many merkle tree insertions were inserted and which were skipped
+```rust
+pub struct ResponseBody {
+    pub count: u64,
+    pub skipped: Vec<TreeInsertion>,
+}
+```
+
+**Example:**
+```sh
+curl -X POST \
+    localhost:9090/merkle_tree_insertions
+    -H 'Content-type: application/json' \
+    -d
+'{
+    "merkle_tree_insertions": [
+        {
+            "chain": 1,
+            "insertion_block_number": 100000,
+            "leaf_index": 5000,
+            "message_id": "0x006ce24a2b5aff423febad6587a68541f2f997a8ba12f0d239748b68f4e0dde5"
+        }
+    ]
+}'
+```
+
+## Interchain Gas Payment Policy Management API
+
+### GET /igp_rules
 
 **Purpose:** List current IGP rules
 
-### POST /igp/rules
+**Response:** Each chain and their gas payment enforcement policy
+```rust
+pub struct ResponseBody {
+    pub policies: HashMap<String, Vec<GasEnforcementResponse>>,
+}
 
-**Purpose:** Add new IGP rules
+pub struct GasEnforcementResponse {
+    pub policy: GasPaymentEnforcementPolicy,
+    pub matching_list: Vec<String>,
+}
+```
 
-### DELETE /igp/rules
+**Example:**
+```sh
+curl localhost:9090/igp_rules
+```
 
-**Purpose:** Remove existing IGP rules
+### POST /igp_rules
 
-<Note>
-These endpoints are available when gas enforcers are configured `mod.rs:82-83`.
-</Note>
+**Purpose:** Add new IGP rules to the current relayer instance (does not persist on restart)
+
+**Body:** IGP rule to add
+
+```rust
+pub struct RequestBody {
+    pub policy: GasPaymentEnforcementPolicy,
+    pub matching_list: MatchingList,
+}
+```
+
+**Response:** None
+
+**Example:**
+```sh
+curl -X POST \
+    localhost:9090/igp_rules
+    -H 'Content-type: application/json' \
+    -d
+'{
+    "policy": "None",
+    "matching_list": [
+        {
+            "messageid": "0x03ae9509ddf792965c98729b43f0988d689ae17c79619e87e6c670f61eb1d4bc"
+        }
+    ]
+}'
+```
+
+### DELETE /igp_rules/\{index\}
+
+**Purpose:** Remove an existing IGP rule
+
+**Example:**
+```sh
+curl -X DELETE localhost:9090/igp_rules/1
+```
