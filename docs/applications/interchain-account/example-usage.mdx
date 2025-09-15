@@ -1,0 +1,97 @@
+---
+title: "Example Usage"
+---
+
+## Encoding
+
+When calling remote contracts using `callRemote`, the function parameters must be encoded into an array of `Call` structs.
+
+Each `Call` struct contains:
+
+- `to`: The target contract address (converted to bytes32).
+- `value`: The ETH or native token amount to send with the call.
+- `data`: The function call data, which can be encoded using abi.encodeCall.
+
+`Call.data` can be easily encoded with the `abi.encodeCall` function.
+
+```solidity
+struct Call {
+    bytes32 to; // supporting non EVM targets
+    uint256 value;
+    bytes data;
+}
+
+interface IUniswapV3Pool {
+    function swap(
+        address recipient,
+        bool zeroForOne,
+        int256 amountSpecified,
+        uint160 sqrtPriceLimitX96,
+        bytes calldata data
+    ) external returns (int256 amount0, int256 amount1);
+}
+
+IUniswapV3Pool pool = IUniswapV3Pool(...);
+Call swapCall = Call({
+    to: TypeCasts.addressToBytes32(address(pool)),
+    data: abi.encodeCall(pool.swap, (...));
+    value: 0,
+});
+uint32 ethereumDomain = 1;
+IInterchainAccountRouter(0xabc...).callRemote(ethereumDomain, [swapCall]);
+```
+
+## Typescript Usage
+
+We also have Typescript tooling to easily deploy ICA accounts and call `callRemote` on the origin chain:
+
+```typescript
+const localChain = 'ethereum';
+const signer = <YOUR_SIGNER>;
+const localRouter: InterchainAccountRouter = InterchainAccountRouter__factory.connect(<ICA_ROUTER_ADDRESS>, signer);
+const recipientAddress = <EXAMPLE_ADDRESS>; // use your own address here
+const recipientF = new TestRecipient__factory.connect(recipientAddress, signer); // use your own contract here
+const fooMessage = "Test";
+const data = recipient.interface.encodeFunctionData("fooBar", [1, fooMessage]);
+
+const call = {
+  to: recipientAddress,
+  data,
+  value: BigNumber.from("0"),
+};
+const quote = await local["quoteGasPayment(uint32)"](
+  multiProvider.getDomainId(remoteChain)
+);
+
+const config: AccountConfig = {
+  origin: localChain,
+  owner: signer.address,
+  localRouter: localRouter.address,
+};
+await localRouter.callRemote(localChain, remoteChain, [call], config);
+```
+
+## Determine addresses
+
+In some cases, you may need to compute the ICA address on a remote chain before making a call. For example, if your ICA needs funding before executing transactions, you can retrieve its address and transfer assets to it in advance. See the [Transfer and Call Pattern](/docs/guides/warp-routes/evm/transfer-and-call-pattern) section for more information.
+
+The `getRemoteInterchainAccount` function can be used to get the address of an ICA given the destination chain and owner address.
+
+An example is included below of a contract precomputing its own Interchain Account address.
+
+```solidity
+address myInterchainAccount = IInterchainAccountRouter(...).getRemoteInterchainAccount(
+    destination,
+    address(this)
+);
+```
+
+If you are using [#overrides](./overrides) to specify remote chains, pass those overrides when computing the remote ICA address.
+
+```solidity
+address myRemoteIca = IInterchainAccountRouter(...).getRemoteInterchainAccount(
+    address(this),
+    remoteRouterOverride,
+    remoteIsmOverride
+);
+```

@@ -73,7 +73,14 @@
                   "docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing"
                 ]
               },
-              "docs/applications/interchain-account",
+              {
+                "group": "Interchain Accounts",
+                "pages": [
+                  "docs/applications/interchain-account/overview",
+                  "docs/applications/interchain-account/example-usage",
+                  "docs/applications/interchain-account/overrides"
+                ]
+              },
               {
                 "group": "Use Cases",
                 "pages": ["docs/applications/use-cases/cross-chain-swaps"]
@@ -222,7 +229,6 @@
                       "docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM"
                     ]
                   },
-                  "docs/protocol/ISM/community-ISMs/overview",
                   {
                     "group": "Economic Security",
                     "pages": [
@@ -407,5 +413,11 @@
     "metatags": {
       "og:image": "/images/hero-light.png"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/docs/applications/interchain-account",
+      "destination": "/docs/applications/interchain-account/overview"
+    }
+  ]
 }
