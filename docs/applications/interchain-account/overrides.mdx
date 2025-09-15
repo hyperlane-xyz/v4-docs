@@ -1,0 +1,48 @@
+---
+title: "Overrides"
+---
+
+Interchain Accounts allow developers to override the default chains and security models configured in the `InterchainAccountRouter`.
+
+These are useful for:
+
+- Calling an ICA on chains not configured in `InterchainAccountRouter`.
+- Using different ISM than the defaults configured in the `InterchainAccountRouter`
+- Adjusting the gas limit for IGP payments or setting other parameters.
+
+## Interface
+
+The `callRemoteWithOverrides` function looks similar to the `callRemote` function, but takes three additional arguments.
+
+First, developers can override `_router`, the address of the `InterchainAccountRouter` on the remote chain. This allows developers to control an ICA on remote chains that have not been configured on the local `InterchainAccountRouter`.
+
+Second, developers can override `_ism`, the address of the remote interchain security module (ISM) used to secure their ICA. This ISM will be used to verify the interchain messages passed between the local and remote `InterchainAccountRouters`. This allows developers to use a custom security model that best suits their needs.
+
+Third, developers can override `_hookMetadata`, the [StandardHookMetadata](../libraries/hookmetadata) metadata passed to the message hooks for each ICA call (for example, overriding the gas limit for the IGP payment).
+
+```solidity
+    /**
+     * @notice Dispatches a sequence of remote calls to be made by an owner's
+     * interchain account on the destination domain
+     * @dev Recommend using CallLib.build to format the interchain calls
+     * @param _destination The remote domain of the chain to make calls on
+     * @param _router The remote router address
+     * @param _ism The remote ISM address
+     * @param _calls The sequence of calls to make
+     * @param _hookMetadata The hook metadata to override with for the hook set by the owner
+     * @return The Hyperlane message ID
+     */
+    function callRemoteWithOverrides(
+        uint32 _destination,
+        bytes32 _router,
+        bytes32 _ism,
+        CallLib.Call[] calldata _calls,
+        bytes memory _hookMetadata
+    ) public payable returns (bytes32)
+
+    function getRemoteInterchainAccount(
+        address _owner,
+        address _router,
+        address _ism
+    ) public view returns (address)
+```
