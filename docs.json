@@ -413,5 +413,11 @@
     "metatags": {
       "og:image": "/images/hero-light.png"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/docs/applications/interchain-account",
+      "destination": "/docs/applications/interchain-account/overview"
+    }
+  ]
 }

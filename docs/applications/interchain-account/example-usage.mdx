@@ -73,7 +73,7 @@ await localRouter.callRemote(localChain, remoteChain, [call], config);
 
 ## Determine addresses
 
-In some cases, you may need to compute the ICA address on a remote chain before making a call. For example, if your ICA needs funding before executing transactions, you can retrieve its address and transfer assets to it in advance. See the [Transfer and Call Pattern](/docs/guides/transfer-and-call) section for more information.
+In some cases, you may need to compute the ICA address on a remote chain before making a call. For example, if your ICA needs funding before executing transactions, you can retrieve its address and transfer assets to it in advance. See the [Transfer and Call Pattern](/docs/guides/warp-routes/evm/transfer-and-call-pattern) section for more information.
 
 The `getRemoteInterchainAccount` function can be used to get the address of an ICA given the destination chain and owner address.
 
@@ -86,7 +86,7 @@ address myInterchainAccount = IInterchainAccountRouter(...).getRemoteInterchainA
 );
 ```
 
-If you are using [#overrides](#overrides) to specify remote chains, pass those overrides when computing the remote ICA address.
+If you are using [#overrides](./overrides) to specify remote chains, pass those overrides when computing the remote ICA address.
 
 ```solidity
 address myRemoteIca = IInterchainAccountRouter(...).getRemoteInterchainAccount(

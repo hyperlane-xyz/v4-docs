@@ -18,7 +18,7 @@ First, developers can override `_router`, the address of the `InterchainAccountR
 
 Second, developers can override `_ism`, the address of the remote interchain security module (ISM) used to secure their ICA. This ISM will be used to verify the interchain messages passed between the local and remote `InterchainAccountRouters`. This allows developers to use a custom security model that best suits their needs.
 
-Third, developers can override `_hookMetadata`, the [StandardHookMetadata](../libraries/hookmetadata) metadata passed to the message hooks for each ICA call (for example, overriding the gas limit for the IGP payment).
+Third, developers can override `_hookMetadata`, the [StandardHookMetadata](/docs/reference/developer-tools/libraries/hookmetadata) metadata passed to the message hooks for each ICA call (for example, overriding the gas limit for the IGP payment).
 
 ```solidity
     /**

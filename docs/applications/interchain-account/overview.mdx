@@ -1,7 +1,5 @@
 ---
 title: "Overview"
-redirect: "/docs/applications/interchain-accounts/overview"
-hidden: true
 ---
 
 Interchain Accounts (ICAs) enable a contract on the origin chain to make authenticated calls to contracts on a remote chain. Unlike general message passing, which requires the recipient to implement a specific interface, ICAs allow interaction with _any_ contract on the destination chain.
@@ -46,7 +44,7 @@ flowchart TB
 
 ## How Interchain Accounts Work
 
-Interchain Accounts allow you to make a remote call from **Chain A** to **Chain B** using the router (`InterchainAccountRouter`). We use [CREATE2](https://docs.openzeppelin.com/cli/2.8/deploying-with-create2) to compute the deterministic [OwnableMulticall](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/middleware/libs/OwnableMulticall.sol) contract address for you, which serves as a proxy for your cross-chain calls. You can explore this [here](#example-usage).
+Interchain Accounts allow you to make a remote call from **Chain A** to **Chain B** using the router (`InterchainAccountRouter`). We use [CREATE2](https://docs.openzeppelin.com/cli/2.8/deploying-with-create2) to compute the deterministic [OwnableMulticall](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/middleware/libs/OwnableMulticall.sol) contract address for you, which serves as a proxy for your cross-chain calls. You can explore this [here](./example-usage).
 
 Here's how it works:
 
@@ -57,7 +55,7 @@ Here's how it works:
 
 The Interchain Account interface assigns every `(uint32 origin, address owner, address remoteRouter, address remoteISM)` tuple a unique ICA address. The sender owns that ICA on the destination chain, and can direct it to make arbitrary function calls via the `InterchainAccountRouter.callRemote()` endpoint.
 
-For core chains supported by Hyperlane, you are able to use the defaults that are set by the owner of the router contract. See the [#overrides](#overrides) section to see how to make calls to _any_ chain.
+For core chains supported by Hyperlane, you are able to use the defaults that are set by the owner of the router contract. See the [#overrides](./overrides) section to see how to make calls to _any_ chain.
 
 ## Interface
 
@@ -83,7 +81,7 @@ interface IInterchainAccountRouter {
 <Tip>
   - Use `InterchainAccountRouter` out of the box - ICA routers have already been
   deployed to core chains. Please refer to
-  [addresses](/docs/reference/addresses/deployments/mainnet/interchainAccountRouter).
+  [addresses](/docs/reference/addresses/deployments/interchainAccountRouter).
   Try using the `callRemote` method to do a call via your wallet's interchain
   account.
 </Tip>
