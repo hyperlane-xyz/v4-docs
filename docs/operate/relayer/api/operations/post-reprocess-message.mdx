@@ -5,6 +5,10 @@ api: 'POST http://localhost:9090/reprocess_message'
 
 Re-queue a message for processing on demand. This endpoint allows external services to trigger message delivery instead of relying on queue backoff, and can handle scenarios like blockchain network reorganizations or manual message processing.
 
+<Note>
+For purely on-demand processing without automatic retries, combine this endpoint with `max_message_retries := 0` in your relayer configuration. This ensures messages are only processed when explicitly triggered via this API.
+</Note>
+
 <Expandable title="Request Body">
   <ParamField body="origin_id" type="u32" required>
     Domain/chain ID where the message originated
