@@ -3,7 +3,7 @@ title: 'Retry Messages'
 api: 'POST http://localhost:9090/message_retry'
 ---
 
-Trigger retry of failed messages matching specific patterns.
+Trigger retry of failed messages matching specific patterns. This resets the retry count to 0 and re-queues the messages for processing.
 
 <Expandable title="Request Body">
   <Expandable title="Array of objects">

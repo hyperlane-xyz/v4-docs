@@ -3,7 +3,7 @@ title: 'Reprocess Message'
 api: 'POST http://localhost:9090/reprocess_message'
 ---
 
-Reprocess a message that has already been marked as delivered. This endpoint is useful for handling scenarios like blockchain network reorganizations where messages might have been incorrectly processed.
+Re-queue a message for processing on demand. This endpoint allows external services to trigger message delivery instead of relying on queue backoff, and can handle scenarios like blockchain network reorganizations or manual message processing.
 
 <Expandable title="Request Body">
   <ParamField body="origin_id" type="u32" required>
