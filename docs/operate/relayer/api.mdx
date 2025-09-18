@@ -19,6 +19,11 @@ The following endpoints are available for interacting with the relayer:
 ### Operation Management
 - [List Operations](/docs/operate/relayer/api/operations/get-operations) - View pending messages in operation queues
 - [Retry Messages](/docs/operate/relayer/api/operations/post-message-retry) - Trigger retry of failed messages
+- [Reprocess Message](/docs/operate/relayer/api/operations/post-reprocess-message) - Re-queue messages for processing on demand
+
+<Info>
+**Retry vs Reprocess**: Retry handles failed messages currently in the operation queues (memory), while reprocess re-queues messages from the database (storage) for processing - either already-delivered messages that need reprocessing or to allow external services to trigger message delivery instead of relying on queue backoff.
+</Info>
 
 ### Data Inspection
 - [Get Merkle Tree Insertions](/docs/operate/relayer/api/merkle-tree-insertions/get-merkle-tree-insertions) - Query merkle tree insertion in the database
