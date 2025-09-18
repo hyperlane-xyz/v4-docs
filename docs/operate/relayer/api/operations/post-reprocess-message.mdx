@@ -1,0 +1,79 @@
+---
+title: 'Reprocess Message'
+api: 'POST http://localhost:9090/reprocess_message'
+---
+
+Reprocess a message that has already been marked as delivered. This endpoint is useful for handling scenarios like blockchain network reorganizations where messages might have been incorrectly processed.
+
+<Expandable title="Request Body">
+  <ParamField body="origin_id" type="u32" required>
+    Domain/chain ID where the message originated
+  </ParamField>
+  <ParamField body="message_id" type="string" required>
+    Hex-encoded message identifier (H256)
+  </ParamField>
+</Expandable>
+
+<Expandable title="Response Body">
+  <ResponseField name="success" type="boolean">
+    Whether the message was successfully re-queued for processing
+  </ResponseField>
+  <ResponseField name="message" type="string">
+    Details about the reprocessing operation
+  </ResponseField>
+</Expandable>
+
+<RequestExample>
+```bash curl
+curl -X POST "http://localhost:9090/reprocess_message" \
+  -H "Content-Type: application/json" \
+  -d \
+'{
+  "origin_id": 1399811149,
+  "message_id": "0x9484bd5c635b17b28cb382249d7a6fe5ca15debfd4f824247c68d47badc5b7de"
+}'
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/reprocess_message', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    origin_id: 1399811149,
+    message_id: "0x9484bd5c635b17b28cb382249d7a6fe5ca15debfd4f824247c68d47badc5b7de"
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post('http://localhost:9090/reprocess_message', json={
+  'origin_id': 1399811149,
+  'message_id': '0x9484bd5c635b17b28cb382249d7a6fe5ca15debfd4f824247c68d47badc5b7de'
+})
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "success": true,
+  "message": "Message re-queued for processing"
+}
+```
+
+```json Error Response (400 Bad Request)
+{
+  "error": "Invalid message_id format"
+}
+```
+
+```json Error Response (404 Not Found)
+{
+  "error": "Message or context not found"
+}
+```
+</ResponseExample>
