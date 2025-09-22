@@ -1,0 +1,63 @@
+---
+title: "Alt SVMs: Using Squads"
+---
+
+## UI Setup
+
+The main Squads UI doesn’t support alt SVMs. Instead use: [Squads Backup App](https://backup.app.squads.so/)
+
+### 1. Configure for the Alt-SVM
+
+<Warning>**You MUST configure it to work with the alt-SVM!**</Warning>
+
+Go to **Settings** and use the following settings depending on the chain:
+
+<Tabs>
+
+    <Tab title="Eclipse">
+      - **RPC URL:** `https://mainnetbeta-rpc.eclipse.xyz`
+      - **Program ID:**
+      `eSQDSMLf3qxwHVHeTr9amVAGmZbRLY2rFdSURandt6f`
+    </Tab>
+    <Tab title="SOON">
+      - **RPC URL:** `https://rpc.mainnet.soo.network/rpc`
+      - **Program ID:**
+      `Hz8Zg8JYFshThnKHXSZV9XJFbyYUUKBb5NJUrxDvF8PB`
+    </Tab>
+    <Tab title="Sonic SVM">
+      - **RPC URL:** `https://api.mainnet-alpha.sonic.game/`
+      - **Program ID:**
+      `sqdsFBUUwbsuoLUhoWdw343Je6mvn7dGVVRYCa4wtqJ`
+    </Tab>
+    <Tab title="Solana (Fallback)">
+      - **RPC URL:** `https://api.mainnet-beta.solana.com` _(might need to be a
+      private RPC URL for better performance)_
+      - **Program ID:**
+      `SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf`
+    </Tab>
+
+  </Tabs>
+
+<Note>
+  Note that these configs are saved in your browser’s storage, and while they
+  may go away in the UI after refreshing, they do persist. ![svm
+  squads](/images/docs/guides/squads/altvm-squads1.png)
+</Note>
+
+### 2. Import the Multisig Address
+
+For this step, the **Multisig account** is required. You can either import it
+directly or search for it using the **Vault address** (token owner address).
+
+![svm squads](/images/docs/guides/squads/altvm-squads2.png)
+
+## Submit Transaction
+
+1. You’ll receive a base58 **message** from the Abacus Works team that is required for executing step 3.
+2. Go to the **Transactions** tab, and click **Import Transaction**.
+   ![altvm squads](/images/docs/guides/squads/altvm-squads3.png)
+3. Copy the base58 message into the UI and click **Import**.
+4. Refresh the page. You should now see the transaction.
+   ![altvm squads](/images/docs/guides/squads/altvm-squads4.png)
+5. Make sure to **keep track of the index/public key of the proposed transactions** and what they do. This way, signers know exactly what they’re signing.
+   ![altvm squads](/images/docs/guides/squads/altvm-squads5.png)

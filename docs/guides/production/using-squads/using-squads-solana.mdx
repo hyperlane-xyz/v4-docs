@@ -1,0 +1,31 @@
+---
+title: "Using Squads with Solana"
+---
+
+For Solana, the main UI that can be used: [Squads App](https://app.squads.so/)
+
+## Steps
+
+1. You’ll receive a base58 transaction from the Abacus Works team that is required for executing step 3.
+
+2. Navigate to **Developers → TX Builder** in Squads, and click **Import base58 encoded tx**.
+   ![svm squads](/images/docs/guides/squads/svm-squads1.png)
+
+3. Copy the base58 transaction received from the Abacus Works team into the textbox.
+
+4. Click Next, then **Add Instruction**.
+   ![svm squads](/images/docs/guides/squads/svm-squads2.png)
+
+5. Give it a clear name, and click **Run Simulation**.
+   ![svm squads](/images/docs/guides/squads/svm-squads3.png)
+
+<Check> Simulation should be successful! </Check>
+
+6. Click **Initiate Transaction** when you’re ready to submit it to the Vault.
+
+7. You’ll be prompted for your Ledger to sign about 5 transactions via Phantom.
+
+8. You’ll be brought to the **Transactions** view, which you may need to refresh. Now share the transaction with the other signers for them to confirm or reject.
+
+9. You can simulate the transaction and click **See Details** to view the logs of the simulated transaction. 🎉 You should see logs indicating ownership was successfully transferred!
+   ![svm squads](/images/docs/guides/squads/svm-squads4.png)

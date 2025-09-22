@@ -115,7 +115,14 @@
                   {
                     "group": "SVM HWR",
                     "pages": [
-                      "docs/guides/warp-routes/svm/svm-warp-route-guide"
+                      "docs/guides/warp-routes/svm/svm-warp-route-guide",
+                      {
+                        "group": "Using Squads",
+                        "pages": [
+                          "docs/guides/production/using-squads/alt-vm-using-sqauds",
+                          "docs/guides/production/using-squads/using-squads-solana"
+                        ]
+                      }
                     ]
                   },
                   "docs/guides/warp-routes/evm-svm-warp-route-guide",
