@@ -83,7 +83,10 @@
               },
               {
                 "group": "Use Cases",
-                "pages": ["docs/applications/use-cases/cross-chain-swaps"]
+                "pages": [
+                  "docs/applications/use-cases/cross-chain-swaps",
+                  "docs/applications/use-cases/cross-chain-swaps-with-recovery"
+                ]
               }
             ]
           },

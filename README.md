@@ -15,24 +15,15 @@ This documentation provides comprehensive guides, API references, and examples f
 
 ## Local Development
 
-Install the [Mintlify CLI](https://www.npmjs.com/package/mintlify) to preview documentation changes locally:
-
-```bash
-npm i -g mintlify
-```
-
-Run the development server at the root of the documentation directory:
-
-```bash
-mintlify dev
-```
+Follow the Mintlify setup guide for the most updated instructions:  
+[Mintlify Installation Docs](https://www.mintlify.com/docs/installation)
 
 ## Contributing
 
 This documentation is open source and contributions are welcome. To contribute:
 
 1. Fork this repository
-2. Make your changes locally using `mintlify dev`
+2. Make your changes locally and run a local development server to see how they look like.
 3. Submit a pull request
 
 ## Support
