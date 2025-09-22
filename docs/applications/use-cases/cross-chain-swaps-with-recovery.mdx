@@ -2,7 +2,7 @@
 title: "TaoFi: Cross-Chain Swaps with User-controlled Recovery"
 ---
 
-This use case explains how the **TaoFi Bridge** uses Hyperlane components — including [Interchain Accounts (ICAs)](/docs/applications/interchain-account/overview) and [**Hyperlane Warp Routes (HWR)**](https://docs.hyperlane.xyz/docs/applications/warp-routes/overview) — to enable cross-chain bridging with slippage protection and a user-controlled recovery.
+This use case explains how the **TaoFi Bridge** uses Hyperlane components — including [Interchain Accounts (ICAs)](/docs/applications/interchain-account/overview) and [**Hyperlane Warp Routes (HWR)**](/docs/applications/warp-routes/overview) — to enable cross-chain bridging with slippage protection and a user-controlled recovery.
 
 ![Taofi_Overview.png](/images/docs/applications/taofi-overview.png)
 
@@ -38,7 +38,7 @@ TaoFi is built on Hyperlane’s core components, and makes use of higher-level f
 - [**Interchain Accounts (ICAs)**](/docs/applications/interchain-account): Enable a contract on Chain A to execute arbitrary logic on Chain B
 - [**Hyperlane Warp Routes (HWR)**](/docs/applications/warp-routes/overview): Bridge assets between chains
 - **Salting**: The ICA router supports a `salt` parameter for account derivation. By passing the user’s address as the salt, each user gets a unique destination account. This ensures funds are partitioned by user and can be managed or refunded safely if a swap fails.
-- **Failure handling with Transfer-and-Call and Unique User Account Addresses**: By using the _Transfer and Call_ pattern, applications can bridge tokens first and then execute the contract functions (e.g.: swap) only after the assets arrive. If that action fails (for example, due to slippage), the tokens remain safely in the user’s unique account on the destination chain. The user can then choose to retry with new parameters or withdraw their funds, ensuring they never lose control.
+- **Failure handling with [Transfer-and-Call](/docs/guides/warp-routes/evm/transfer-and-call-pattern) and Unique User Account Addresses**: By using the _Transfer and Call_ pattern, applications can bridge tokens first and then execute the contract functions (e.g.: swap) only after the assets arrive. If that action fails (for example, due to slippage), the tokens remain safely in the user’s unique account on the destination chain. The user can then choose to retry with new parameters or withdraw their funds, ensuring they never lose control.
 - **Slippage checks (min amount parameter):** By including minimum-amount parameters in the remote call, applications prevent sandwiching from succeeding. If someone tries to sandwich the trade, the swap will no longer meet the min amount condition. Instead of executing at a worse price, the transaction fails safely and lets the user decide on what to do with the bridged funds.
 
 ## How it works (step-by-step)
@@ -54,7 +54,7 @@ Let’s say a user wants to swap **USDC on Bittensor EVM** → **USDC on Base.**
 
 ### Step 2: Hyperlane bridges tokens and message
 
-The cross-chain orchestration is handled by Hyperlane’s interoperability framework. The [**Relayer**](https://docs.hyperlane.xyz/docs/protocol/agents/relayer) (a permissionless off-chain agent) carries the 2 messages across the chains.
+The cross-chain orchestration is handled by Hyperlane’s interoperability framework. The [**Relayer**](/docs/protocol/agents/relayer) (a permissionless off-chain agent) carries the 2 messages across the chains.
 
 - **Message 1**: Funds are bridged from Bittensor EVM to Base using HWR. They arrive in the user’s **unique ICA** on Base (generated using the `salt` parameter).
 - **Message 2**: The execution request tells the user’s ICA to perform the swap on Base. This message includes the **minimum amount parameter** that protects against sandwiching and slippage.
