@@ -1,0 +1,89 @@
+---
+title: "TaoFi: Cross-Chain Swaps with User-controlled Recovery"
+---
+
+This use case explains how the **TaoFi Bridge** uses Hyperlane components — including [Interchain Accounts (ICAs)](/docs/applications/interchain-account/overview) and [**Hyperlane Warp Routes (HWR)**](https://docs.hyperlane.xyz/docs/applications/warp-routes/overview) — to enable cross-chain bridging with slippage protection and a user-controlled recovery.
+
+![Taofi_Overview.png](/images/docs/applications/taofi-overview.png)
+
+## Overview
+
+Cross-chain swaps can fail on the destination chain due to slippage or front-running, leaving users with no way to roll back and no control over their funds.
+
+The **TaoFi Bridge** solves this by letting users bridge **USDC** across Ethereum, Base, Solana, and Bittensor EVM, while ensuring a **safe fallback** if execution fails.
+
+To achieve this, TaoFi relies on key design features:
+
+- **Slippage protection**: swaps include minimum-amount parameters that block sandwiching attacks.
+- **Salting**: gives each user a unique account on the destination chain, keeping funds segregated.
+- **Safe fallback**: if a swap fails, funds remain in the user’s account on the destination chain, where they can be withdrawn or retried.
+
+## Problem
+
+Traditionally cross-chain swaps face critical challenges:
+
+1. **Complex UX**: Users often need to bridge, switch chains, and manually swap.
+2. **Same destination address for different users:** On the destination chain, all funds typically arrive at the same address. This makes it hard to partition by user, and if a swap fails, there’s no straightforward way to return tokens to the correct owner.
+3. **Sandwiching**: On the destination chain, swaps can be front-run by MEV bots, leaving the user with worse execution or failed trades.
+4. **Failure cases**: If the swap fails (for example, due to slippage or insufficient liquidity) after funds are bridged, the user can be left without any recovery option.
+
+## Solution: TaoFi Bridge built with Hyperlane
+
+TaoFi overcomes these challenges by building on Hyperlane’s interoperability stack. With these components, users can bridge and swap USDC across Ethereum, Base, Solana, and Bittensor EVM in a single click — while keeping control of their funds even if execution fails.
+
+## Key Components & Features
+
+TaoFi is built on Hyperlane’s core components, and makes use of higher-level features which they enable.
+
+- [**Interchain Accounts (ICAs)**](/docs/applications/interchain-account): Enable a contract on Chain A to execute arbitrary logic on Chain B
+- [**Hyperlane Warp Routes (HWR)**](/docs/applications/warp-routes/overview): Bridge assets between chains
+- **Salting**: The ICA router supports a `salt` parameter for account derivation. By passing the user’s address as the salt, each user gets a unique destination account. This ensures funds are partitioned by user and can be managed or refunded safely if a swap fails.
+- **Failure handling with Transfer-and-Call and Unique User Account Addresses**: By using the _Transfer and Call_ pattern, applications can bridge tokens first and then execute the contract functions (e.g.: swap) only after the assets arrive. If that action fails (for example, due to slippage), the tokens remain safely in the user’s unique account on the destination chain. The user can then choose to retry with new parameters or withdraw their funds, ensuring they never lose control.
+- **Slippage checks (min amount parameter):** By including minimum-amount parameters in the remote call, applications prevent sandwiching from succeeding. If someone tries to sandwich the trade, the swap will no longer meet the min amount condition. Instead of executing at a worse price, the transaction fails safely and lets the user decide on what to do with the bridged funds.
+
+## How it works (step-by-step)
+
+Let’s say a user wants to swap **USDC on Bittensor EVM** → **USDC on Base.**
+
+### Step 1: User initiates swap on **Bittensor EVM**
+
+- The user signs a **single transaction** in the TaoFi UI.
+- Behind the scenes:
+  - The contract derives a **salted Interchain Account** for the user on Base.
+  - A Transfer and Call request is created, which includes the amount to bridge and the swap action to run on Base.
+
+### Step 2: Hyperlane bridges tokens and message
+
+The cross-chain orchestration is handled by Hyperlane’s interoperability framework. The [**Relayer**](https://docs.hyperlane.xyz/docs/protocol/agents/relayer) (a permissionless off-chain agent) carries the 2 messages across the chains.
+
+- **Message 1**: Funds are bridged from Bittensor EVM to Base using HWR. They arrive in the user’s **unique ICA** on Base (generated using the `salt` parameter).
+- **Message 2**: The execution request tells the user’s ICA to perform the swap on Base. This message includes the **minimum amount parameter** that protects against sandwiching and slippage.
+
+### Step 3: Execution on Base and failure handling
+
+- Once the funds arrive onto the remote chain, Hyperlane delivers the swap call to the ICA router. The user’s ICA executes the call on Base (converting into USDC on Base).
+- If the swap cannot meet the **minimum amount condition** (for example, due to slippage), the transaction will not be processed.
+- The funds remain in the user’s ICA, and the user can then:
+  - Retry the swap with updated parameters, or
+  - Withdraw the funds directly.
+
+## Architecture Diagram
+
+![TaoFi Architecture](/images/docs/applications/taofi-architecture.png)
+
+## Putting It Together
+
+To recap:
+
+1. HWR delivers funds cross-chain.
+2. Salting creates a **unique address** for each user on the destination chain.
+3. The ICA executes the swap on the remote chain, and slippage checks ensure it only goes through if the user’s minimum amount is met. If not, it fails safely.
+4. The fallback mechanism ensures users stay in control even if the action fails.
+
+## Result: Cross-Chain Swaps with a Safety Net
+
+With TaoFi, users can swap tokens across Ethereum, Base, Solana, and Bittensor EVM.
+
+- No need to manually bridge
+- Deterministic, isolated ICAs for every user
+- Users remain in control even when swaps don’t execute
