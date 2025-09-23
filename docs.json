@@ -119,7 +119,7 @@
                       {
                         "group": "Using Squads",
                         "pages": [
-                          "docs/guides/production/using-squads/alt-vm-using-sqauds",
+                          "docs/guides/production/using-squads/alt-svm-using-sqauds",
                           "docs/guides/production/using-squads/using-squads-solana"
                         ]
                       }
