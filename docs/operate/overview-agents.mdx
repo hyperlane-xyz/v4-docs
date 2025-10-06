@@ -13,7 +13,9 @@ The Hyperlane protocol decouples the transport layer from the security layer of 
 
 This signature is stored and made publicly available (e.g. in an S3 bucket), which is then used by the offchain Relayer and Interchain Security Modules onchain. Validators are _not_ networked together and do not need to reach consensus; they also do not regularly submit onchain transactions.
 
-This is the agent community operators run if looking to help secure an origin chain, and it's the most important duty one can perform to help decentralize message passing on Hyperlane. **Note that just running a Validator doesn't mean it's actively contributing to securing messages:** a Multisig ISM on the destination chain must have enrolled the Validator's checkpoint-signing key, and that ISM must be used by message recipients.
+Validators are configured with a number of block confirmations to wait before attesting to message finality. You can view the [latencies here](/docs/reference/addresses/validators/latencies) (Note that while this reflects the default ISM configuration, validators can configure their own confirmation thresholds based on their security requirements). If a reorg causes a different set or ordering of dispatched messages, the merkle tree that the validators are indexing will have an inconsistent root from the one already observed. When this happens, validators will halt signing new messages and write a reorg flag to their checkpoint storage (e.g., S3 bucket). Remediation is handled on a case-by-case basis.
+
+This is the agent that community operators run to help secure an origin chain, and it's the most important duty one can perform to help decentralize message passing on Hyperlane. **Note that just running a Validator doesn't mean it's actively contributing to securing messages:** a Multisig ISM on the destination chain must have enrolled the Validator's checkpoint-signing key, and that ISM must be used by message recipients.
 
 These agents are implemented in Rust and distributed as Docker images and binaries.
 
