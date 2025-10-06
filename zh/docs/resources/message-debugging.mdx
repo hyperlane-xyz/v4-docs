@@ -1,0 +1,130 @@
+---
+title: "消息调试"
+---
+
+###
+
+<Accordion title="从原始交易中查找消息 ID">
+  * EVM 源链
+  * Cosmos 源链
+
+最简单的方法是使用 [Hyperlane 浏览器](https://explorer.hyperlane.xyz)，如果您的链受支持的话。如果您的链不受支持，可以通过查看原始交易来找到消息 ID。
+
+在源链的区块浏览器中查看原始交易时，导航到 **日志** 标签页。
+
+**`DispatchId`** 日志在主题编号 1（第二个主题）中包含消息 ID。
+
+有时，链的区块浏览器不会显示人性化的 "DispatchId" 名称。在这种情况下，您可以通过主题 0 找到日志：`0x788dbc1b7152732178210e7f4d9d010ef016f9eafbe66786bd7169f56e0c353a`。
+
+![](/images/docs/guides/dispatch-id-log-evm.png)
+
+Arbiscan 上显示原始交易中 DispatchId 日志的示例。
+
+在源链的区块浏览器中查看原始交易时，导航到 **事件日志** 标签页。
+
+**Wasm Mailbox Dispatch Id** 日志包含消息 ID。
+
+![](/images/docs/guides/dispatch-id-log-cosmos.png)
+
+Mintscan 上显示原始交易中日志的示例。
+
+</Accordion>
+
+<Accordion title="调试发送到 Cosmos 链的消息">
+  目前，[Hyperlane 浏览器](https://explorer.hyperlane.xyz) 不支持非 EVM 链。
+
+要检查您的消息是否已被传递，请选择目标链并在下方输入您的消息 ID：
+
+目标链：
+
+neutron
+
+- [neutron](<#Destination Chain=neutron>)
+- [injective](<#Destination Chain=injective>)
+
+消息 ID：0x...
+
+检查是否已传递
+
+</Accordion>
+
+<Accordion title="我的 Hyperlane Warp Route 转账显示已传递，但我没有看到它">
+  我们可以通过两个步骤来调试这个问题：
+
+**验证是否收到了资金：**
+
+- EVM 目标链
+- Cosmos 目标链
+
+1. 打开目标链的区块浏览器，导航到您期望的接收者地址。
+2. 如果您期望收到代币（例如 ERC-20），请检查代币转账标签页中转移到您地址的代币。
+3. 如果您期望收到原生代币（例如以太坊上的 ETH），请检查"内部交易"标签页中转移到您地址的原生代币。
+
+4. 打开目标链的区块浏览器，导航到您期望的接收者地址。
+5. 查看您的"币"或"代币"标签页，寻找期望的余额。
+6. 如果不清楚您的余额是否符合期望，请检查交易列表。寻找任何包含"Process"的交易。
+
+**验证您转账的接收者**
+
+- EVM 源链
+- Cosmos 源链
+
+在源链的区块浏览器中查看原始交易时，导航到 **日志** 标签页。
+
+**`SentTransferRemote`** 日志在主题编号 1（第二个主题）中包含接收者。
+
+有时，链的区块浏览器不会显示人性化的 "SentTransferRemote" 名称。在这种情况下，您可以通过主题 0 找到日志：`0xd229aacb94204188fe8042965fa6b269c62dc5818b21238779ab64bdd17efeec`。
+
+接收者地址是目标链上将接收包装代币的账户。如果需要，地址左侧填充零。
+
+如果您的目标链是 EVM 链，日志将显示 `0x0000000000000000000000ffffffffffffffffffffffffffffffffffffffff` 表示 `0xffffffffffffffffffffffffffffffffffffffff` 是转账接收者。
+
+如果您的目标链是 Cosmos 链，您可以获取十六进制内容并使用诸如[此工具](https://www.bech32converter.com)之类的工具将其转换为 bech32 地址。一些 Cosmos 链具有不同的地址长度，因此请注意要复制多少个字符。
+
+![](/images/docs/guides/transfer-remote-evm.png)
+
+Arbiscan 上显示原始交易中 DispatchId 日志的示例。
+
+在源链的区块浏览器中查看原始交易时，导航到 **事件日志** 标签页。
+
+包含 **Transfer Remote** 的日志包含消息 ID，例如：`Wasm Hpl Warp Native Transfer Remote`。
+
+接收者地址是目标链上将接收包装代币的账户。如果需要，地址左侧填充零。
+
+如果您的目标链是 EVM 链，日志将显示 `0x0000000000000000000000ffffffffffffffffffffffffffffffffffffffff` 表示 `0xffffffffffffffffffffffffffffffffffffffff` 是转账接收者。
+
+如果您的目标链是 Cosmos 链，您可以获取十六进制内容并使用诸如[此工具](https://www.bech32converter.com)之类的工具将其转换为 bech32 地址。一些 Cosmos 链具有不同的地址长度，因此请注意要复制多少个字符。
+
+![](/images/docs/guides/transfer-remote-cosmos.png)
+
+Mintscan 上显示原始交易中日志的示例。
+
+</Accordion>
+
+<Accordion title="我的 Hyperlane Warp Route 转账接收者不是我想要的地址">
+  有时浏览器扩展钱包可能会相互争用，您通常不使用的钱包地址会优先于您预期的钱包。我们已经看到这种情况在 **OKX 钱包** 中发生过几次。请检查您所有钱包地址中的接收者地址。
+</Accordion>
+
+<Accordion title="自己中继 EVM → EVM 消息">
+  使用 [Hyperlane CLI](/zh/docs/reference/developer-tools/cli)，如果消息在两个 EVM 链之间，您可以自己中继消息。
+
+1. 按照[这些说明](/zh/docs/reference/developer-tools/cli)在本地设置 CLI。
+2. 按照[上述说明](#从原始交易中查找消息-id)查找您的消息 ID
+3. 获取在目标链上有资金的账户的私钥。
+4. 运行命令来中继消息：
+
+```
+HYP_KEY=<your-private-key> hyperlane status --relay --origin <origin-chain> --destination <destination-chain> --id <message-id>
+```
+
+例如：
+
+```
+HYP_KEY=0xffff00000000000000000000000000000000000000000000000000000000ffff hyperlane status --relay --origin base --destination blast --id 0xabcd00000000000000000000000000000000000000000000000000000000abcd
+```
+
+</Accordion>
+
+<Accordion title="我仍然需要帮助解决消息未传递的问题">
+  如果上述步骤没有帮助，您可以加入我们的 [Discord](https://discord.com/invite/hyperlane) 并在 **#support-forum** 频道中创建新帖子。
+</Accordion>

@@ -1,0 +1,44 @@
+---
+title: "管理 HWR 限制"
+description: "管理 xERC20 和 FiatToken 上的 Hyperlane Warp Route 限制"
+---
+
+## xERC20 部署
+
+Hyperlane Warp Routes (HWR) 支持 [`xERC20` tokens](https://github.com/defi-wonderland/xERC20)。按照以下步骤配置 `xERC20` 以供 HWR 使用：
+
+1. **所有权转移**：
+
+- 确保将 [`xERC20` 合约](https://github.com/defi-wonderland/xERC20/blob/main/solidity/contracts/XERC20.sol) 的所有权转移给安全的多签，以确保安全。此步骤对于防止未经授权的更改至关重要。
+- `xERC20` 合约使用 OpenZeppelin 的 `Ownable` 接口。使用 `transferOwnership` 函数完成此步骤。
+
+2. **铸造限制配置**：
+
+- HWR 合约的铸造和销毁限制通过 `xERC20` 合约中的 [`setLimits`](https://github.com/defi-wonderland/xERC20/blob/main/solidity/contracts/XERC20.sol#L85) 函数管理。此函数必须由合约所有者调用。
+  - `xERC20` 合约使用 24 小时窗口来管理限制。这由 [`_DURATION`](https://github.com/defi-wonderland/xERC20/blob/main/solidity/contracts/XERC20.sol#L13) 变量定义，设置为 1 days（24 小时）。当前可用限制使用 [`_getCurrentLimit`](https://github.com/defi-wonderland/xERC20/blob/main/solidity/contracts/XERC20.sol#L234) 函数动态计算。
+  - 如果自上次使用以来已过去 24 小时（`_DURATION`），限制将自动恢复到完整的 `maxLimit`。
+- 确保限制适合预期的交易量以防止中断。根据交易量和预期使用模式审查和调整限制。
+
+## FiatToken 部署
+
+HWRs 支持 [Circle 的 Bridged USDC，以 `FiatToken` 的铸造者形式](https://github.com/circlefin/stablecoin-evm)（有关文档，请参阅该仓库的更多信息）。在 `FiatToken` 和 `MasterMinter` 合约上有三个相关角色：
+
+1. **`MasterMinter` owner** 是可以设置控制器和铸造者的账户。
+2. **`MasterMinter` controller** 是可以为其分配的铸造者设置铸造限制的账户。
+3. **`MasterMinter` minter** 是实际可以在 `FiatToken` 上调用 `mint` 的账户。
+
+所有者和控制器通常应设置为 Safe 多签以增强安全性，铸造者是本地链上的 HWR 合约地址。`FiatToken` 的铸造限制是绝对的，意味着它们不会自动重置，如果需要必须更新。
+
+应在 `MasterMinter` 合约上设置三个操作以准备使用：
+
+1. **移除之前的测试控制器：**
+
+- 作为所有者，通过 [`removeController(address _controller)` 函数](https://github.com/circlefin/stablecoin-evm/blob/master/contracts/minting/Controller.sol#L87C14-L87C51) 移除之前的测试控制器
+
+2. **设置控制器和铸造者：**
+
+- 作为所有者，您应该通过 [`configureController(address controller, address worker)` 函数](https://github.com/circlefin/stablecoin-evm/blob/master/contracts/minting/Controller.sol#L70) 设置控制器和铸造者。控制器可以与所有者相同，铸造者应该是 HWR 地址。
+
+3. **为铸造者设置铸造限制：**
+
+- 作为控制器，您应该通过 [`configureMinter(uint256 _newAllowance)` 函数](https://github.com/circlefin/stablecoin-evm/blob/master/contracts/minting/MintController.sol#L116) 为铸造者设置铸造限制。此限制不会持续重置，因此要么将其设置为足够大的值（如 `cast max-uint`），要么监控使用情况并相应调整。

@@ -1,0 +1,26 @@
+---
+title: "Typecasts 库"
+---
+
+`TypeCasts` 库提供了在 `address` 和 `bytes32` 类型之间转换的简单高效函数。
+
+此库适用于需要在智能合约中使用 `bytes32` 类型但仍需要将其转换回 `address` 类型或反之的情况。
+
+## `TypeCasts` 库
+
+```solidity
+// SPDX-License-Identifier: MIT OR Apache-2.0
+pragma solidity >=0.6.11;
+
+library TypeCasts {
+    // alignment preserving cast
+    function addressToBytes32(address _addr) internal pure returns (bytes32) {
+        return bytes32(uint256(uint160(_addr)));
+    }
+
+    // alignment preserving cast
+    function bytes32ToAddress(bytes32 _buf) internal pure returns (address) {
+        return address(uint160(uint256(_buf)));
+    }
+}
+```

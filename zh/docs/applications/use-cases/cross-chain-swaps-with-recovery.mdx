@@ -1,0 +1,89 @@
+---
+title: "TaoFi：具有用户控制恢复功能的跨链交换"
+---
+
+本用例解释了[**TaoFi Bridge**](https://www.taofi.com/bridge)如何使用Hyperlane组件——包括[跨链账户(ICAs)](/zh/docs/applications/interchain-account/overview)和[**Hyperlane Warp路由(HWR)**](/zh/docs/applications/warp-routes/overview)——来实现具有滑点保护和用户控制恢复功能的跨链桥接。
+
+![Taofi_Overview.png](/images/docs/applications/taofi-overview.png)
+
+## 概述
+
+跨链交换可能由于滑点或抢跑而在目标链上失败，导致用户无法回滚且无法控制其资金。
+
+**TaoFi Bridge**通过让用户在Ethereum、Base、Solana和Bittensor EVM之间桥接**USDC**，同时确保在执行失败时有**安全回退**机制来解决这个问题。
+
+为了实现这一点，TaoFi依赖于关键的设计功能：
+
+- **滑点保护**：交换包含最小金额参数，可以减轻夹子攻击。
+- **加盐**：为每个用户在目标链上提供唯一账户，保持资金隔离。
+- **安全回退**：如果交换失败，资金仍保留在用户在目标链上的账户中，可以提取或重试。
+
+## 问题
+
+传统上，跨链交换面临关键挑战：
+
+1. **复杂的用户体验**：用户通常需要桥接、切换链并手动交换。
+2. **不同用户的相同目标地址**：在目标链上，所有资金通常到达同一地址。这使得按用户分区变得困难，如果交换失败，就没有直接的方法将代币返还给正确的所有者。
+3. **夹子攻击**：在目标链上，交换可能被MEV机器人抢跑，导致用户获得更差的执行或失败的交易。
+4. **失败情况**：如果交换在资金桥接后失败（例如，由于滑点或流动性不足），用户可能无法获得任何恢复选项。
+
+## 解决方案：基于Hyperlane构建的TaoFi Bridge
+
+TaoFi通过构建在Hyperlane的互操作性堆栈上克服了这些挑战。使用这些组件，用户可以在Ethereum、Base、Solana和Bittensor EVM之间一键桥接和交换USDC——同时在执行失败时仍保持对其资金的控制。
+
+## 关键组件与功能
+
+TaoFi基于Hyperlane的核心组件构建，并利用它们启用的高级功能。
+
+- [**跨链账户(ICAs)**](/zh/docs/applications/interchain-account)：使链A上的合约能够在链B上执行任意逻辑
+- [**Hyperlane Warp路由(HWR)**](/zh/docs/applications/warp-routes/overview)：在链之间桥接资产
+- **加盐**：ICA路由器支持用于账户派生的`salt`参数。通过将用户地址作为盐传递，每个用户都获得一个唯一的目标账户。这确保资金按用户分区，并可以在交换失败时安全管理或退款。
+- **通过[Transfer-and-Call](/zh/docs/guides/warp-routes/evm/transfer-and-call-pattern)和唯一用户账户地址进行故障处理**：通过使用_Transfer and Call_模式，应用程序可以首先桥接代币，然后仅在资产到达后执行合约功能（例如：交换）。如果该操作失败（例如，由于滑点），代币仍安全地保留在用户在目标链上的唯一账户中。然后用户可以选择使用新参数重试或提取其资金，确保他们永远不会失去控制。
+- **滑点检查（最小金额参数）**：通过在远程调用中包含最小金额参数，应用程序防止夹子攻击成功。如果有人试图夹子交易，交换将不再满足最小金额条件。交易不会以更差的价格执行，而是安全失败，让用户决定如何处理桥接的资金。
+
+## 工作原理（分步说明）
+
+假设用户想要交换**Bittensor EVM上的USDC** → **Base上的USDC**。
+
+### 步骤1：用户在**Bittensor EVM**上发起交换
+
+- 用户在TaoFi UI中签署**单个交易**。
+- 在幕后：
+  - 合约为用户在Base上派生一个**加盐的跨链账户**。
+  - 创建一个Transfer and Call请求，其中包括要桥接的金额和在Base上运行的交换操作。
+
+### 步骤2：Hyperlane桥接代币和消息
+
+跨链编排由Hyperlane的互操作性框架处理。[**中继器**](/zh/docs/protocol/agents/relayer)（一个无需许可的链下代理）在链之间传递2条消息。
+
+- **消息1**：使用HWR将资金从Bittensor EVM桥接到Base。它们到达用户在Base上的**唯一ICA**（使用`salt`参数生成）。
+- **消息2**：执行请求告诉用户的ICA在Base上执行交换。此消息包括保护免受夹子攻击和滑点的**最小金额参数**。
+
+### 步骤3：Base上的执行和故障处理
+
+- 一旦资金到达远程链，Hyperlane就会将交换调用传递给ICA路由器。用户的ICA在Base上执行调用（转换为Base上的USDC）。
+- 如果交换无法满足**最小金额条件**（例如，由于滑点），交易将不被处理。
+- 资金保留在用户的ICA中，然后用户可以：
+  - 使用更新的参数重试交换，或
+  - 直接提取资金。
+
+## 架构图
+
+![TaoFi Architecture](/images/docs/applications/taofi-architecture.png)
+
+## 总结
+
+回顾：
+
+1. HWR跨链传递资金。
+2. 加盐为目标链上的每个用户创建**唯一地址**。
+3. ICA在远程链上执行交换，滑点检查确保只有在满足用户最小金额时才进行。如果不满足，则安全失败。
+4. 回退机制确保即使操作失败，用户也能保持控制。
+
+## 结果：具有安全网的跨链交换
+
+使用TaoFi，用户可以在Ethereum、Base、Solana和Bittensor EVM之间交换代币。
+
+- 无需手动桥接
+- 为每个用户提供确定性、隔离的ICA
+- 即使交换未执行，用户仍保持控制

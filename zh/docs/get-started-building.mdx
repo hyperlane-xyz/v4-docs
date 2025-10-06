@@ -1,0 +1,132 @@
+---
+title: "开始使用 Hyperlane 构建"
+---
+
+通过三个步骤构建跨链应用程序。无论您是创建代币桥、跨链 NFT 还是跨链消息传递，本指南都将帮助您入门。
+
+## 步骤 1：确定您的虚拟机
+
+选择您想要启用跨链功能的区块链环境。
+
+<Card title="支持的虚拟机" icon="server">
+  Hyperlane 支持多种虚拟机类型，包括 EVM 链（以太坊、Polygon、Arbitrum）、Cosmos 和 Solana。
+</Card>
+
+**您需要决定的内容：**
+
+- 源链（消息发起的地方）
+- 目标链（消息传递的地方）
+- 每条链的 Gas 代币要求
+
+---
+
+## 步骤 2：部署 Hyperlane 核心基础设施
+
+部署核心 Hyperlane 合约，包括核心邮箱和 ISM 合约。
+
+**在部署之前，检查您的链上是否已有 Hyperlane：**
+
+<AccordionGroup>
+  <Accordion title="我的链上是否已部署 Hyperlane？">
+    查看 [Hyperlane 注册表](https://github.com/hyperlane-xyz/hyperlane-registry) 
+    了解哪些链已有 Hyperlane 部署。如果您要连接的链已经部署了 Hyperlane 核心合约，请跳转到步骤 3！
+  </Accordion>
+</AccordionGroup>
+
+**如果您需要部署：**
+
+- 使用 Hyperlane CLI 进行自动化部署
+- 配置您的安全设置
+- 部署 Hyperlane 核心合约
+
+[部署 Hyperlane 基础设施 →](/zh/docs/guides/chains/deploy-hyperlane)
+
+---
+
+## 步骤 3：创建您的 Hyperlane Warp 路由 (HWR)
+
+使用 Hyperlane 的消息传递基础设施桥接您的代币。
+
+<Card
+  title="Hyperlane Warp 路由"
+  icon="route"
+  href="/zh/docs/applications/warp-routes/overview"
+>
+  Hyperlane Warp 路由是使用 Hyperlane 消息传递基础设施的模块化跨链资产桥。了解它们的工作原理。
+</Card>
+
+**常见的 HWR 类型：**
+
+- **ERC-20 HWR**：桥接任何 ERC-20 代币
+- **原生 HWR**：移动原生代币（ETH、SOL 等）
+- **抵押品 HWR**：在源链锁定代币，在目标链铸造
+- **合成 HWR**：在目标链上创建包装版本
+
+**选择您的部署指南：**
+
+<CardGroup cols={3}>
+  <Card
+    title="EVM HWR"
+    icon="code"
+    href="/zh/docs/guides/quickstart/deploy-warp-route"
+  >
+    在以太坊、Polygon、Arbitrum 和其他 EVM 链上部署
+  </Card>
+
+{" "}
+
+<Card
+  title="Solana HWR"
+  icon="code"
+  href="/zh/docs/guides/warp-routes/svm/svm-warp-route-guide"
+>
+  在 Solana 和其他 Sealevel VM 链上部署
+</Card>
+
+  <Card
+    title="Cosmos SDK"
+    icon="code"
+    href="/zh/docs/alt-vm-implementations/cosmos-sdk"
+  >
+    在基于 Cosmos SDK 的链上部署
+  </Card>
+</CardGroup>
+
+<Note>
+  **高级 HWR**：查看我们的 [HWR 资源](/zh/docs/applications/warp-routes/types) 和 [HWR 指南](/zh/docs/guides/warp-routes) 了解更复杂的用例。
+</Note>
+
+---
+
+## 下一步
+
+<CardGroup cols={3}>
+  <Card title="部署桥接 UI" icon="window" href="/zh/docs/guides/warp-routes/bridge-ui-guide">
+    为您的 HWR 创建用户界面
+  </Card>
+
+<Card
+  title="运行验证器和中继器"
+  icon="shield-check"
+  href="/zh/docs/guides/chains/deploy-hyperlane-with-local-agents"
+>
+  使用本地验证器和中继器部署 Hyperlane
+</Card>
+
+<Card
+  title="安全模块"
+  icon="shield"
+  href="/zh/docs/protocol/ISM/modular-security"
+>
+  为您的跨链消息配置自定义安全
+</Card>
+
+{" "}
+
+</CardGroup>
+
+## 需要帮助？
+
+<Note>
+  加入我们的 [Discord 社区](https://discord.gg/hyperlane) 获取支持！
+</Note>

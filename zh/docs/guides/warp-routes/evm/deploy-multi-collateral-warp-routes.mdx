@@ -1,0 +1,71 @@
+---
+title: "部署 HWR 2.0"
+---
+
+本指南将指导您如何使用 Hyperlane Warp Routes 2.0 创建多抵押代币桥接器，允许资产从多个链而不是单一来源链获取。
+
+<Info>
+  - 有关 Hyperlane Warp Routes 2.0 的入门知识，请查看：[Hyperlane Warp
+  Routes 2.0](/zh/docs/applications/warp-routes/multi-collateral-warp-routes)
+</Info>
+
+## 前置条件
+
+要完成本操作步骤，您应该具备以下条件：
+
+1. 两个抵押链和一个您选择的合成链，您希望在它们之间部署 Hyperlane Warp Route 2.0。确保在链上有一些资金来支付部署 gas 费用。
+2. 用作抵押的代币。
+3. 已安装的 [Hyperlane CLI](https://docs.hyperlane.xyz/docs/reference/developer-tools/cli) 实例和设置为 `HYP_KEY` 环境变量的钱包私钥，在您的源网络和目标网络上有资金。
+
+## 部署您的 Hyperlane Warp Route 2.0
+
+### 1. 创建您的 Hyperlane Warp Route 配置
+
+1. 使用 Hyperlane CLI 初始化 Hyperlane Warp Route 部署文件：
+
+`hyperlane warp init`
+
+此命令提供操作步骤，直接在终端中提示您进行配置选择。
+
+您的设置应该如下所示：
+
+- 选择三个网络：为两个源网络选择 `collateral`，为目标网络选择 `synthetic`。
+- 输入代币地址、代理管理合约，并选择是否要使用受信任的 ISMs。
+
+做出选择后，CLI 将在 `./configs/warp-route-deployment.yaml` 生成 Hyperlane Warp Route 配置文件。
+
+### 2. 部署您的 Hyperlane Warp Routes 2.0
+
+配置就绪后，您可以使用以下命令启动 Hyperlane Warp Route 部署：
+
+`hyperlane warp deploy`
+
+在部署过程中，CLI 需要访问您的私钥来签署交易。您可以在提示时输入或将您的私钥设置为 `HYP_KEY`。确保您的钱包在所有相关链上都有足够的资金来支付部署的 gas 成本。
+
+### 3. 测试
+
+您可以使用以下命令启动测试转账：
+
+`hyperlane warp send --symbol TOKEN`
+
+CLI 将提示您：
+
+- 选择匹配的 Hyperlane Warp Route
+- 选择源链和目标链
+
+<Info>
+  在两个 `collateral` 链之间发送时，确保目标链上有足够的抵押品来完成转账。合成代币在目标链上铸造。在抵押路由中，代币必须已经存在于目标链上才能被释放。
+</Info>
+
+它将运行检查并发送消息。您将获得：
+
+- 交易链接（例如，BaseScan）
+- 消息 ID 和浏览器链接
+- 处理完成后的确认
+
+<Success>
+  🎉 **恭喜！** 您已成功部署了 Hyperlane Warp Route 2.0。
+  您的用户现在可以从多个链桥接资产！
+</Success>
+
+👉 下一步：[为 Hyperlane Warp Routes 部署 Bridge UI](/zh/docs/guides/warp-routes/bridge-ui-guide)

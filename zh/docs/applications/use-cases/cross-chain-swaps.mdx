@@ -1,0 +1,110 @@
+---
+title: "Superswaps：一键跨链代币交换"
+---
+
+本用例解释了[Superswaps](https://velodrome.finance/docs/superswaps)如何在幕后使用Hyperlane组件工作，包括[**跨链账户(ICAs)**](/zh/docs/applications/interchain-account)、[**Hyperlane Warp路由(HWR)**](/zh/docs/applications/warp-routes/overview)和[**链下查找ISM**](/zh/docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM)。
+
+## 概述
+
+**[Superswaps](https://velodrome.finance/docs/superswaps)**是由[Velodrome](https://velodrome.finance/)开发的跨链交换机制，用于在Superchain生态系统中实现一键代币交换。
+
+![Warp Route diagram/doodle](/images/docs/applications/superswap-intro.png)
+
+Superswaps不需要用户手动桥接资产并在不同链上执行单独的交换，而是使用Hyperlane的互操作性堆栈通过一键操作提供多个跨链异步可组合交易和抗MEV的交换体验。
+
+在我们深入了解Superswaps的工作原理之前，让我们先讨论当今存在的挑战。
+
+## 问题
+
+作为用户，跨链交换传统上需要多个步骤。假设您在链A上有代币A，想要在链B上获得代币B。这通常需要：
+
+1. 在链A上交换代币（例如，在Optimism上将OP交换为USDC）
+2. 手动将代币桥接到链B（例如，Base）
+3. 切换到链B
+4. 再次交换为所需资产（例如，USDC到DAI）
+
+**挑战：**
+
+- **糟糕的用户体验**：多个交易、钱包交互和链切换
+- **流动性碎片化**：每条链上的不同资金池
+
+## 解决方案：基于Hyperlane的Superswaps
+
+Superswaps通过利用Hyperlane的开放互操作性框架，将整个过程简化为用户的单击操作。
+
+### 关键组件
+
+- **[跨链账户(ICAs)](/zh/docs/applications/interchain-account/overview)**：允许链A上的合约在链B上执行任意逻辑
+- **[Hyperlane Warp路由(HWR)](/zh/docs/applications/warp-routes/overview)**：在链之间桥接资产
+- **[oUSDT](https://docs.openusdt.xyz/)**：用于在链之间传输价值的跨链稳定币
+- **[链下查找ISM](/zh/docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM)**：提供一种使用存储在链下的数据验证Hyperlane消息的方法，这些数据可以在需要时获取和验证
+
+### Superswap流程（分步说明）
+
+假设用户想要交换**Optimism上的OP** → **Base上的USDC**。
+
+#### 步骤1：用户在Optimism上发起Superswap（源链）
+
+- 用户通过Velodrome UI签署**一个交易**。
+- 在幕后，Velodrome：
+  - 交换用户的`OP → oUSDT`（在Optimism上）
+  - 准备一个**跨链账户(ICA)**调用以在Base上执行交换
+
+#### 步骤2：Hyperlane处理桥接和消息传递
+
+一旦用户签署了单个Superswap交易，跨链编排就由Hyperlane的互操作性框架处理。
+
+[中继器](/zh/docs/protocol/agents/relayer)（一个无需许可的链下代理）负责**在链之间传送3个不同的消息**。每个消息在确保代币移动、指令安全提交和仅在验证时执行方面发挥不同的作用。
+
+**1. oUSDT通过HWR桥接**
+
+- [oUSDT](https://docs.openusdt.xyz/)，驱动Superswaps的中介代币，从源链（Optimism）桥接到目标链（Base），并交付到Base上的**用户跨链账户(ICA)**。
+- 这确保Base上的ICA持有交换所需的代币。
+
+**2. 提交消息（交换详情的哈希）**
+
+- 第二个消息是**提交**。此消息不发送完整的交换详情，而只包含**交换指令的哈希**（例如，"交换`oUSDT → USDC`"）。
+- 此消息通过Hyperlane的跨链账户路由器发送，由[链下查找ISM](/zh/docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM)（一个可以在需要时从外部源获取数据的安全模块）处理。ISM将哈希存储在链上作为已提交内容的公共记录，同时保持实际交换参数隐藏。
+- 完整的交换调用数据在此阶段不会放置在链上。相反，它存储在网关服务的链下。只有通过Hyperlane的**跨链燃气支付(IGP)**系统支付燃气费的中继器才能检索它，并且它必须在访问数据之前使用**ECDSA签名**进行身份验证。这通过在最终执行之前保持交换详情隐藏来保护交换免受MEV攻击。
+
+<Note> 
+使用**链下查找ISM**的MEV保护：链下查找ISM在执行任何ICA指令之前强制执行**提交-揭示方案**。
+
+- 首先，交换详情作为哈希**提交**到链上（不透露完整数据）。
+- 稍后，当揭示调用到达时，ISM：
+  - 从链下网关获取完整的调用数据
+  - 验证此数据的哈希与早期的链上提交匹配
+- 只有当提交和揭示匹配时，ICA才继续执行。
+- 此过程通过**保持交换详情私密**直到执行时刻来保护用户免受MEV攻击。
+
+</Note>
+
+**3. 揭示和执行消息（完整交换详情）**
+
+- 第三个消息是**揭示和执行**步骤。此消息传递到**目标ICA路由器**，后者又调用**链下查找ISM**。
+- 揭示消息本身不包含完整的调用数据。相反，它包含指向链下网关的指针以及中继器的签名证明，这将其认证为正确的传送者。
+- **链下查找ISM**然后触发链下查找。此步骤从网关获取交换调用数据并将其返回。ISM重新计算此调用数据的哈希，并将其与早期存储在链上的提交进行检查。如果两者匹配，消息即被验证。
+- 最后，目标链上的**发送方ICA**调用交换功能。由于代币已经通过HWR就位，调用数据现在已验证，ICA在目标链上执行交换 - 将`oUSDT`转换为`USDC`。
+
+#### 总结
+
+回顾：
+
+1. Hyperlane Warp路由跨链传递代币。
+2. 提交消息在链上锁定交换哈希（但隐藏详情）。
+3. 揭示消息在链下获取真实交换数据，将其与哈希验证，然后执行交换。
+
+#### ICA架构概述
+
+此图显示了ICA在Superswaps中的工作方式：源链调度提交和执行消息，链下基础设施（Velodrome网关和中继器）协调数据检索和消息传递，目标链通过ICA执行交换。
+
+![Warp Route diagram/doodle](/images/docs/applications/superswap-diagram.png)
+
+### 结果：一键跨链代币交换
+
+使用Superswaps，用户只需一键即可在目标链上接收代币
+
+- 无需手动桥接
+- 无需切换网络
+- 无需作为用户执行多个交易
+- 交换受到MEV保护

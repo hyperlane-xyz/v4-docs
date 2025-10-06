@@ -1,0 +1,55 @@
+---
+title: "ISM 市场"
+---
+
+ISM 市场是跨链安全模块 (ISM) 的注册表，让开发者可以自定义其消息的验证方式。应用团队可以根据其安全性、延迟和成本要求选择 ISM（即对高价值消息使用更严格的验证，对日常转移使用较轻的 ISM）。
+
+市场包括来自 Abacus Works 的标准 ISM，以及由合作伙伴团队和社区成员开发的社区贡献 ISM。
+
+### 标准 ISM
+
+标准 ISM 由 Abacus Works 开发和维护。
+
+| ISM 名称                                                                                                                                            | 类型        | 阶段           | 描述                                                                                                                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Aggregation ISM (Static)](/zh/docs/protocol/ISM/standard-ISMs/aggregation-ISM)                                                                        | Composition | In Production  | 将多个 ISM 组合在一起，要求全部或 k-of-n 子集同意才能验证。                                                                                                                 |
+| [Aggregation ISM (Storage)](/zh/docs/protocol/ISM/standard-ISMs/aggregation-ISM#customize)                                                             | Composition | In Production  | 将多个 ISM 组合在一起，要求全部或 k-of-n 子集同意才能验证。模块集和阈值存储在状态中，可以在部署后更新。                                                                      |
+| [Routing ISM](/zh/docs/protocol/ISM/standard-ISMs/routing-ISM)                                                                                         | Composition | In Production  | 根据源域将消息定向到不同的 ISM。                                                                                                                                            |
+| Amount Routing ISM                                                                                                                                  | Composition | In Development | 根据转移金额将消息路由到不同的 ISM。                                                                                                                                        |
+| [Fallback Routing ISM](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/routing/DefaultFallbackRoutingIsm.sol) | Composition | In Production  | 如果路由映射中未配置源域，则提供备用 ISM 路径。                                                                                                                             |
+| ICA Routing ISM                                                                                                                                     | Composition | In Production  | 通过跨链账户 (ICA) 路由消息。                                                                                                                                               |
+| [Pausable ISM](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/PausableIsm.sol)                               | Composition | In Production  | 允许在紧急情况下暂停消息流。                                                                                                                                                 |
+| Rate Limited ISM                                                                                                                                    | Composition | In Development | 使用令牌桶速率限制器来限制在给定时间间隔内可以通过 HWR 发送的金额。仅适用于 HWR 应用程序/消息编码。                                                                          |
+| [Merkle Root Multisig ISM](/zh/docs/protocol/ISM/standard-ISMs/multisig-ISM#merklerootmultisigismmetadata)                                             | Security    | In Production  | 验证 Merkle root 上的 k-of-n 签名，并使用此 root 中消息 ID 的 Merkle 证明。                                                                                                 |
+| [Merkle Root Multisig ISM (Storage)](/zh/docs/protocol/ISM/standard-ISMs/multisig-ISM#customize)                                                       | Security    | In Production  | 验证 Merkle root 上的 k-of-n 签名，并使用此 root 中消息 ID 的 Merkle 证明。模块集和阈值存储在状态中，可以在部署后更新。                                                      |
+| [Message ID Multisig ISM](/zh/docs/protocol/ISM/standard-ISMs/multisig-ISM#messageidmultisigismmetadata)                                               | Security    | In Production  | 验证消息 ID 上的 k-of-n 签名。签名来自 checkpoint 结构，并在相关 ISM 之间共享。                                                                                             |
+| [Message ID Multisig ISM (Storage)](/zh/docs/protocol/ISM/standard-ISMs/multisig-ISM#customize)                                                        | Security    | In Production  | 验证消息 ID 上的 k-of-n 签名。签名来自 checkpoint 结构，并在相关 ISM 之间共享。模块集和阈值存储在状态中，可以在部署后更新。                                                  |
+| Weighted Merkle Root Multisig ISM                                                                                                                   | Security    | In Development | 加权投票系统，扩展 Merkle Root 多签，其中每个签名者的影响力由其质押权重决定。                                                                                                |
+| Weighted Message ID Multisig ISM                                                                                                                    | Security    | In Development | Message ID 多签之上的加权投票系统。                                                                                                                                         |
+| [Offchain Lookup ISM](/zh/docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM)                                                                         | Security    | In Production  | 作为构建利用外部数据源进行验证的验证逻辑的抽象。                                                                                                                             |
+| [Chainlink CCIP ISM](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/hook/CCIPIsm.sol)                        | Security    | In Production  | 利用 Chainlink CCIP 验证消息。                                                                                                                                              |
+| [Arbitrum L2 to L1 ISM](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/hook/ArbL2ToL1Ism.sol)                | Security    | In Development | 使用 Arbitrum 的原生证明系统验证从 Arbitrum L2 到 Ethereum L1 的跨链消息。                                                                                                  |
+| [OP Stack ISM](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/hook/OPStackIsm.sol)                           | Security    | In Production  | 使用 OP Stack 原生安全模型验证来自 OP Stack rollup 的跨链消息。                                                                                                             |
+| [Noop ISM / Test ISM](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/NoopIsm.sol)                            | Security    | In Production  | 用于测试目的的 ISM。                                                                                                                                                        |
+| [Trusted Relayer ISM](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/TrustedRelayerIsm.sol)                  | Security    | In Production  | 依赖可信 Relayer 在 Mailbox 上传递消息。                                                                                                                                    |
+
+<Note>
+
+- Static 变体在字节码中是不可变的。
+- Storage 变体将模块集和阈值保持在状态中可变。
+
+</Note>
+
+### 社区 ISM
+
+社区 ISM 由 Abacus Works 以外的贡献者开发和维护。
+
+| ISM 名称                 | 类型     | 阶段           |
+| ------------------------ | -------- | -------------- |
+| Axelar ISM               | Security | In Development |
+| Celestia ZK ISM          | Security | In Development |
+| Noble ISM                | Security | In Development |
+| Polygon zkEVM V2 ISM     | Security | In Development |
+| Succinct Lightclient ISM | Security | In Development |
+| Timelock ISM             | Security | In Development |
+| Wormhole ISM             | Security | In Development |

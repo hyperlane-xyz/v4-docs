@@ -1,0 +1,52 @@
+---
+title: "Relayer HTTP API"
+---
+
+Relayer 提供了一个全面的 HTTP API，用于检查数据库内容和管理操作。下面的每个端点都包含一个交互式测试平台，您可以直接测试 API。
+
+<Note>
+在测试端点之前，请确保更新服务器 URL 以匹配您的 Relayer 实例。
+</Note>
+
+## API 端点
+
+以下端点可用于与 Relayer 交互：
+
+### Messages API
+- [Get Messages](/zh/docs/operate/relayer/api/messages/get-messages) - 通过 domain 和 nonce 范围查询数据库中的消息
+- [Insert Messages](/zh/docs/operate/relayer/api/messages/post-messages) - 向数据库添加新消息
+
+### 操作管理
+- [List Operations](/zh/docs/operate/relayer/api/operations/get-operations) - 查看操作队列中的待处理消息
+- [Retry Messages](/zh/docs/operate/relayer/api/operations/post-message-retry) - 触发重试失败的消息（重置重试计数）
+- [Reprocess Message](/zh/docs/operate/relayer/api/operations/post-reprocess-message) - 按需重新排队处理消息
+
+<Info>
+**Retry vs Reprocess**：Retry 处理当前在操作队列（内存）中的失败消息，而 reprocess 从数据库（存储）重新排队消息以进行处理 - 无论是需要重新处理的已传递消息，还是允许外部服务触发消息传递而不依赖队列退避机制。
+</Info>
+
+### 数据检查
+- [Get Merkle Tree Insertions](/zh/docs/operate/relayer/api/merkle-tree-insertions/get-merkle-tree-insertions) - 查询数据库中的 merkle tree 插入
+- [Insert Merkle Tree Insertions](/zh/docs/operate/relayer/api/merkle-tree-insertions/post-merkle-tree-insertions) - 插入 merkle tree 插入记录
+
+### IGP 管理
+- [List IGP Rules](/zh/docs/operate/relayer/api/igp/get-igp-rules) - 查看当前的 gas 支付规则
+- [Add IGP Rule](/zh/docs/operate/relayer/api/igp/post-igp-rules) - 创建新的 gas 支付规则
+- [Remove IGP Rules](/zh/docs/operate/relayer/igp/api/delete-igp-rules) - 删除现有的 gas 支付规则
+
+<Note>
+IGP 端点仅在配置了 gas enforcers 时可用（`mod.rs:82-83`）。
+</Note>
+
+## 身份验证
+
+大多数端点的读取操作不需要身份验证。写入操作可能需要适当的 API 密钥或身份验证，具体取决于您的 Relayer 配置。
+
+## Base URL
+
+本地开发的默认 base URL 是：
+```
+http://localhost:9090
+```
+
+部署时请更新此 URL 以匹配您的 Relayer 实际端点。

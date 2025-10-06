@@ -1,0 +1,32 @@
+---
+title: '删除 IGP 规则'
+api: 'DELETE http://localhost:9090/igp_rules/:index'
+---
+
+删除现有的跨链 Gas 支付（IGP）规则。
+
+<Note>
+仅当配置了 gas 执行器时，此端点才可用。
+</Note>
+
+<ParamField body="index" type="number" required>
+  要删除的 IGP 规则的索引
+</ParamField>
+
+<RequestExample>
+```bash curl
+curl -X DELETE "http://localhost:9090/igp_rules/1"
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/igp_rules/1', {
+  method: 'DELETE',
+});
+```
+
+```python Python
+import requests
+
+response = requests.delete('http://localhost:9090/igp_rules/1')
+```
+</RequestExample>

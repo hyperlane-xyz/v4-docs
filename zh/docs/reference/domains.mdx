@@ -1,0 +1,33 @@
+---
+title: "Domain 标识符"
+---
+
+import DomainsTable from "/snippets/addresses/domains.mdx";
+
+## 核心 Domain
+
+此列表仅包含由 Abacus Works（我们的法律实体）管理的链上部署。任何人都可以在任何链上[无需许可地部署 Hyperlane](/zh/docs/guides/chains/deploy-hyperlane) - 我们正在构建一个注册表来反映社区的无需许可部署。
+
+Hyperlane 为每个 Hyperlane 支持的链使用唯一的 ID。在可能的情况下，Hyperlane domain ID 与 EVM chain ID 匹配，但这**并不保证**，因为我们也支持非 EVM 链。
+
+<Warning>
+  某些 Hyperlane domain ID 与其对应的 EVM chain ID 不匹配，例如：
+
+- `immutablezkevmmainnet`
+- `rarichain`
+- `rootstockmainnet`
+- `alephzeroevmmainnet`
+- `chilizmainnet`
+- `lumiaprism`
+- `superpositionmainnet`
+- `flowmainnet`
+- `metal`
+- `polynomialfi`
+
+请参阅下表以获取 Hyperlane domain ID 的完整列表。
+
+</Warning>
+
+发送消息时，用户必须提供目标链的 domain ID。当[接收消息](/zh/docs/reference/messaging/receive)时，接收者将获得源链的 domain ID。
+
+<DomainsTable />

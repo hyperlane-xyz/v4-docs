@@ -1,0 +1,137 @@
+---
+title: "部署 EVM <-> SVM HWR"
+---
+
+## 前置条件
+
+确保您已安装并配置以下工具：
+
+- [Hyperlane CLI](/zh/docs/reference/developer-tools/cli)
+- Rust (最新稳定版本)
+- Yarn 和 Node.js (最新稳定版本)
+- Solana CLI 工具
+
+## 操作步骤
+
+### 步骤 1：创建 HWR 目录
+
+1. 在 `./rust/sealevel/environments/${environment}` 中，创建一个名为 `warp-routes` 的目录
+2. 在 `warp-routes` 内，为您的 HWR 部署创建一个新目录，例如 `environments/mainnet3/warp-routes/pzeth`
+3. **可选：** 如果需要，向 `hyperlane-registry` 提交 PR，添加与 HWR 中的合成代币关联的元数据。示例[在此](https://github.com/hyperlane-xyz/hyperlane-registry/pull/142)。
+
+   - **提示：** 虽然不是必需的，但对于 `image` 字段，尽量选择不太可能破坏 URL 的来源
+
+### 步骤 2：在 SVM 端部署
+
+4. 从这里开始，要在 SVM 端部署，您也可以按照我们的官方指南获取提示：[部署 SVM HWR](https://docs.hyperlane.xyz/docs/guides/warp-routes/svm/svm-warp-route-guide)
+5. 为 SVM 配置创建 `token-config.json`，例如
+
+   ```bash
+   {
+     "solana": {
+       "type": "synthetic",
+       "decimals": 9,
+       "name": "Renzo Restaked LST",
+       "symbol": "pzETH",
+       "uri": "<https://raw.githubusercontent.com/hyperlane-xyz/hyperlane-registry/12660fd34d30e960a748d87408a8d88f634f7454/deployments/warp_routes/pzETH/ethereum-solana-metadata.json>",
+       "interchainGasPaymaster": "5FG1TUuhXGKdMbbH8uHEnUghazD4aVfEPAgKLNGNx3SL",
+       "remoteDecimals": 18
+     }
+   }
+   ```
+
+   - 通常 EVM 代币有 18 位小数，这对 SVM 来说太大了。模式是使用 `remoteDecimals: 18` 将它们作为 9 位小数桥接到 SOL。
+
+6. 运行部署命令：
+
+   ```bash
+   cargo run -- -k ~/solana-mainnet-deployer-keypair.json warp-route deploy \
+   --warp-route-name pzeth  \
+   --environment mainnet3  \
+   --environments-dir ../environments  \
+   --built-so-dir ../../target/deploy  \
+   --token-config-file ../environments/mainnet3/warp-routes/pzeth/token-config.json  \
+   --chain-config-file ../environments/mainnet3/chain-config.json  \
+   --ata-payer-funding-amount 50000000
+   ```
+
+### 步骤 3：在 Ethereum 端部署
+
+7. 部署 Ethereum HWR 合约，这也将基于 yaml 代币配置注册 SVM 路由器。
+
+   1. 确保您有最新版本的 [Hyperlane CLI](/zh/docs/reference/developer-tools/cli)。
+   2. 使用 CLI 的配置命令创建 HWR 部署配置文件：`hyperlane warp init `
+
+      该命令提供了一个操作步骤，直接在终端中提示您进行配置选择。
+      使用以下步骤进行 HWR 配置。您可以在操作过程中输入，也可以直接在生成的 YAML 配置文件中输入。
+
+      - 为 SVM 链手动设置 `foreignDeployment: <SVM address>`，如下面的配置示例所示。
+      - 设置 `interchainSecurityModule: "0x0000000000000000000000000000000000000000"` 以使用目标链 Mailbox 中设置的默认 ISM
+      - 将 `gas` 设置为您期望 SVM 消息传递交易所需计算单元的上限。例如，HWRs 的 gas 设置为 `300`。这很重要，必须是上限 - 否则 relayer (中继器) 不会传递 HWR 转账消息，因为发送者支付的金额不足以传递它们。
+
+      ```json
+      ethereum:
+        interchainSecurityModule: "0x0000000000000000000000000000000000000000"
+        isNft: false
+        mailbox: "0xc005dc82818d67AF737725bD4bf75435d065D239"
+        owner: "0xa7ECcdb9Be08178f896c26b7BbD8C3D4E844d9Ba"
+        token: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        type: collateral
+        gas: 300000
+      eclipsemainnet:
+        foreignDeployment: "D6k6T3G74ij6atCtBiWBs5TbFa1hFVcrFUSGZHuV7q3Z"
+        mailbox: "EitxJuv2iBjsg2d7jVy2LDC1e2zBrx4GB5Y9h2Ko3A9Y"
+        owner: "9bRSUPjfS3xS6n5EfkJzHFTRDa4AHLda8BU2pP4HoWnf"
+        interchainSecurityModule: "0x0000000000000000000000000000000000000000"
+        type: synthetic
+        gas: 300000
+      ```
+
+   3. 使用 Hyperlane CLI 部署：`hyperlane warp deploy `
+   4. 确认部署：
+      ```bash
+      $ cast call 0x1D622da2ce4C4D9D4B0611718cb3BcDcAd008DD4 'routers(uint32)(bytes32)' $DESTINATION_DOMAIN --rpc-url $(rpc ethereum) 1399811149
+      0xe9792265ec273ffc17731af890d3e9963e9d744e7b99f02491911ce1bb75b8cb
+      ```
+
+### 步骤 4：更新 SVM token-config.json
+
+8. 回到 Solana 工具，使用外部部署更新 `token-config.json`：
+
+   - `ethereum` 的字段应设置为来自 HWR 合约 artifact 的值。
+   - `token` 应设置为 `collateralAddressOrDenom`（被桥接的代币地址）
+   - `foreignDeployment` 应设置为 `addressOrDenom`（HWR 合约的地址，如 `HypERC20Collateral`）。
+
+   ```bash
+   {
+     "solana": {
+       "type": "synthetic",
+       "decimals": 9,
+       "name": "Renzo Restaked LST",
+       "symbol": "pzETH",
+       "uri": "<https://raw.githubusercontent.com/hyperlane-xyz/hyperlane-registry/12660fd34d30e960a748d87408a8d88f634f7454/deployments/warp_routes/pzETH/ethereum-solana-metadata.json>",
+       "interchainGasPaymaster": "5FG1TUuhXGKdMbbH8uHEnUghazD4aVfEPAgKLNGNx3SL",
+       "remoteDecimals": 18
+     },
+     "ethereum": {
+       "type": "collateral",
+       "decimals": 18,
+       "token": "0x8c9532a60e0e7c6bbd2b2c1303f63ace1c3e9811",
+       "foreignDeployment": "0x1D622da2ce4C4D9D4B0611718cb3BcDcAd008DD4"
+     }
+   }
+   ```
+
+### 步骤 5：部署
+
+9. 运行最终部署命令：
+
+```bash
+cargo run -- -k ~/solana-mainnet-deployer-keypair.json warp-route deploy  \
+--warp-route-name pzeth \
+--environment mainnet3 \
+--environments-dir ../environments \
+--built-so-dir ../../target/deploy \
+--token-config-file ../environments/mainnet3/warp-routes/pzeth/token-config.json  \
+--chain-config-file ../environments/mainnet3/chain-config.json  \
+--ata-payer-funding-amount 50000000

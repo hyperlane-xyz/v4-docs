@@ -1,0 +1,96 @@
+---
+title: '插入 Merkle Tree 插入'
+api: 'POST http://localhost:9090/merkle_tree_insertions'
+---
+
+将 merkle tree 插入插入到 relayer 数据库中。
+
+<Expandable title="请求正文">
+  <ParamField body="merkle_tree_insertions" type="Object[]" required>
+    Merkle Tree 插入数组
+    <Expandable title="merkle_tree_insertions">
+      <ParamField body="chain" type="u32" required>
+        merkle tree 插入的链
+      </ParamField>
+      <ParamField body="insertion_block_number" type="u64" required>
+        merkle tree 插入的区块号
+      </ParamField>
+      <ParamField body="leaf_index" type="u32" required>
+        叶子索引
+      </ParamField>
+      <ParamField body="message_id" type="string" required>
+        消息 ID
+      </ParamField>
+    </Expandable>
+  </ParamField>
+</Expandable>
+
+<Expandable title="响应正文">
+  <ResponseField name="count" type="number">
+    成功插入的 merkle tree 插入数
+  </ResponseField>
+  <ResponseField name="skipped" type="Object[]">
+    被跳过的 merkle tree 插入列表
+  </ResponseField>
+</Expandable>
+
+<RequestExample>
+```bash curl
+curl "http://localhost:9090/merkle_tree_insertions" \
+  -H "Content-Type: application/json" \
+  -d \
+'{
+    "merkle_tree_insertions": [
+        {
+            "chain": 1,
+            "insertion_block_number": 100000,
+            "leaf_index": 5000,
+            "message_id": "0x006ce24a2b5aff423febad6587a68541f2f997a8ba12f0d239748b68f4e0dde5"
+        }
+    ]
+}'
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/igp_rules', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    merkle_tree_insertions: [
+      {
+          chain: 1,
+          insertion_block_number: 100000,
+          leaf_index: 5000,
+          message_id: "0x006ce24a2b5aff423febad6587a68541f2f997a8ba12f0d239748b68f4e0dde5"
+      }
+  ]
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post('http://localhost:9090/igp_rules', json={
+  "merkle_tree_insertions": [
+      {
+          "chain": 1,
+          "insertion_block_number": 100000,
+          "leaf_index": 5000,
+          "message_id": "0x006ce24a2b5aff423febad6587a68541f2f997a8ba12f0d239748b68f4e0dde5"
+      }
+  ]
+})
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "count": 4,
+  "skipped": []
+}
+```
+</ResponseExample>

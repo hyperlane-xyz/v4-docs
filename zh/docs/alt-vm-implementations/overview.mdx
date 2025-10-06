@@ -1,0 +1,58 @@
+---
+title: "替代虚拟机实现"
+---
+
+虽然我们的公共文档目前主要关注 EVM 兼容性，但我们为其他生态系统提供不同程度的支持。这些生态系统目前可能没有完整的功能对等性或完整的工具集成（如 TypeScript CLI 支持）。我们正在积极努力扩展我们在这些平台上的文档和工具。
+
+<Note>
+  如果您对在这些生态系统上构建或将 Hyperlane 引入其他新生态系统感到兴奋，请通过[我们的 Discord](https://discord.gg/hyperlane) 联系我们！
+</Note>
+
+## Cosmos
+
+### CosmosSDK
+
+Hyperlane Cosmos SDK 模块支持与基于 Cosmos SDK 的区块链直接集成。参见 [Hyperlane - Cosmos SDK 模块](/zh/docs/alt-vm-implementations/cosmos-sdk)。
+
+### CosmWasm
+
+查看 Hyperlane 的 CosmWasm 实现[在此](https://github.com/many-things/cw-hyperlane)，由 [Mitosis 团队](https://mitosis.org/)实现和维护。
+
+按照[此指南](https://github.com/many-things/cw-hyperlane/blob/main/DEPLOYMENT.md)了解如何部署到 Cosmos 应用链。截至 2024 年 7 月，我们已在 Celestia、Stride 和 Neutron 上线。
+
+## Sealevel
+
+用于 Solana 虚拟机的 Hyperlane v3 现已在 Solana 和 Eclipse 上线，更多 Solana rollup 即将推出。
+
+您可以在[此处](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/rust/sealevel/programs)找到 Sealevel 合约实现。
+
+<Info>
+  **Hyperlane 是否为 Solana 程序使用 Anchor？**
+
+- 不，Hyperlane 的核心 Solana 程序不使用 Anchor。
+
+**我可以使用 Anchor 构建 Hyperlane 的 Solana 集成吗？**
+
+- 可以。虽然 Hyperlane 本身不使用 Anchor，但可以与其一起构建。例如：[Everclear 的 Solana spoke](https://github.com/everclearorg/monorepo/tree/dev/packages/contracts/solana-spoke/programs/everclear_spoke/src) - 将 Anchor 与 Hyperlane 的 SVM 邮箱一起使用。
+
+**我可以为 Solana 程序使用什么测试框架？**
+
+- Hyperlane 使用 `solana-program-test` crate 进行单元和集成测试。这是一个原生 Rust 工具。如果您使用 Anchor，您可能会发现 Anchor 的内置测试实用程序或通用 Rust 测试框架很有帮助。
+
+</Info>
+
+## Cairo
+
+Hyperlane 协议已由 [Pragma 团队](https://www.pragma.build/)为 Starkware 在 Cairo 中实现。
+
+您可以在[此处](https://github.com/astraly-labs/hyperlane_starknet)找到进行中的实现。
+
+## Move
+
+Hyperlane 已由 [Movement Labs](https://movementlabs.xyz/) 在 MoveVM 中实现。
+
+您可以在[此处](https://github.com/movementlabsxyz/hyperlane-monorepo)找到进行中的实现。这些 Move 合约已在 Movement 的 M1 测试网上线。
+
+## Sway
+
+在[此处](https://github.com/hyperlane-xyz/fuel-contracts)找到我们进行中的 Sway 实现。

@@ -1,0 +1,66 @@
+---
+title: "Agent 配置"
+---
+
+所有 agent 使用相同的配置方法，这是一种多层配置方法，允许轻松覆盖默认配置。每一层都会覆盖前一层中的重叠值。
+
+## 配置层
+
+1. [monorepo](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/rust/main/config) 中"默认部署"的基础配置会自动加载。
+2. 接下来加载通过 `CONFIG_FILES` 环境变量传入的配置文件；此环境变量应该是要按顺序从第一个到最后一个加载的 json 文件路径的逗号分隔列表。
+3. 接下来读取以 `HYP_` 为前缀的环境变量。
+4. 然后读取以 `HYP_<AGENT>_` 为前缀的环境变量，并且仅适用于当前 agent。即 `RELAYER`、`VALIDATOR` 和 `SCRAPER` 将只读取其各自的前缀。
+5. 最后读取命令行参数
+
+## 命令行参数[​](#command-line-arguments "直接链接到命令行参数")
+
+命令行参数在应用程序名称之后添加，例如 `./relayer --originChainNames="test1,test2,test3"`
+
+支持以下格式：
+
+- `--argName argValue`
+- `--argName "argValue"`
+- `--argName 'argValue'`
+- `--argName=argValue`
+- `--argName="argValue"`
+- `--argName='argValue'`
+
+参数名称不区分大小写，因此在本指南中，我们可能会以驼峰命名法显示它们以便于阅读，但 `--argName` 等效于 `--ARGNAME` 和 `--argname`。
+
+示例：
+
+- `{ "db": "/path/to/dir" }` 可以使用 `--db "/path/to/dir"` 设置
+- `{ "chains": { "ethereum": { "name": "ethereum" } } }`（缩写为 `chains.ethereum.name` 或 `chains.<chain_name>.name`）可以使用 `--chains.ethereum.name ethereum` 设置
+- `{ "chains": { "avalanche": { "customRpcUrls": "https://some-url.com" } } }`（缩写为 `chains.<chain_name>.customrpcurls`）可以使用 `--chains.avalanche.customrpcurls "https://some-url.com"` 设置
+
+## 环境变量[​](#environment-variables "直接链接到环境变量")
+
+配置文件格式是设置非机密且不需要每次运行都更改的内容的首选方式，因为它是最容易检查和编辑的格式。配置文件中的每个配置值都可以设置为环境变量，只要您使用正确的名称，但是，有一些环境变量无法在配置中设置，例如 `CONFIG_FILES`。
+
+`HYP_` 和 `HYP_<AGENT>_` 是等效的前缀，唯一的区别是它们的加载顺序，并且可以引用配置文件中的所有配置值。
+
+环境变量名称将是这两个前缀之一，然后是配置值的大写路径组件的下划线分隔路径。
+
+例如：
+
+- `{ "db": "/path/to/dir" }` 可以使用 `HYP_DB="/path/to/dir"` 或 `HYP_RELAYER_DB="/path/to/dir"` 设置
+- `{ "chains": { "ethereum": { "name": "ethereum" } } }`（缩写为 `chains.ethereum.name` 或 `chains.<chain_name>.name`）可以使用 `HYP_CHAINS_ETHEREUM_NAME="ethereum"` 或 `HYP_VALIDATOR_CHAINS_ETHEREUM_NAME="ethereum"` 或 `HYP_RELAYER_CHAINS_ETHEREUM_NAME="ethereum"` 等设置
+- `{ "chains": { "avalanche": { "customRpcUrls": "https://some-url.com" } } }`（缩写为 `chains.<chain_name>.customrpcurls`）可以使用 `HYP_CHAINS_AVALANCHE_CUSTOMRPCURLS="https://some-url.com"` 或 `HYP_VALIDATOR_AVALANCHE_CUSTOMRPCURLS="https://some-url.com"` 等设置
+
+## 使用 Docker 的配置文件
+
+在 Docker 中运行 agent 会增加额外的复杂性，因为配置文件需要从 Docker 容器内部访问。可以在 [repo](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/rust/main/config) 中找到的基础配置已经是提供的 Docker 镜像的一部分，默认情况下将全部加载。
+
+可以使用标志 `--mount type=bind,source=$LOCAL_CONFIG_PATH,target=/config/$CONFIG_NAME,readonly` 挂载单个配置文件，然后将配置文件添加到 `CONFIG_FILES` 以便加载。
+
+可以使用标志 `--mount source=$LOCAL_CONFIG_DIR_PATH,target=/config,readonly` 挂载整个目录，然后将单个配置文件添加到 `CONFIG_FILES` 以便加载。
+
+例如，假设您在本地机器的路径 `/home/workspace/ethereum.json` 有一个配置文件，并且想要使用它运行 validator。
+
+```bash
+docker run -it \
+--mount type=bind,source=/home/workspace/ethereum.json,target=/config/ethereum.json,readonly \
+-e CONFIG_FILES=/config/ethereum.json $DOCKER_IMAGE ./validator
+```
+
+`source` 路径是您本地机器上的路径，`target` 路径是源路径内容将在 Docker 容器内可用的位置，`CONFIG_FILES` 应从目标路径指定配置。

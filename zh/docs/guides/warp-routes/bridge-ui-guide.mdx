@@ -1,0 +1,138 @@
+---
+title: "为您的 HWR 部署 Bridge UI (跨链桥用户界面)"
+---
+
+在您成功[部署 Hyperlane Warp Route (HWR) (跨链资产路由)](/zh/docs/guides/quickstart/deploy-warp-route)后，您有两个现成的选项来设置前端 UI 以支持跨链代币转账：
+
+1. **[Fork、自定义并部署 Hyperlane Warp UI 模板](#fork--customize-the-ui)**
+2. **[使用托管的 Superbridge 实例](#superbridge)**
+
+## 1. Hyperlane Warp UI 模板
+
+[Hyperlane Warp UI 模板](https://github.com/hyperlane-xyz/hyperlane-warp-ui-template) 是一个预构建的 Next.JS 应用，您可以轻松自定义和部署。
+
+- **配置**：按照[配置说明](https://github.com/hyperlane-xyz/hyperlane-warp-ui-template/blob/main/README.md)了解如何配置 Warp UI Web 应用程序并在本地运行的详细信息。
+- **自定义**：按照[自定义说明](https://github.com/hyperlane-xyz/hyperlane-warp-ui-template/blob/main/CUSTOMIZE.md)了解如何配置 UI 的代币并更改默认品牌资产/主题的详细信息。
+
+### Registry (注册表)
+
+默认情况下，应用程序将使用发布在 NPM 上的规范 Hyperlane registry (注册表)。要使用不同的 registry (注册表)，您可以使用 `NEXT_PUBLIC_REGISTRY_URL` 环境变量设置 URL。
+
+### HWR 配置示例
+
+以下是连接 Sepolia 上的 USDC 到 Alfajores 的 HWR 配置示例。您可以使用 Typescript 或 YAML 作为路由配置。
+
+```typescript
+{
+  tokens: [
+    {
+      // 代币的 ChainName
+      chainName: "sepolia",
+      // 参见 https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/sdk/src/token/TokenStandard.ts
+      standard: TokenStandard.EvmHypCollateral,
+      // 代币元数据（decimals、symbol、name）
+      decimals: 6,
+      symbol: "USDC",
+      name: "USD Coin",
+      // 路由器地址
+      addressOrDenom: "YOUR_ROUTER_ADDRESS_1",
+      // 底层抵押代币的地址
+      collateralAddress: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+      // 代币标志图像的路径
+      logoURI: "/logos/usdc.png",
+      // 此代币连接到的代币列表
+      connections: [{ token: "ethereum|alfajores|YOUR_ROUTER_ADDRESS_2" }],
+    },
+    {
+      chainName: "alfajores",
+      standard: TokenStandard.EvmHypSynthetic,
+      decimals: 6,
+      symbol: "USDC",
+      name: "USD Coin",
+      addressOrDenom: "YOUR_ROUTER_ADDRESS_2",
+      logoURI: "/logos/usdc.png",
+      connections: [{ token: "ethereum|alfajores|YOUR_ROUTER_ADDRESS_2" }],
+    },
+  ];
+}
+```
+
+#### 链配置示例
+
+链元数据也可以根据需要进行配置。这些配置与 CLI 用于其任何部署或发送命令的配置相同（例如，来自[部署指南](/zh/docs/guides/chains/deploy-hyperlane)的配置）。
+
+```typescript
+{
+anvil1: {
+    chainId: 31337,
+    name: 'anvil1',
+    displayName: 'Anvil 1 Local',
+    nativeToken: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    publicRpcUrls: [{ http: 'http://127.0.0.1:8545' }],
+    blocks: {
+      confirmations: 1,
+      reorgPeriod: 0,
+      estimateBlockTime: 10,
+    },
+    logoURI: '/logo.svg'
+  }
+}
+```
+
+### 部署 UI
+
+由于 UI 是一个 Next.js 应用程序，您可以使用您喜欢的托管服务来托管它。我们推荐 [Vercel](https://vercel.com)，它与 Next 配合得很好。[AWS Amplify](https://aws.amazon.com/amplify) 是另一个流行的选择。
+
+1. 注册 [Vercel](https://vercel.com/)
+2. 创建新项目并将其连接到您的 GitHub 仓库
+3. 点击 Deploy！
+
+就是这样！现在您和您的用户可以使用 UI 将代币从抵押链发送到远程链、从一个远程链发送到另一个远程链，以及从任何远程链发送回抵押链。
+
+<Tip>
+如果这些链没有运行生产 relayer (中继器)，您可以在后台运行一个轻量级 CLI relayer (中继器)，仅为您的 HWR 提供服务：
+
+```bash
+hyperlane relayer --symbol TOKEN
+```
+
+这将允许您在本地测试 warp UI 或进行快速演示，而无需在云中运行完整的生产 relayer (中继器)。
+
+</Tip>
+
+### Return gas (返回 gas)
+
+像 HWRs 这样的代币桥接器的一个常见问题是，用户可能将 USDC 等代币转移到新链上，但之后才意识到他们没有原生 gas 代币来移动这些代币到任何地方，包括返回。
+
+为了改善用户体验，您可以通过 faucet (水龙头) 提供一些原生 gas 代币，此外还有 UI 警告。要创建 faucet (水龙头)，请修改 HWR 合约以持有原生代币余额与接收者共享。
+
+<Tip>
+  对于希望进一步自定义 Warp UI 用于自己项目或构建自己的跨链应用程序的开发者，我们鼓励您探索 Typescript SDK。SDK 包含越来越多的实用程序和抽象，用于在不同协议（EVM、Cosmos、Solana）之间与 Hyperlane 交互。
+</Tip>
+
+## 2. Superbridge
+
+[Superbridge](https://superbridge.app) 是一个自定义桥接提供商，他们为数百个 rollups、各种代币和不同生态系统管理桥接前端。
+
+为您的 HWR 获得托管的 Superbridge 是运营您的桥接器的无忧方法。他们最受欢迎的一些 Hyperlane 驱动的桥接器包括 [Renzo 的 ezETH bridge](https://renzo.superbridge.app) 和 [Elixir 的 deUSD bridge](https://elixir.superbridge.app)。通过托管桥接实例，Superbridge 将为您的 HWR 处理托管、主题化、升级和用户支持请求。
+
+他们还构建了一个便捷功能，允许对最近部署的 HWRs 进行自助测试。
+
+### 测试您的 HWR
+
+1. 导航至 [Superbridge Hyperlane Playground](https://hyperlane.superbridge.app)
+2. 点击设置齿轮，然后点击 Customize ![](/images/docs/guides/deploy-warp-ui/superbridge-settings.png)
+3. 粘贴您在部署 HWRs 时生成的 YAML 文件 ![](/images/docs/guides/deploy-warp-ui/superbridge-paste-yaml.png)
+4. 指定的代币和网络现在将可用于桥接。
+
+<Tip>
+  如果在您粘贴 YAML 文件后任何代币或网络丢失，可能是 Superbridge 尚不支持此网络上的 Hyperlane。[联系](mailto:support@superbridge.app) Superbridge 了解添加支持的时间表。
+</Tip>
+
+### 桥接 Widget (小部件)
+
+除了托管 UI 外，Superbridge 还提供桥接 widget (小部件)，因此您可以将桥接器嵌入到自己的网站中。查看他们的 [Widget Demos](https://widget-demos.superbridge.app/) 网站，了解所有可用配置选项的概述。
+
+### 投入生产
+
+要通过 Superbridge 将您的 HWR 投入生产，[联系 Superbridge 团队](mailto:alex@superbridge.app)。他们通常可以在大约一天内启动并运行前端。
