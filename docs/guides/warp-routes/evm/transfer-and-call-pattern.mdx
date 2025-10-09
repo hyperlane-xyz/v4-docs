@@ -6,7 +6,7 @@ title: "Transfer and Call Pattern"
 
 The **Transfer and Call Pattern** enables a contract to both bridge assets via [Hyperlane Warp Route (HWR)](/docs/protocol/warp-routes/warp-routes-overview) and execute an action on the destination chain after the assets arrive. This pattern is useful for cases where an action depends on token balances after bridging.
 
-While HWR handle cross-chain token transfers, this pattern extends their capabilities by using [Interchain Accounts (ICA)](docs/applications/interchain-account) to execute arbitrary logic on the destination chain.
+While HWR handle cross-chain token transfers, this pattern extends their capabilities by using [Interchain Accounts (ICA)](/docs/applications/interchain-account) to execute arbitrary logic on the destination chain.
 
 ### Use Cases
 
@@ -67,7 +67,7 @@ flowchart TB
 ## How It Works
 
 1. Tokens are transferred from the sender to the contract.
-2. An [Interchain Account (ICA)](docs/applications/interchain-account) is derived for the contract on the destination chain.
+2. An [Interchain Account (ICA)](/docs/applications/interchain-account) is derived for the contract on the destination chain.
 3. The HWR transfer is initiated, sending the tokens crosschain to the interchain account.
 4. A remote contract call is executed on the destination chain from the interchain account after the tokens arrive.
 

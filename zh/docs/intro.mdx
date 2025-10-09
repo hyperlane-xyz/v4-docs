@@ -1,0 +1,33 @@
+---
+title: "Hyperlane 介绍"
+---
+
+## 什么是 Hyperlane？
+
+Hyperlane 是一个无需许可的互操作性协议，用于跨不同区块链环境进行跨链通信。它实现了跨不同链的消息传递和资产转移，无需依赖中心化中介或获得任何许可。
+
+### 主要特性
+
+- **无需许可**：任何人都可以[部署 Hyperlane](/zh/docs/guides/chains/deploy-hyperlane)，无论是一层区块链、Rollup 还是应用链，都可以立即开始构建跨链应用程序——无需审批，无需中介。
+- **模块化安全**：Hyperlane 的[跨链安全模块 (ISM)](/zh/docs/protocol/ISM/modular-security) 允许开发者根据应用程序的需求配置、组合和定制其安全模型。
+- **多虚拟机支持**：Hyperlane 支持多个虚拟机 (VM) 的跨链通信，包括 EVM、SVM 和 CosmWasm。
+  - Hyperlane 还支持**跨虚拟机交互**，例如 EVM ↔ SVM 资产转移。
+
+## 开始使用 Hyperlane 构建[​](#start-building-with-hyperlane "Direct link to Start Building with Hyperlane")
+
+通过探索部署指南和主要功能来开始使用 Hyperlane：
+
+- **[使用 Hyperlane Warp 路由 (HWR) 桥接任何代币](/zh/docs/guides/quickstart/deploy-warp-route)**：HWR 让您部署自定义代币桥，使任何原生或 `ERC20` 代币都能跨链转移。
+
+  - 对于 **EVM 链**，使用 **[EVM HWR 指南](/zh/docs/guides/quickstart/deploy-warp-route)**。
+  - 对于 **Solana 虚拟机 (SVM) 链**，参见 **[SVM HWR 指南](/zh/docs/guides/warp-routes/svm/svm-warp-route-guide)**。
+  - 对于 **Cosmos SDK 链**，使用 **[Cosmos SDK 模块](/zh/docs/alt-vm-implementations/cosmos-sdk)**。
+  - 对于 **EVM 和 SVM 之间的跨链转移**，查看 **[EVM-SVM HWR 指南](/zh/docs/guides/warp-routes/evm-svm-warp-route-guide)**。
+
+- **[了解通用消息传递](/zh/docs/reference/messaging/send)**：在链之间发送任意消息。
+
+- **使用[跨链账户](/zh/docs/applications/interchain-account)**：从单个账户在远程链上执行智能合约调用。
+
+- **[将 Hyperlane 部署到您的链](/zh/docs/guides/chains/deploy-hyperlane)**：在新链上设置 Hyperlane。
+
+- **加入我们的生态系统：** [Discord](https://discord.com/invite/hyperlane) | [Twitter](https://x.com/hyperlane)

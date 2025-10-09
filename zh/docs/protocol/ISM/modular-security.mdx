@@ -1,0 +1,45 @@
+---
+title: "ISM 概述"
+---
+
+import IsmDiagram from "/snippets/messaging-isms.mdx";
+
+Hyperlane 由跨链安全模块（ISM）保护。ISM 是智能合约，负责验证在目标链上传递的跨链消息是否存在于源链上。
+
+<IsmDiagram />
+
+## 核心概念
+
+### 默认 ISM 与自定义 ISM
+
+开发者可以使用[邮箱](/zh/docs/protocol/core/mailbox)的默认 ISM，也可以指定自己的应用程序特定 ISM。
+
+应用程序特定的 ISM 可以是：
+
+- **配置的**：使用具有自定义参数的预构建 ISM
+- **组合的**：将多个 ISM 组合在一起，就像安全"积木"
+- **定制的**：创建完全针对特定需求定制的新 ISM
+
+<Note>
+  "默认 ISM" 是指邮箱合约上的预配置安全模块（即多重签名 ISM），当应用程序不指定自己的自定义 ISM 时使用。
+</Note>
+
+#### 配置
+
+Hyperlane 定义了一组[预构建的 ISM](#standard-isms)。开发者可以"开箱即用"地部署这些合约中的任何一个，并使用自己的参数配置它们。
+
+例如，希望对跨链安全拥有更多主权的应用程序开发者可以部署一个[多重签名 ISM](/zh/docs/protocol/ISM/standard-ISMs/multisig-ISM)，使用来自自己社区的验证器进行配置。
+
+#### 组合
+
+ISM 充当"安全积木"。开发者可以将不同的 ISM 混合搭配在一起，编码最适合其需求的安全模型。
+
+例如，希望额外安全性的应用程序开发者可以部署一个[聚合 ISM](/zh/docs/protocol/ISM/standard-ISMs/aggregation-ISM)，该 ISM 需要由使用来自 Hyperlane 社区的验证器配置的[多重签名 ISM](/zh/docs/protocol/ISM/standard-ISMs/multisig-ISM) **和** 验证 [Wormhole](https://wormhole.com/) 验证器集合的法定人数验证了消息的 Wormhole ISM 进行验证。
+
+#### 定制
+
+ISM 是完全可定制的。开发者可以编写自己的 ISM，根据其应用程序的需求进行定制。
+
+例如，应用程序开发者可以构建根据消息内容调整安全模型的 ISM。高价值和不频繁的消息（例如治理）可以通过优先考虑安全性而非延迟和 Gas 成本的安全模型进行验证。较低价值和更频繁的消息可以通过优先考虑延迟和 Gas 成本而非安全性的安全模型进行验证。
+
+<Tip>了解如何[创建您自己的 ISM](/zh/docs/protocol/ISM/custom-ISM)</Tip>

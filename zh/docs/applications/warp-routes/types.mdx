@@ -1,0 +1,124 @@
+---
+title: "HWR 类型"
+---
+
+Hyperlane Warp 路由（HWR）是 Hyperlane 的代币桥接实现，允许通过 Hyperlane 在任何链上无需许可地转移原生、ERC20 和合成（新部署的 ERC20）资产。本文档提供了所有 HWR 类型的详细信息。
+
+| **HWR 类型**             | **描述**                                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------------ |
+| 原生代币 HWR          | 实现原生 Gas 代币（例如 ETH）在链之间的直接转移，无需包装。        |
+| 抵押品支持的 ERC20   | 在源链上锁定 ERC20 代币作为跨链转移的抵押品。                  |
+| 合成 ERC20           | 在目标链上铸造新的 ERC20 代币来代表原始代币。                |
+| Hyperlane Warp 路由 2.0 | 允许从多个抵押品代币获取流动性。                                  |
+| 专用 HWR           | 添加高级功能或与特定用例集成（例如，资金库、法币支持的代币）。 |
+
+_请注意，本文档不包括 ERC721 HWR。_
+
+## 核心 HWR 类型
+
+### 原生代币 HWR
+
+在 `HypNative.sol` 中实现，原生 HWR 处理原生 Gas 代币（例如以太坊或 Arbitrum 上的 ETH，Mantle 上的 MNT）在不同链之间的转移。
+
+#### 特性
+
+- 直接转移原生代币而无需包装。
+- 使用 `msg.value` 作为转移金额。
+- 将多余的 `msg.value` 作为钩子支付处理。
+- 通过 `receive()` 函数支持捐赠。
+
+有关更多详细信息，请参见[实现](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/HypNative.sol)。
+
+### 抵押品支持的 ERC20 HWR
+
+在 `HypERC20Collateral.sol` 中实现，抵押品 HWR 使 ERC20 代币能够在源链上作为抵押品被锁定，然后用于在目标链上铸造合成表示。
+
+#### 特性
+
+- 将现有的 ERC20 代币包装为转移的抵押品。
+- 在源链的合约中锁定代币。
+- 在目标链上释放等值代币。
+- 使用 SafeERC20 进行安全的代币转移。
+
+有关更多详细信息，请参见[实现](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/HypERC20Collateral.sol)。
+
+### 合成 ERC20 HWR
+
+在 `HypERC20.sol` 中实现，合成 HWR 在目标链上铸造代表源链原始代币的新代币。原始代币不会转移，而是保持锁定状态。
+
+#### 特性
+
+- 在所有链中保持一致的总供应量。
+- 支持自定义代币属性（名称、符号、小数位数）。
+- 在目标链上铸造新代币。
+- 当转回时在源链上销毁代币。
+
+有关更多详细信息，请参见[实现](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/HypERC20.sol)。
+
+## 高级功能
+
+### TokenRouter 功能
+
+所有 HWR 都扩展了 `TokenRouter` 合约，该合约为 HWR 代币转移提供核心功能。
+
+#### 特性
+
+1. **消息结构**：使用 [TokenMessage](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/libs/TokenMessage.sol) 库编码和解码代币转移消息。
+2. **转移启动**：`transferRemote` 函数启动跨链转移。
+3. **消息处理**：`_handle` 函数处理传入的转移消息。
+4. **抽象方法**：
+   - `_transferFromSender`：由所有 HWR 实现以处理代币收集。
+   - `_transferTo`：由所有 HWR 实现以处理代币分发。
+
+#### TokenMessage 格式
+
+```solidity
+[32 bytes for recipient][32 bytes for amount][remaining bytes for metadata]
+```
+
+这种标准化格式确保不同 HWR 实现之间的一致处理，同时允许通过元数据进行扩展。
+
+有关更多详细信息，请参见[实现](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/libs/TokenRouter.sol)。
+
+### FastTokenRouter 转移
+
+在 `FastTokenRouter.sol` 中实现，此路由器扩展了 TokenRouter 并通过流动性提供者机制提供更快的代币转移。
+
+#### 特性
+
+- 允许流动性提供者在消息处理之前满足转移请求。
+- 包括 `fastFee` 以激励流动性提供者。
+- 引入 `fastTransferId` 用于唯一转移标识。
+
+有关更多详细信息，请参见[实现](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/libs/FastTokenRouter.sol)。
+
+## 专用 HWR 扩展
+
+### 1. 快速抵押品转移（FastHypERC20Collateral）
+
+- 将快速转移功能与抵押品支持的 ERC20 功能相结合。
+- 有关更多详细信息，请参见[实现](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/extensions/FastHypERC20Collateral.sol)。
+
+### 2. 资金库集成（HypERC4626OwnerCollateral，HypERC4626Collateral）
+
+- 通过与 ERC-4626 资金库集成，允许抵押品产生收益。
+- 有关更多详细信息，请参见[实现](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/extensions/HypERC4626OwnerCollateral.sol)和[重新平衡变体](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/extensions/HypERC4626Collateral.sol)。
+
+### 3. 法币支持的代币（HypFiatToken）
+
+- 专为稳定币和其他法币支持的代币设计，实现特定的铸造和销毁操作。
+- 有关更多详细信息，请参见[实现](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/extensions/HypFiatToken.sol)。
+
+### 4. 缩放原生代币（HypNativeScaled）
+
+- 缩放原生代币值以在具有不同小数位的链之间保持一致性。
+- 有关更多详细信息，请参见[实现](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/extensions/HypNativeScaled.sol)。
+
+### 5. xERC20 集成（HypXERC20 和 HypXERC20Lockbox）
+
+- 启用 xERC20 代币的跨链转移，与锁箱机制集成进行转换。
+- 有关更多详细信息，请参见 [HypXERC20 实现](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/extensions/HypXERC20.sol)和 [HypXERC20Lockbox 实现](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/extensions/HypXERC20Lockbox.sol)。
+
+## 参考资料
+
+有关设置示例和用例，请查看 [HWR：示例用法](./example-usage)。
