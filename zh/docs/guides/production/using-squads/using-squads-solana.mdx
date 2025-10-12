@@ -1,0 +1,32 @@
+---
+title: "在Solana上使用Squads"
+description: "在Solana上的Squads应用中执行和签署交易的分步指南"
+---
+
+对于Solana，可以使用的主要UI：[Squads应用](https://app.squads.so/)
+
+## 步骤
+
+1. 您将从Abacus Works团队收到一个base58交易，这是执行步骤3所必需的。
+
+2. 在Squads中导航到**开发者 → TX构建器**，然后点击**导入base58编码的交易**。
+   ![svm squads](/images/docs/guides/squads/svm-squads1.png)
+
+3. 将从Abacus Works团队收到的base58交易复制到文本框中。
+
+4. 点击下一步，然后点击**添加指令**。
+   ![svm squads](/images/docs/guides/squads/svm-squads2.png)
+
+5. 给它一个清晰的名称，然后点击**运行模拟**。
+   ![svm squads](/images/docs/guides/squads/svm-squads3.png)
+
+<Check> 模拟应该成功！ </Check>
+
+6. 当您准备将其提交到保险库时，点击**发起交易**。
+
+7. 您将被提示使用Ledger通过Phantom签署大约5笔交易。
+
+8. 您将被带到**交易**视图，您可能需要刷新。现在与其他签署者分享交易，让他们确认或拒绝。
+
+9. 您可以模拟交易并点击**查看详情**来查看模拟交易的日志。🎉 您应该看到显示所有权已成功转移的日志！
+   ![svm squads](/images/docs/guides/squads/svm-squads4.png)

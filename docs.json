@@ -13,352 +13,711 @@
   },
   "favicon": "/favicon.svg",
   "navigation": {
-    "tabs": [
+    "languages": [
       {
-        "tab": "Home",
-        "groups": [
+        "language": "en",
+        "tabs": [
           {
-            "group": "Overview",
-            "pages": [
-              "index",
-              "docs/intro",
+            "tab": "Home",
+            "groups": [
               {
-                "group": "Deployments",
+                "group": "Overview",
                 "pages": [
+                  "index",
+                  "docs/intro",
                   {
-                    "group": "Contract Addresses",
+                    "group": "Deployments",
                     "pages": [
-                      "docs/reference/addresses/deployments/mailbox",
-                      "docs/reference/addresses/deployments/interchainGasPaymaster",
-                      "docs/reference/addresses/deployments/storageGasOracle",
-                      "docs/reference/addresses/deployments/merkleTreeHook",
-                      "docs/reference/addresses/deployments/validatorAnnounce",
-                      "docs/reference/addresses/deployments/proxyAdmin",
-                      "docs/reference/addresses/deployments/testRecipient",
-                      "docs/reference/addresses/deployments/interchainAccountRouter"
-                    ]
-                  },
-                  {
-                    "group": "Default ISM Validators",
-                    "pages": [
-                      "docs/reference/addresses/validators/mainnet-default-ism-validators",
-                      "docs/reference/addresses/validators/testnet-default-ism-validators"
-                    ]
-                  },
-                  "docs/reference/domains",
-                  "docs/reference/registries"
-                ]
-              }
-            ]
-          },
-          {
-            "group": "Quickstart",
-            "pages": [
-              "docs/get-started-building",
-              "docs/guides/quickstart/deploy-warp-route",
-              "docs/guides/quickstart/local-testnet-setup"
-            ]
-          },
-          {
-            "group": "Applications",
-            "pages": [
-              {
-                "group": "Hyperlane Warp Routes",
-                "pages": [
-                  "docs/applications/warp-routes/overview",
-                  "docs/applications/warp-routes/interface",
-                  "docs/applications/warp-routes/types",
-                  "docs/applications/warp-routes/example-usage",
-                  "docs/applications/warp-routes/multi-collateral-warp-routes",
-                  "docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing"
-                ]
-              },
-              {
-                "group": "Interchain Accounts",
-                "pages": [
-                  "docs/applications/interchain-account/overview",
-                  "docs/applications/interchain-account/example-usage",
-                  "docs/applications/interchain-account/overrides"
-                ]
-              },
-              {
-                "group": "Use Cases",
-                "pages": [
-                  "docs/applications/use-cases/cross-chain-swaps",
-                  "docs/applications/use-cases/cross-chain-swaps-with-recovery"
-                ]
-              }
-            ]
-          },
-          {
-            "group": "Guides",
-            "pages": [
-              {
-                "group": "Setup Hyperlane on your Chain",
-                "pages": [
-                  "docs/guides/chains/deploy-hyperlane",
-                  "docs/guides/chains/deploy-hyperlane-with-local-agents"
-                ]
-              },
-              {
-                "group": "Hyperlane Warp Routes (HWR)",
-                "pages": [
-                  {
-                    "group": "EVM HWR",
-                    "pages": [
-                      "docs/guides/warp-routes/evm/deploy-yield-routes",
-                      "docs/guides/warp-routes/evm/fast-native-transfer-via-gas-token",
-                      "docs/guides/warp-routes/evm/extending-warp-routes",
-                      "docs/guides/warp-routes/evm/xerc20-warp-route",
-                      "docs/guides/warp-routes/evm/managing-warp-route-limits",
-                      "docs/guides/warp-routes/evm/deploy-multi-collateral-warp-routes",
-                      "docs/guides/warp-routes/evm/transfer-and-call-pattern"
-                    ]
-                  },
-                  {
-                    "group": "SVM HWR",
-                    "pages": [
-                      "docs/guides/warp-routes/svm/svm-warp-route-guide",
                       {
-                        "group": "Using Squads",
+                        "group": "Contract Addresses",
                         "pages": [
-                          "docs/guides/production/using-squads/alt-svm-using-sqauds",
-                          "docs/guides/production/using-squads/using-squads-solana"
+                          "docs/reference/addresses/deployments/mailbox",
+                          "docs/reference/addresses/deployments/interchainGasPaymaster",
+                          "docs/reference/addresses/deployments/storageGasOracle",
+                          "docs/reference/addresses/deployments/merkleTreeHook",
+                          "docs/reference/addresses/deployments/validatorAnnounce",
+                          "docs/reference/addresses/deployments/proxyAdmin",
+                          "docs/reference/addresses/deployments/testRecipient",
+                          "docs/reference/addresses/deployments/interchainAccountRouter"
+                        ]
+                      },
+                      {
+                        "group": "Default ISM Validators",
+                        "pages": [
+                          "docs/reference/addresses/validators/mainnet-default-ism-validators",
+                          "docs/reference/addresses/validators/testnet-default-ism-validators"
+                        ]
+                      },
+                      "docs/reference/domains",
+                      "docs/reference/registries"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "Quickstart",
+                "pages": [
+                  "docs/get-started-building",
+                  "docs/guides/quickstart/deploy-warp-route",
+                  "docs/guides/quickstart/local-testnet-setup"
+                ]
+              },
+              {
+                "group": "Applications",
+                "pages": [
+                  {
+                    "group": "Hyperlane Warp Routes",
+                    "pages": [
+                      "docs/applications/warp-routes/overview",
+                      "docs/applications/warp-routes/interface",
+                      "docs/applications/warp-routes/types",
+                      "docs/applications/warp-routes/example-usage",
+                      "docs/applications/warp-routes/multi-collateral-warp-routes",
+                      "docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing"
+                    ]
+                  },
+                  {
+                    "group": "Interchain Accounts",
+                    "pages": [
+                      "docs/applications/interchain-account/overview",
+                      "docs/applications/interchain-account/example-usage",
+                      "docs/applications/interchain-account/overrides"
+                    ]
+                  },
+                  {
+                    "group": "Use Cases",
+                    "pages": [
+                      "docs/applications/use-cases/cross-chain-swaps",
+                      "docs/applications/use-cases/cross-chain-swaps-with-recovery"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "Guides",
+                "pages": [
+                  {
+                    "group": "Setup Hyperlane on your Chain",
+                    "pages": [
+                      "docs/guides/chains/deploy-hyperlane",
+                      "docs/guides/chains/deploy-hyperlane-with-local-agents"
+                    ]
+                  },
+                  {
+                    "group": "Hyperlane Warp Routes (HWR)",
+                    "pages": [
+                      {
+                        "group": "EVM HWR",
+                        "pages": [
+                          "docs/guides/warp-routes/evm/deploy-yield-routes",
+                          "docs/guides/warp-routes/evm/fast-native-transfer-via-gas-token",
+                          "docs/guides/warp-routes/evm/extending-warp-routes",
+                          "docs/guides/warp-routes/evm/xerc20-warp-route",
+                          "docs/guides/warp-routes/evm/managing-warp-route-limits",
+                          "docs/guides/warp-routes/evm/deploy-multi-collateral-warp-routes",
+                          "docs/guides/warp-routes/evm/transfer-and-call-pattern"
+                        ]
+                      },
+                      {
+                        "group": "SVM HWR",
+                        "pages": [
+                          "docs/guides/warp-routes/svm/svm-warp-route-guide",
+                          {
+                            "group": "Using Squads",
+                            "pages": [
+                              "docs/guides/production/using-squads/alt-svm-using-sqauds",
+                              "docs/guides/production/using-squads/using-squads-solana"
+                            ]
+                          }
+                        ]
+                      },
+                      "docs/guides/warp-routes/evm-svm-warp-route-guide",
+                      "docs/guides/warp-routes/bridge-ui-guide"
+                    ]
+                  },
+                  {
+                    "group": "Go to Production",
+                    "pages": [
+                      "docs/guides/production/prod-overview",
+                      {
+                        "group": "Core Deployment",
+                        "pages": [
+                          "docs/guides/production/core-deployment/update-mailbox-default-ism",
+                          "docs/guides/production/core-deployment/transfer-mailbox-ownership"
+                        ]
+                      },
+                      {
+                        "group": "HWR Deployment",
+                        "pages": [
+                          "docs/guides/production/warp-route-deployment/remove-trusted-relayer",
+                          "docs/guides/production/warp-route-deployment/transfer-warp-route-ownership"
                         ]
                       }
                     ]
                   },
-                  "docs/guides/warp-routes/evm-svm-warp-route-guide",
-                  "docs/guides/warp-routes/bridge-ui-guide"
+                  "docs/guides/create-custom-hook-and-ism",
+                  "docs/guides/deploy-hyperlane-troubleshooting"
                 ]
               },
               {
-                "group": "Go to Production",
+                "group": "Developer Tools",
                 "pages": [
-                  "docs/guides/production/prod-overview",
+                  "docs/reference/developer-tools/cli",
                   {
-                    "group": "Core Deployment",
+                    "group": "Libraries",
                     "pages": [
-                      "docs/guides/production/core-deployment/update-mailbox-default-ism",
-                      "docs/guides/production/core-deployment/transfer-mailbox-ownership"
+                      "docs/reference/developer-tools/libraries/mailbox-client",
+                      "docs/reference/developer-tools/libraries/router",
+                      "docs/reference/developer-tools/libraries/typecasts",
+                      "docs/reference/developer-tools/libraries/message",
+                      "docs/reference/developer-tools/libraries/hookmetadata"
                     ]
                   },
                   {
-                    "group": "HWR Deployment",
+                    "group": "Typescript SDK",
                     "pages": [
-                      "docs/guides/production/warp-route-deployment/remove-trusted-relayer",
-                      "docs/guides/production/warp-route-deployment/transfer-warp-route-ownership"
+                      "docs/reference/developer-tools/typescript-sdk/overview",
+                      "docs/reference/developer-tools/typescript-sdk/transfer-fee-calculation"
                     ]
+                  },
+                  {
+                    "group": "Developer Tips",
+                    "pages": ["docs/reference/developer-tips/unit-testing"]
                   }
                 ]
               },
-              "docs/guides/create-custom-hook-and-ism",
-              "docs/guides/deploy-hyperlane-troubleshooting"
-            ]
-          },
-          {
-            "group": "Developer Tools",
-            "pages": [
-              "docs/reference/developer-tools/cli",
               {
-                "group": "Libraries",
+                "group": "Resources",
                 "pages": [
-                  "docs/reference/developer-tools/libraries/mailbox-client",
-                  "docs/reference/developer-tools/libraries/router",
-                  "docs/reference/developer-tools/libraries/typecasts",
-                  "docs/reference/developer-tools/libraries/message",
-                  "docs/reference/developer-tools/libraries/hookmetadata"
-                ]
-              },
-              {
-                "group": "Typescript SDK",
-                "pages": [
-                  "docs/reference/developer-tools/typescript-sdk/overview",
-                  "docs/reference/developer-tools/typescript-sdk/transfer-fee-calculation"
-                ]
-              },
-              {
-                "group": "Developer Tips",
-                "pages": ["docs/reference/developer-tips/unit-testing"]
-              }
-            ]
-          },
-          {
-            "group": "Resources",
-            "pages": [
-              {
-                "group": "Hyperlane Explorer",
-                "pages": [
-                  "docs/reference/explorer/overview",
-                  "docs/reference/explorer/configuring-pi-chains",
-                  "docs/reference/explorer/graphql-api",
-                  "docs/reference/explorer/explorer-debugging"
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Learn",
-        "groups": [
-          {
-            "group": "Introduction",
-            "pages": ["docs/protocol/protocol-overview"]
-          },
-          {
-            "group": "Protocol",
-            "pages": [
-              {
-                "group": "General Message Passing",
-                "pages": [
-                  "docs/protocol/core/mailbox",
-                  "docs/protocol/core/fees",
-                  "docs/protocol/core/interchain-gas-payment"
-                ]
-              },
-              {
-                "group": "Modular Security",
-                "pages": [
-                  "docs/protocol/ISM/modular-security",
-                  "docs/protocol/ISM/sequence-diagram",
-                  "docs/protocol/ISM/ism-marketplace",
-                  "docs/protocol/ISM/custom-ISM",
                   {
-                    "group": "Standard ISMs",
+                    "group": "Hyperlane Explorer",
                     "pages": [
+                      "docs/reference/explorer/overview",
+                      "docs/reference/explorer/configuring-pi-chains",
+                      "docs/reference/explorer/graphql-api",
+                      "docs/reference/explorer/explorer-debugging"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Learn",
+            "groups": [
+              {
+                "group": "Introduction",
+                "pages": ["docs/protocol/protocol-overview"]
+              },
+              {
+                "group": "Protocol",
+                "pages": [
+                  {
+                    "group": "General Message Passing",
+                    "pages": [
+                      "docs/protocol/core/mailbox",
+                      "docs/protocol/core/fees",
+                      "docs/protocol/core/interchain-gas-payment"
+                    ]
+                  },
+                  {
+                    "group": "Modular Security",
+                    "pages": [
+                      "docs/protocol/ISM/modular-security",
+                      "docs/protocol/ISM/sequence-diagram",
+                      "docs/protocol/ISM/ism-marketplace",
+                      "docs/protocol/ISM/custom-ISM",
                       {
-                        "group": "Multisig ISM",
+                        "group": "Standard ISMs",
                         "pages": [
-                          "docs/protocol/ISM/standard-ISMs/multisig-ISM",
-                          "docs/reference/addresses/validators/latencies"
+                          {
+                            "group": "Multisig ISM",
+                            "pages": [
+                              "docs/protocol/ISM/standard-ISMs/multisig-ISM",
+                              "docs/reference/addresses/validators/latencies"
+                            ]
+                          },
+                          "docs/protocol/ISM/standard-ISMs/routing-ISM",
+                          "docs/protocol/ISM/standard-ISMs/aggregation-ISM",
+                          "docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM"
                         ]
                       },
-                      "docs/protocol/ISM/standard-ISMs/routing-ISM",
-                      "docs/protocol/ISM/standard-ISMs/aggregation-ISM",
-                      "docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM"
+                      {
+                        "group": "Economic Security",
+                        "pages": [
+                          "docs/protocol/ISM/economic-security/overview",
+                          "docs/protocol/ISM/economic-security/hyperlane-avs"
+                        ]
+                      }
                     ]
                   },
                   {
-                    "group": "Economic Security",
+                    "group": "Hyperlane Agents",
                     "pages": [
-                      "docs/protocol/ISM/economic-security/overview",
-                      "docs/protocol/ISM/economic-security/hyperlane-avs"
+                      "docs/protocol/agents/overview",
+                      "docs/protocol/agents/validators",
+                      "docs/protocol/agents/relayer"
                     ]
                   }
                 ]
               },
               {
-                "group": "Hyperlane Agents",
-                "pages": [
-                  "docs/protocol/agents/overview",
-                  "docs/protocol/agents/validators",
-                  "docs/protocol/agents/relayer"
-                ]
-              }
-            ]
-          },
-          {
-            "group": "HYPER and Protocol Economics",
-            "pages": ["docs/protocol-economics/intro"]
-          },
-          {
-            "group": "Reference",
-            "pages": [
+                "group": "HYPER and Protocol Economics",
+                "pages": ["docs/protocol-economics/intro"]
+              },
               {
-                "group": "Send & Receive",
+                "group": "Reference",
                 "pages": [
-                  "docs/reference/messaging/send",
-                  "docs/reference/messaging/receive"
+                  {
+                    "group": "Send & Receive",
+                    "pages": [
+                      "docs/reference/messaging/send",
+                      "docs/reference/messaging/receive"
+                    ]
+                  },
+                  {
+                    "group": "Post-Dispatch Hooks",
+                    "pages": [
+                      "docs/protocol/core/post-dispatch-hooks-overview",
+                      "docs/reference/hooks/interchain-gas",
+                      "docs/reference/hooks/op-stack",
+                      "docs/reference/hooks/arbitrum-L2-to-L1",
+                      "docs/reference/hooks/polygon-pos"
+                    ]
+                  }
                 ]
               },
               {
-                "group": "Post-Dispatch Hooks",
+                "group": "Alt-VM Implementations & Guides",
                 "pages": [
-                  "docs/protocol/core/post-dispatch-hooks-overview",
-                  "docs/reference/hooks/interchain-gas",
-                  "docs/reference/hooks/op-stack",
-                  "docs/reference/hooks/arbitrum-L2-to-L1",
-                  "docs/reference/hooks/polygon-pos"
+                  "docs/alt-vm-implementations/overview",
+                  "docs/alt-vm-implementations/implementation-guide",
+                  "docs/alt-vm-implementations/cosmos-sdk"
+                ]
+              },
+              {
+                "group": "Resources",
+                "pages": [
+                  "docs/resources/message-debugging",
+                  "docs/resources/glossary",
+                  "docs/resources/faq",
+                  "docs/resources/audits"
                 ]
               }
             ]
           },
           {
-            "group": "Alt-VM Implementations & Guides",
-            "pages": [
-              "docs/alt-vm-implementations/overview",
-              "docs/alt-vm-implementations/implementation-guide",
-              "docs/alt-vm-implementations/cosmos-sdk"
-            ]
-          },
-          {
-            "group": "Resources",
-            "pages": [
-              "docs/resources/message-debugging",
-              "docs/resources/glossary",
-              "docs/resources//faq",
-              "docs/resources/audits"
+            "tab": "Agent Operators",
+            "groups": [
+              {
+                "group": "Introduction",
+                "pages": ["docs/operate/overview-agents"]
+              },
+              {
+                "group": "Key Management",
+                "pages": ["docs/operate//set-up-agent-keys"]
+              },
+              {
+                "group": "Validators",
+                "pages": [
+                  "docs/operate/validators/run-validators",
+                  "docs/operate/validators/validator-signatures-aws",
+                  "docs/operate/validators/monitoring-alerting"
+                ]
+              },
+              {
+                "group": "Relayer",
+                "pages": [
+                  "docs/operate/relayer/run-relayer",
+                  {
+                    "group": "HTTP API",
+                    "pages": [
+                      "docs/operate/relayer/api",
+                      "docs/operate/relayer/api/operations/get-operations",
+                      "docs/operate/relayer/api/operations/post-message-retry",
+                      "docs/operate/relayer/api/operations/post-reprocess-message",
+                      "docs/operate/relayer/api/messages/get-messages",
+                      "docs/operate/relayer/api/messages/post-messages",
+                      "docs/operate/relayer/api/merkle-tree-insertions/get-merkle-tree-insertions",
+                      "docs/operate/relayer/api/merkle-tree-insertions/post-merkle-tree-insertions",
+                      "docs/operate/relayer/api/igp/get-igp-rules",
+                      "docs/operate/relayer/api/igp/post-igp-rules",
+                      "docs/operate/relayer/api/igp/delete-igp-rules"
+                    ]
+                  },
+                  "docs/operate/relayer/message-filtering",
+                  "docs/operate/relayer/monitoring-alerting"
+                ]
+              },
+              {
+                "group": "Agent Config",
+                "pages": [
+                  "docs/operate/config/agent-config",
+                  "docs/operate/config/config-reference"
+                ]
+              },
+              {
+                "group": "Guides",
+                "pages": [
+                  "docs/operate/guides/docker-quickstart",
+                  "docs/operate/guides/deploy-with-terraform",
+                  "docs/operate/guides/avs-operator-guide"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "Agent Operators",
-        "groups": [
+        "language": "zh",
+        "tabs": [
           {
-            "group": "Introduction",
-            "pages": ["docs/operate/overview-agents"]
-          },
-          {
-            "group": "Key Management",
-            "pages": ["docs/operate//set-up-agent-keys"]
-          },
-          {
-            "group": "Validators",
-            "pages": [
-              "docs/operate/validators/run-validators",
-              "docs/operate/validators/validator-signatures-aws",
-              "docs/operate/validators/monitoring-alerting"
-            ]
-          },
-          {
-            "group": "Relayer",
-            "pages": [
-              "docs/operate/relayer/run-relayer",
+            "tab": "首页",
+            "groups": [
               {
-                "group": "HTTP API",
+                "group": "概述",
                 "pages": [
-                  "docs/operate/relayer/api",
-                  "docs/operate/relayer/api/operations/get-operations",
-                  "docs/operate/relayer/api/operations/post-message-retry",
-                  "docs/operate/relayer/api/operations/post-reprocess-message",
-                  "docs/operate/relayer/api/messages/get-messages",
-                  "docs/operate/relayer/api/messages/post-messages",
-                  "docs/operate/relayer/api/merkle-tree-insertions/get-merkle-tree-insertions",
-                  "docs/operate/relayer/api/merkle-tree-insertions/post-merkle-tree-insertions",
-                  "docs/operate/relayer/api/igp/get-igp-rules",
-                  "docs/operate/relayer/api/igp/post-igp-rules",
-                  "docs/operate/relayer/api/igp/delete-igp-rules"
+                  "zh/index",
+                  "zh/docs/intro",
+                  {
+                    "group": "部署",
+                    "pages": [
+                      {
+                        "group": "合约地址",
+                        "pages": [
+                          "zh/docs/reference/addresses/deployments/mailbox",
+                          "zh/docs/reference/addresses/deployments/interchainGasPaymaster",
+                          "zh/docs/reference/addresses/deployments/storageGasOracle",
+                          "zh/docs/reference/addresses/deployments/merkleTreeHook",
+                          "zh/docs/reference/addresses/deployments/validatorAnnounce",
+                          "zh/docs/reference/addresses/deployments/proxyAdmin",
+                          "zh/docs/reference/addresses/deployments/testRecipient",
+                          "zh/docs/reference/addresses/deployments/interchainAccountRouter"
+                        ]
+                      },
+                      {
+                        "group": "默认 ISM 验证器",
+                        "pages": [
+                          "zh/docs/reference/addresses/validators/mainnet-default-ism-validators",
+                          "zh/docs/reference/addresses/validators/testnet-default-ism-validators"
+                        ]
+                      },
+                      "zh/docs/reference/domains",
+                      "zh/docs/reference/registries"
+                    ]
+                  }
                 ]
               },
-              "docs/operate/relayer/message-filtering",
-              "docs/operate/relayer/monitoring-alerting"
+              {
+                "group": "快速开始",
+                "pages": [
+                  "zh/docs/get-started-building",
+                  "zh/docs/guides/quickstart/deploy-warp-route",
+                  "zh/docs/guides/quickstart/local-testnet-setup"
+                ]
+              },
+              {
+                "group": "应用",
+                "pages": [
+                  {
+                    "group": "Hyperlane Warp 路由",
+                    "pages": [
+                      "zh/docs/applications/warp-routes/overview",
+                      "zh/docs/applications/warp-routes/interface",
+                      "zh/docs/applications/warp-routes/types",
+                      "zh/docs/applications/warp-routes/example-usage",
+                      "zh/docs/applications/warp-routes/multi-collateral-warp-routes",
+                      "zh/docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing"
+                    ]
+                  },
+                  {
+                    "group": "跨链账户",
+                    "pages": [
+                      "zh/docs/applications/interchain-account/overview",
+                      "zh/docs/applications/interchain-account/example-usage",
+                      "zh/docs/applications/interchain-account/overrides"
+                    ]
+                  },
+                  {
+                    "group": "用例",
+                    "pages": [
+                      "zh/docs/applications/use-cases/cross-chain-swaps",
+                      "zh/docs/applications/use-cases/cross-chain-swaps-with-recovery"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "指南",
+                "pages": [
+                  {
+                    "group": "在您的链上设置 Hyperlane",
+                    "pages": [
+                      "zh/docs/guides/chains/deploy-hyperlane",
+                      "zh/docs/guides/chains/deploy-hyperlane-with-local-agents"
+                    ]
+                  },
+                  {
+                    "group": "Hyperlane Warp 路由 (HWR)",
+                    "pages": [
+                      {
+                        "group": "EVM HWR",
+                        "pages": [
+                          "zh/docs/guides/warp-routes/evm/deploy-yield-routes",
+                          "zh/docs/guides/warp-routes/evm/fast-native-transfer-via-gas-token",
+                          "zh/docs/guides/warp-routes/evm/extending-warp-routes",
+                          "zh/docs/guides/warp-routes/evm/xerc20-warp-route",
+                          "zh/docs/guides/warp-routes/evm/managing-warp-route-limits",
+                          "zh/docs/guides/warp-routes/evm/deploy-multi-collateral-warp-routes",
+                          "zh/docs/guides/warp-routes/evm/transfer-and-call-pattern"
+                        ]
+                      },
+                      {
+                        "group": "SVM HWR",
+                        "pages": [
+                          "zh/docs/guides/warp-routes/svm/svm-warp-route-guide",
+                          {
+                            "group": "使用 Squads",
+                            "pages": [
+                              "zh/docs/guides/production/using-squads/alt-svm-using-sqauds",
+                              "zh/docs/guides/production/using-squads/using-squads-solana"
+                            ]
+                          }
+                        ]
+                      },
+                      "zh/docs/guides/warp-routes/evm-svm-warp-route-guide",
+                      "zh/docs/guides/warp-routes/bridge-ui-guide"
+                    ]
+                  },
+                  {
+                    "group": "进入生产环境",
+                    "pages": [
+                      "zh/docs/guides/production/prod-overview",
+                      {
+                        "group": "核心部署",
+                        "pages": [
+                          "zh/docs/guides/production/core-deployment/update-mailbox-default-ism",
+                          "zh/docs/guides/production/core-deployment/transfer-mailbox-ownership"
+                        ]
+                      },
+                      {
+                        "group": "HWR 部署",
+                        "pages": [
+                          "zh/docs/guides/production/warp-route-deployment/remove-trusted-relayer",
+                          "zh/docs/guides/production/warp-route-deployment/transfer-warp-route-ownership"
+                        ]
+                      }
+                    ]
+                  },
+                  "zh/docs/guides/create-custom-hook-and-ism",
+                  "zh/docs/guides/deploy-hyperlane-troubleshooting"
+                ]
+              },
+              {
+                "group": "开发工具",
+                "pages": [
+                  "zh/docs/reference/developer-tools/cli",
+                  {
+                    "group": "库",
+                    "pages": [
+                      "zh/docs/reference/developer-tools/libraries/mailbox-client",
+                      "zh/docs/reference/developer-tools/libraries/router",
+                      "zh/docs/reference/developer-tools/libraries/typecasts",
+                      "zh/docs/reference/developer-tools/libraries/message",
+                      "zh/docs/reference/developer-tools/libraries/hookmetadata"
+                    ]
+                  },
+                  {
+                    "group": "TypeScript SDK",
+                    "pages": [
+                      "zh/docs/reference/developer-tools/typescript-sdk/overview",
+                      "zh/docs/reference/developer-tools/typescript-sdk/transfer-fee-calculation"
+                    ]
+                  },
+                  {
+                    "group": "开发者提示",
+                    "pages": ["zh/docs/reference/developer-tips/unit-testing"]
+                  }
+                ]
+              },
+              {
+                "group": "资源",
+                "pages": [
+                  {
+                    "group": "Hyperlane 浏览器",
+                    "pages": [
+                      "zh/docs/reference/explorer/overview",
+                      "zh/docs/reference/explorer/configuring-pi-chains",
+                      "zh/docs/reference/explorer/graphql-api",
+                      "zh/docs/reference/explorer/explorer-debugging"
+                    ]
+                  }
+                ]
+              }
             ]
           },
           {
-            "group": "Agent Config",
-            "pages": [
-              "docs/operate/config/agent-config",
-              "docs/operate/config/config-reference"
+            "tab": "学习",
+            "groups": [
+              {
+                "group": "介绍",
+                "pages": ["zh/docs/protocol/protocol-overview"]
+              },
+              {
+                "group": "协议",
+                "pages": [
+                  {
+                    "group": "通用消息传递",
+                    "pages": [
+                      "zh/docs/protocol/core/mailbox",
+                      "zh/docs/protocol/core/fees",
+                      "zh/docs/protocol/core/interchain-gas-payment"
+                    ]
+                  },
+                  {
+                    "group": "模块化安全",
+                    "pages": [
+                      "zh/docs/protocol/ISM/modular-security",
+                      "zh/docs/protocol/ISM/sequence-diagram",
+                      "zh/docs/protocol/ISM/ism-marketplace",
+                      "zh/docs/protocol/ISM/custom-ISM",
+                      {
+                        "group": "标准 ISM",
+                        "pages": [
+                          {
+                            "group": "多重签名 ISM",
+                            "pages": [
+                              "zh/docs/protocol/ISM/standard-ISMs/multisig-ISM",
+                              "zh/docs/reference/addresses/validators/latencies"
+                            ]
+                          },
+                          "zh/docs/protocol/ISM/standard-ISMs/routing-ISM",
+                          "zh/docs/protocol/ISM/standard-ISMs/aggregation-ISM",
+                          "zh/docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM"
+                        ]
+                      },
+                      {
+                        "group": "经济安全",
+                        "pages": [
+                          "zh/docs/protocol/ISM/economic-security/overview",
+                          "zh/docs/protocol/ISM/economic-security/hyperlane-avs"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "group": "Hyperlane 代理",
+                    "pages": [
+                      "zh/docs/protocol/agents/overview",
+                      "zh/docs/protocol/agents/validators",
+                      "zh/docs/protocol/agents/relayer"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "HYPER 和协议经济学",
+                "pages": ["zh/docs/protocol-economics/intro"]
+              },
+              {
+                "group": "参考",
+                "pages": [
+                  {
+                    "group": "发送和接收",
+                    "pages": [
+                      "zh/docs/reference/messaging/send",
+                      "zh/docs/reference/messaging/receive"
+                    ]
+                  },
+                  {
+                    "group": "调度后钩子",
+                    "pages": [
+                      "zh/docs/protocol/core/post-dispatch-hooks-overview",
+                      "zh/docs/reference/hooks/interchain-gas",
+                      "zh/docs/reference/hooks/op-stack",
+                      "zh/docs/reference/hooks/arbitrum-L2-to-L1",
+                      "zh/docs/reference/hooks/polygon-pos"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "替代虚拟机实现和指南",
+                "pages": [
+                  "zh/docs/alt-vm-implementations/overview",
+                  "zh/docs/alt-vm-implementations/implementation-guide",
+                  "zh/docs/alt-vm-implementations/cosmos-sdk"
+                ]
+              },
+              {
+                "group": "资源",
+                "pages": [
+                  "zh/docs/resources/message-debugging",
+                  "zh/docs/resources/glossary",
+                  "zh/docs/resources/faq",
+                  "zh/docs/resources/audits"
+                ]
+              }
             ]
           },
           {
-            "group": "Guides",
-            "pages": [
-              "docs/operate/guides/docker-quickstart",
-              "docs/operate/guides/deploy-with-terraform",
-              "docs/operate/guides/avs-operator-guide"
+            "tab": "代理",
+            "groups": [
+              {
+                "group": "介绍",
+                "pages": ["zh/docs/operate/overview-agents"]
+              },
+              {
+                "group": "密钥管理",
+                "pages": ["zh/docs/operate//set-up-agent-keys"]
+              },
+              {
+                "group": "验证器",
+                "pages": [
+                  "zh/docs/operate/validators/run-validators",
+                  "zh/docs/operate/validators/validator-signatures-aws",
+                  "zh/docs/operate/validators/monitoring-alerting"
+                ]
+              },
+              {
+                "group": "中继器",
+                "pages": [
+                  "zh/docs/operate/relayer/run-relayer",
+                  {
+                    "group": "HTTP API",
+                    "pages": [
+                      "zh/docs/operate/relayer/api",
+                      "zh/docs/operate/relayer/api/operations/get-operations",
+                      "zh/docs/operate/relayer/api/operations/post-message-retry",
+                      "zh/docs/operate/relayer/api/operations/post-reprocess-message",
+                      "zh/docs/operate/relayer/api/messages/get-messages",
+                      "zh/docs/operate/relayer/api/messages/post-messages",
+                      "zh/docs/operate/relayer/api/merkle-tree-insertions/get-merkle-tree-insertions",
+                      "zh/docs/operate/relayer/api/merkle-tree-insertions/post-merkle-tree-insertions",
+                      "zh/docs/operate/relayer/api/igp/get-igp-rules",
+                      "zh/docs/operate/relayer/api/igp/post-igp-rules",
+                      "zh/docs/operate/relayer/api/igp/delete-igp-rules"
+                    ]
+                  },
+                  "zh/docs/operate/relayer/message-filtering",
+                  "zh/docs/operate/relayer/monitoring-alerting"
+                ]
+              },
+              {
+                "group": "代理配置",
+                "pages": [
+                  "zh/docs/operate/config/agent-config",
+                  "zh/docs/operate/config/config-reference"
+                ]
+              },
+              {
+                "group": "指南",
+                "pages": [
+                  "zh/docs/operate/guides/docker-quickstart",
+                  "zh/docs/operate/guides/deploy-with-terraform",
+                  "zh/docs/operate/guides/avs-operator-guide"
+                ]
+              }
             ]
           }
         ]
@@ -421,8 +780,13 @@
     "options": ["copy", "view", "chatgpt", "claude"]
   },
   "seo": {
+    "indexing": "all",
     "metatags": {
-      "og:image": "/images/hero-light.png"
+      "og:image": "/images/hero-light.png",
+      "og:type": "website",
+      "og:site_name": "Hyperlane Docs",
+      "twitter:card": "summary_large_image",
+      "twitter:site": "@hyperlane"
     }
   },
   "redirects": [

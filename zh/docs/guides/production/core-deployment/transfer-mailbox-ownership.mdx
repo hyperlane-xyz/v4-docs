@@ -1,0 +1,109 @@
+---
+title: "转移邮箱所有权"
+description: "学习如何使用Hyperlane CLI更改您的Hyperlane邮箱所有者"
+---
+
+import PrerequisitesPartial from "/snippets/core/prerequisites-config-artifacts.mdx";
+import CoreReadChainPartial from "/snippets/core/core-read-chain.mdx";
+import CoreApplyChainPartial from "/snippets/core/core-apply-chain.mdx";
+
+本指南解释了如何使用Hyperlane CLI更改您的Hyperlane邮箱所有者。当您想要将控制权给予不同的地址时，例如出于安全原因或在更改管理邮箱的人员时，转移所有权是必要的。
+
+作为新所有者，您将完全控制邮箱设置，包括管理钩子、ISM配置和消息处理权限。我们将指导您更新所有者地址、应用更改并确认一切设置正确。
+
+## 使用Hyperlane CLI
+
+转移邮箱所有权的最快方法之一是使用[Hyperlane CLI](https://docs.hyperlane.xyz/docs/reference/developer-tools/cli)。
+
+<PrerequisitesPartial />
+
+<Note>
+  如果您遵循了[如何使用Hyperlane连接您的链](/zh/docs/guides/chains/deploy-hyperlane)指南，您可能已部署了一个所有者设置为单个私钥的邮箱。在生产环境中，建议使用多重签名。
+</Note>
+
+要使用Hyperlane CLI确认，请执行以下命令，将`--chain`设置为部署邮箱的链名称：
+
+<CoreReadChainPartial />
+
+运行`core read`后，您应该看到类似的配置，其中`owner`设置为私钥地址：
+
+```yaml {8}
+defaultHook:
+  address: "0xC2E88eC0aB5FDB9756CD3EFEE40D24120fFa6E57"
+  type: "merkleTreeHook"
+defaultIsm:
+  address: "0xF37395A79f56268FD0040E1f5711e9Af974a545A"
+  relayer: "0xa5558cA30cd9952Ab0e2349C274a3736698bD60e"
+  type: "trustedRelayerIsm"
+owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+requiredHook:
+  address: "0x390d29a822C21F57B163F1173cD43382bd643401"
+  beneficiary: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  maxProtocolFee: "100000000000000000"
+  owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  protocolFee: "0"
+  type: "protocolFee"
+```
+
+输出保存到`CURRENT_DIR/configs/core-config.yaml`。
+
+按照这些步骤使用CLI将现有所有权转移到另一个地址。
+
+## 步骤1：更新配置
+
+在`core-config.yaml`中更新`owner`地址
+
+```diff core-config.yaml
+defaultHook:
+  address: "0xE71AC7A1ccB822423576EfFdb0B74564C49BEcBA"
+  type: merkleTreeHook
+defaultIsm:
+  address: "0x89842f40928f81FC4415b39bfBFC3205eB6161cB"
+  relayer: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  type: trustedRelayerIsm
+- owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
++ owner: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+requiredHook:
+  address: "0x390d29a822C21F57B163F1173cD43382bd643401"
+  beneficiary: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  maxProtocolFee: "100000000000000000"
+  owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  protocolFee: "0"
+  type: protocolFee
+```
+
+## 步骤2：应用
+
+使用CLI执行：
+
+<CoreApplyChainPartial />
+
+您应该看到在链上执行的一批交易，以及指示邮箱已更新的最终消息。
+
+## 步骤3：确认
+
+要使用Hyperlane CLI确认，请执行以下命令：
+
+<CoreReadChainPartial />
+
+运行`core read`后，您应该看到类似的配置，现在已更新的`owner`：
+
+```yaml {8}
+defaultHook:
+  address: "0x67F8c06Fd2915728E9D21451E33FbDFbCcd63c44"
+  type: "merkleTreeHook"
+defaultIsm:
+  address: "0xac7D6df90fa937ADEfE7aD2d4905f0AEa170c467"
+  relayer: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  type: "trustedRelayerIsm"
+owner: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+requiredHook:
+  address: "0x1Cd94b4D9B5f0e3474a6bDB8b9503Ca84F53e548"
+  beneficiary: "0xa5558cA30cd9952Ab0e2349C274a3736698bD60e"
+  maxProtocolFee: "100000000000000000"
+  owner: "0xa5558cA30cd9952Ab0e2349C274a3736698bD60e"
+  protocolFee: "0"
+  type: "protocolFee"
+```
+
+通过完成这些步骤，您已成功转移并验证了邮箱所有权到新地址。

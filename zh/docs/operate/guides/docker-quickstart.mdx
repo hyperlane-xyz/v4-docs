@@ -1,0 +1,163 @@
+---
+title: "使用 Docker Compose 和 AWS 快速入门"
+---
+
+使用 Docker Compose 提供了一种结构化的方式来管理 validator 部署，同时保持原始 Docker 的灵活性。您可以在 [Docker 文档](https://docs.Docker.com/compose/compose-file/)中找到格式的完整规范。
+
+## 1. 设置 validator 密钥
+
+按照[此处](/zh/docs/operate/set-up-agent-keys#2-aws-kms)的指南使用 AWS KMS 创建 agent 密钥。
+
+## 2. 为签名创建 S3 存储桶
+
+按照[此处](/zh/docs/operate/validators/validator-signatures-aws)的指南创建和配置 S3 存储桶供您的 validator 写入签名。
+
+## 3.（仅限 AVS 运营商）注册 Hyperlane AVS[​](#3-avs-operators-only-register-with-hyperlane-avs "直接链接到 3.（仅限 AVS 运营商）注册 Hyperlane AVS")
+
+如果您是 AVS 运营商，请按照[此处](/zh/docs/operate/guides/avs-operator-guide#4-register-your-operator)的指南注册 Hyperlane AVS。
+
+## 4. 设置 validator 环境
+
+### 创建配置文件
+
+在此示例中，我们将运行三条链。
+
+```bash
+mkdir -p ethereum/hyperlane_db optimism/hyperlane_db base/hyperlane_db && \
+touch ethereum/config.json optimism/config.json base/config.json docker-compose.yml .env.ethereum .env.optimism .env.base
+```
+
+### 编辑每个 config.json
+
+您可以在[此处](/zh/docs/operate/config/agent-config)阅读有关 Agent 配置的更多信息。
+
+| 参数                      | 描述                                                                                                                                    |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `customRpcUrls`           | 您希望支持的链的高性能 RPC 端点的逗号分隔列表。我们建议使用付费提供商以避免速率限制。                                                  |
+| `chains.ethereum`         | 在 base/config.json 中应更改为 `chains.base`，在 optimism/config.json 中更改为 `chains.optimism`。                                     |
+| `signer.region`           | 应调整为您的 AWS 区域。                                                                                                                |
+| `validator.region`        | 应调整为您的 AWS 区域。                                                                                                                |
+| `signer.id`               | 应调整为您在步骤 3 中配置的 AWS KMS id，前缀为 `alias/`。                                                                              |
+| `validator.id`            | 应调整为您在步骤 3 中配置的 AWS KMS id，前缀为 `alias/`。                                                                              |
+| `originChainName`         | 应该是您正在验证的链。                                                                                                                  |
+| `checkpointSyncer.bucket` | 应反映 S3 存储桶的名称。                                                                                                                |
+| `checkpointSyncer.folder` | validator 将在存储桶中使用的文件夹名称。您可以为多个 validator 使用相同的存储桶，但要确保每个 validator 的文件夹名称都是唯一的。     |
+| `reorgPeriod`             | 每条链可能不同。[查找 reorgPeriod](https://github.com/hyperlane-xyz/hyperlane-registry/tree/main/chains)。                            |
+
+以下是示例 agent 配置。
+
+```json
+{
+  "chains": {
+    "ethereum": {
+      "customRpcUrls": "https://eth.llamarpc.com,https://rpc.mevblocker.io",
+      "signer": {
+        "region": "us-east-1",
+        "type": "aws",
+        "id": "alias/hyperlane-validator-signer"
+      }
+    }
+  },
+  "originChainName": "ethereum",
+  "db": "/mnt/hyperlane_db",
+  "validator": {
+    "id": "alias/hyperlane-validator",
+    "type": "aws",
+    "region": "us-east-1"
+  },
+  "checkpointSyncer": {
+    "bucket": "hyperlane-validator-signatures",
+    "region": "us-east-1",
+    "type": "s3",
+    "folder": "ethereum"
+  },
+  "reorgPeriod": 14,
+  "metricsPort": "9090"
+}
+```
+
+### 编辑每个 .env 文件
+
+您应该为每条链更改服务名称和 AWS 凭据。
+
+```bash
+AWS_ACCESS_KEY_ID=<您的 AWS 访问密钥 ID>
+AWS_SECRET_ACCESS_KEY=<您的 AWS 秘密访问密钥>
+SERVICE_NAME=ethereum
+```
+
+## 5. 配置 Docker Compose (docker-compose.yml)
+
+```yaml
+x-common-attributes: &common-validator
+  image: gcr.io/abacus-labs-dev/hyperlane-agent:agents-v1.4.0
+  command: ./validator
+  container_name: ${SERVICE_NAME}-validator
+  environment:
+    CONFIG_FILES: /config.json
+    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+  volumes:
+    - ./${SERVICE_NAME}/hyperlane_db:/mnt/hyperlane_db
+    - ./${SERVICE_NAME}/config.json:/config.json
+  restart: unless-stopped
+
+services:
+  ethereum-validator:
+    <<: *common-validator
+    ports:
+      - "9091:9090/tcp"
+
+  optimism-validator:
+    <<: *common-validator
+    ports:
+      - "9092:9090/tcp"
+
+  base-validator:
+    <<: *common-validator
+    ports:
+      - "9093:9090/tcp"
+```
+
+您的目录结构应类似于这样：
+
+```bash
+.
+├── base
+│   ├── config.json
+│   └── hyperlane_db
+├── docker-compose.yml
+├── ethereum
+│   ├── config.json
+│   └── hyperlane_db
+├── .env.base
+├── .env.ethereum
+├── .env.optimism
+└── optimism
+    ├── config.json
+    └── hyperlane_db
+```
+
+## 6. 运行 Hyperlane Validator
+
+启动容器：
+
+记住为您的 validator 地址提供资金，以便 validator 可以宣布。
+
+```bash
+docker compose --env-file .env.ethereum up ethereum-validator -d
+docker compose --env-file .env.optimism up optimism-validator -d
+docker compose --env-file .env.base up base-validator -d
+```
+
+确保没有错误：
+
+```bash
+docker logs -f ethereum-validator
+docker logs -f optimism-validator
+docker logs -f base-validator
+```
+
+<Tip>
+  **运行多个 Validator**：运行多个 validator 可以提高可靠性并确保即使一个失败，消息验证也能继续。在[此处](/zh/docs/operate/validators/run-validators#running-multiple-validators)了解有关设置和要求的更多信息。
+</Tip>

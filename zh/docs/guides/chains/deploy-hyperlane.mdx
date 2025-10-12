@@ -1,0 +1,219 @@
+---
+title: "部署到新链"
+description: "关于如何将您的链与 Hyperlane 连接的分步指南"
+---
+
+<Note>
+
+- 本指南仅适用于 **EVM 兼容** 链。
+- 它将引导您尽快将 Hyperlane 部署到新链以进行测试，而非生产。这包括核心邮箱和 ISM 合约以及用于资产桥接的 Hyperlane Warp 路由合约。
+- 要查看已支持的链，请访问[注册表](https://github.com/hyperlane-xyz/hyperlane-registry/tree/main/chains)。
+- 如果您需要任何帮助，请在 Discord 的 #developers 频道联系我们或[取得联系](https://forms.gle/KyRTaWvo4XNmNvrq6)。
+
+</Note>
+
+## 先决条件
+
+任何人都可以在具备以下构件和资产后开始此快速入门指南：
+
+- 您选择的新的、自定义的或预先存在的网络，包括以下元数据：
+  - 链名称，例如 `ethereum`
+  - 链 ID，例如 `1`
+  - RPC URL，例如 `https://eth.llamarpc.com`
+- 部署者钱包/EOA 私钥或助记词
+  - 此 EOA 应在您的自定义链和您将向其发送消息和从中发送消息的任何链上提供资金
+- [Hyperlane CLI](/zh/docs/reference/developer-tools/cli)
+
+## 1. 注册表
+
+让我们创建一个自定义链配置，运行：
+
+```bash
+hyperlane registry init
+```
+
+按照提示设置您的链元数据。设置区块或 Gas 属性是可选的。
+
+现在，在 `$HOME/.hyperlane/chains` 下，您将找到一个以您的自定义链名称命名的新文件夹，以及该文件夹内名为 `metadata.yaml` 的文件。
+
+<details> 
+  <summary>
+    此配置在 `$HOME/.hyperlane/chains/yourchain/metadata.yaml` 的示例内容
+  </summary>
+
+```yaml
+# yaml-language-server: $schema=../schema.json
+# 您的自定义链的元数据
+
+blockExplorers:
+  - apiUrl: https://explorer.yourchain.com/api
+    apiKey: XXXX # 有助于避免合约验证 API 的速率限制
+    family: etherscan #您使用的浏览器，也支持 routescan 或 blockscout
+    name: Chainscan
+    url: https://explorer.yourchain.com
+blocks:
+  confirmations: 1
+  estimateBlockTime: 1
+  reorgPeriod: 0
+chainId: 171717
+displayName: Chain Name
+domainId: 171717
+isTestnet: true # 可选
+name: yourchain
+nativeToken:
+  name: Ether
+  symbol: ETH
+  decimals: 18
+protocol: ethereum
+rpcUrls:
+  - http: https://hyper-lane-docs.rpc.caldera.xyz/http
+```
+
+</details>
+
+## 2. 核心
+
+接下来，让我们配置、部署和测试您自定义链的核心合约。
+
+### 初始化配置
+
+1. 从您的本地环境，将您已资助的部署者地址的私钥或助记词设置为 `HYP_KEY`。例如：`export HYP_KEY='<YOUR_PRIVATE_KEY>'`
+2. 从同一终端实例，运行：
+
+```bash
+hyperlane core init
+```
+
+<details>
+  <summary>
+    部署配置将写入 `./configs/core-config.yaml`
+  </summary>
+
+```yaml
+# 拥有和管理已部署合约的地址。此账户具有管理员权限。
+owner: "0x16F4898F47c085C41d7Cc6b1dc72B91EA617dcBb"
+
+# 默认跨链安全模块 (ISM) 配置。
+defaultIsm:
+  #`type`: 指定 ISM 的类型。这里，它使用受信任的中继器 ism。
+  type: trustedRelayerIsm
+  #`relayer`: 负责处理跨链消息的中继器地址。
+  relayer: "0x16F4898F47c085C41d7Cc6b1dc72B91EA617dcBb"
+
+defaultHook:
+  # 指定使用默克尔树的钩子配置。
+  type: merkleTreeHook
+
+requiredHook:
+  # 负责管理钩子配置的所有者地址。
+  owner: "0x16F4898F47c085C41d7Cc6b1dc72B91EA617dcBb"
+  # 钩子的类型。这个应用协议费用机制。
+  type: protocolFee
+  # 接收协议费用的地址。
+  beneficiary: "0x16F4898F47c085C41d7Cc6b1dc72B91EA617dcBb"
+  # 协议允许的最大费用，以 wei 为单位。
+  maxProtocolFee: "100000000000000000"
+  # 协议收取的当前费用，为测试目的设置为 0。
+  protocolFee: "0"
+```
+
+</details>
+
+### 部署合约
+
+要部署合约，运行：
+
+```bash
+hyperlane core deploy
+```
+
+使用箭头和回车从主网列表底部选择您的自定义链。所有合约部署需要几分钟时间。
+
+<details>
+  <summary>
+    在 `$HOME/.hyperlane/chains` 下，您将找到一个以您的自定义链名称命名的新文件夹，以及该文件夹内名为 `addresses.yaml` 的文件
+  </summary>
+
+```yaml
+staticMerkleRootMultisigIsmFactory: "0x6906cb4741d3E2322E9f9aA645DfC8AB6F122c47"
+staticMessageIdMultisigIsmFactory: "0x3CE97a32d9C8294691cBd2baC09B078EDa75c429"
+staticAggregationIsmFactory: "0x81f969fDBF48278Ce09685Ce48e03388B6785aF4"
+staticAggregationHookFactory: "0x3d864A3c25F61E3c3A7d02e980453A6E1f0a92A6"
+domainRoutingIsmFactory: "0xC4c01f7B03f0fFa77A0265C600dEF7Ad28BCa5A2"
+proxyAdmin: "0xABb7175d5F123172E7B7Fa467CC9fE4C2FEdb942"
+mailbox: "0x5F58d75A9caDE4e2b191313223978dF049f93b81"
+interchainAccountRouter: "0x43c0745b0dE9Cb780816a24ddE63d79Ca99B5dE8"
+interchainAccountIsm: "0x9C96dC8f4257413225d6B5C47d1afbafc39B269F"
+validatorAnnounce: "0xE3bd39BF92DB385dE6313D6070b035bD934378CB"
+testRecipient: "0xa58462b1943Be1469Ed58db690C78583BA34Fd2E"
+```
+
+</details>
+
+<Warning>
+  - `eth_getStorageAt()` 兼容性：某些链可能不使用 [`eth_getStorageAt()`](https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getstorageat) API。如果您的部署遇到相关问题，请参考[故障排除指南](/zh/docs/guides/deploy-hyperlane-troubleshooting#eth-getstorageat-compatibility)。
+</Warning>
+
+### 发送测试消息
+
+要发送测试消息，运行：
+
+```bash
+hyperlane send message --relay
+```
+
+`--relay` 标志是可选的，将消息传递到目标链。
+
+您也可以在后台运行中继器：
+
+```bash
+hyperlane relayer --chains yourchain,sepolia
+```
+
+<Check>
+  **🎉 恭喜！您已成功向您的自定义链发送了消息**
+</Check>
+
+## 3. Hyperlane Warp 路由
+
+现在您的链上有了 Hyperlane 邮箱和核心合约，是时候在您的链和任何其他 Hyperlane 链之间设置代币桥接了。
+
+继续查看[部署 Hyperlane Warp 路由](/zh/docs/guides/quickstart/deploy-warp-route)文档了解更多详细信息。
+
+## 4. 提交到注册表
+
+如果您希望其他链也能与您连接以及将此投入生产，请提交注册表 PR。
+
+### 确保信息完整
+
+确保您的元数据完整：
+
+- 在文件夹内添加 `logo.svg` 文件
+- 包括标识部署团队的 `Deployer` 信息
+- 如果链是测试网，则表示 `isTestnet` `true`
+- 如果您有 gnosis safe 服务，添加 api url `gnosisSafeTransactionServiceUrl`
+- 检查 yaml 文件并按字母顺序排序
+
+### 提交到 GitHub
+
+首先，导航到您的本地注册表实例并提交更改
+
+```bash
+cd ~/.hyperlane && git init && git add . && git commit
+```
+
+然后，将本地注册表与规范注册表同步
+
+```bash
+git remote add canonical git@github.com:hyperlane-xyz/hyperlane-registry.git
+git pull canonical main --rebase
+```
+
+最后，将本地注册表推送到 github fork 并提交 PR。请在您的 PR 中包含一个[变更集](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md)。
+
+<Check>
+**恭喜！您已成功将 Hyperlane 部署到您的链并将您的工作添加到 Hyperlane 注册表**
+
+感谢您为无需许可互操作性的未来做出贡献 🫡
+
+</Check>

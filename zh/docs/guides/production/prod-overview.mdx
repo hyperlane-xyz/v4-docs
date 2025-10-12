@@ -1,0 +1,48 @@
+---
+title: "概述"
+---
+
+要将您的Hyperlane部署启动到生产环境中，请按照以下步骤设置您的链的核心部署并配置Hyperlane Warp路由(HWR)部署。
+
+### 1. 核心部署
+
+首先，您需要设置并生产化Hyperlane部署的核心组件。
+
+<Columns cols={2}>
+  <Card
+    title="更新邮箱默认ISM"
+    icon="link"
+    href="./core-deployment/update-mailbox-default-ism"
+  >
+    更新与邮箱合约关联的跨链安全模块(ISM)。ISM作为关键安全层，验证链之间的消息。确保默认ISM设置符合您的安全要求。
+  </Card>
+  <Card
+    title="转移邮箱所有权"
+    icon="link"
+    href="./core-deployment/transfer-mailbox-ownership"
+  >
+    将邮箱合约的所有权转移到生产就绪的所有者账户。此步骤通过确保只有受信任的方控制其配置来保护邮箱。
+  </Card>
+</Columns>
+
+### 2. HWR部署
+
+  <Columns cols={2}>
+    <Card
+      title="移除可信中继器"
+      icon="link"
+      href="./warp-route-deployment/remove-trusted-relayer"
+    >
+      移除最初可能配置的任何测试或开发中继器。在生产环境中，确保只使用受信任的安全中继器以防止未授权的消息中继。
+    </Card>
+    <Card
+      title="转移HWR所有权"
+      icon="link"
+      href="./warp-route-deployment/transfer-warp-route-ownership"
+    >
+
+将HWR的所有权转移到指定的生产所有者。此步骤确保只有受信任的方控制关键的HWR设置，如ISM配置、验证器选项和中继器设置。
+
+</Card>
+
+  </Columns>

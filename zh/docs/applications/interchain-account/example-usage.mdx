@@ -1,0 +1,96 @@
+---
+title: "示例用法"
+---
+
+## 编码
+
+当使用 `callRemote` 调用远程合约时，函数参数必须编码为 `Call` 结构体数组。
+
+每个 `Call` 结构体包含：
+
+- `to`：目标合约地址（转换为 bytes32）。
+- `value`：随调用发送的 ETH 或原生代币数量。
+- `data`：函数调用数据，可以使用 abi.encodeCall 编码。
+
+`Call.data` 可以使用 `abi.encodeCall` 函数轻松编码。
+
+```solidity
+struct Call {
+    bytes32 to; // 支持非 EVM 目标
+    uint256 value;
+    bytes data;
+}
+
+interface IUniswapV3Pool {
+    function swap(
+        address recipient,
+        bool zeroForOne,
+        int256 amountSpecified,
+        uint160 sqrtPriceLimitX96,
+        bytes calldata data
+    ) external returns (int256 amount0, int256 amount1);
+}
+
+IUniswapV3Pool pool = IUniswapV3Pool(...);
+Call swapCall = Call({
+    to: TypeCasts.addressToBytes32(address(pool)),
+    data: abi.encodeCall(pool.swap, (...));
+    value: 0,
+});
+uint32 ethereumDomain = 1;
+IInterchainAccountRouter(0xabc...).callRemote(ethereumDomain, [swapCall]);
+```
+
+## TypeScript 用法
+
+我们还提供了 TypeScript 工具，可以轻松部署 ICA 账户并在源链上调用 `callRemote`：
+
+```typescript
+const localChain = 'ethereum';
+const signer = <YOUR_SIGNER>;
+const localRouter: InterchainAccountRouter = InterchainAccountRouter__factory.connect(<ICA_ROUTER_ADDRESS>, signer);
+const recipientAddress = <EXAMPLE_ADDRESS>; // 在此处使用您自己的地址
+const recipientF = new TestRecipient__factory.connect(recipientAddress, signer); // 在此处使用您自己的合约
+const fooMessage = "Test";
+const data = recipient.interface.encodeFunctionData("fooBar", [1, fooMessage]);
+
+const call = {
+  to: recipientAddress,
+  data,
+  value: BigNumber.from("0"),
+};
+const quote = await local["quoteGasPayment(uint32)"](
+  multiProvider.getDomainId(remoteChain)
+);
+
+const config: AccountConfig = {
+  origin: localChain,
+  owner: signer.address,
+  localRouter: localRouter.address,
+};
+await localRouter.callRemote(localChain, remoteChain, [call], config);
+```
+
+## 确定地址
+
+在某些情况下，您可能需要在进行调用之前计算远程链上的 ICA 地址。例如，如果您的 ICA 在执行交易之前需要资金，您可以检索其地址并提前向其转移资产。有关更多信息，请参见[转移和调用模式](/zh/docs/guides/warp-routes/evm/transfer-and-call-pattern)部分。
+
+`getRemoteInterchainAccount` 函数可用于获取给定目标链和所有者地址的 ICA 地址。
+
+下面包含了一个合约预计算其自己的跨链账户地址的示例。
+
+```solidity
+address myInterchainAccount = IInterchainAccountRouter(...).getRemoteInterchainAccount(
+    destination,
+    address(this)
+);
+```
+
+如果您使用[#overrides](./overrides)来指定远程链，请在计算远程 ICA 地址时传递这些覆盖设置。
+
+```solidity
+address myRemoteIca = IInterchainAccountRouter(...).getRemoteInterchainAccount(
+    address(this),
+    remoteRouterOverride,
+    remoteIsmOverride
+);

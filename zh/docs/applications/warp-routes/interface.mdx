@@ -1,0 +1,26 @@
+---
+title: "HWR 接口"
+---
+
+Hyperlane Warp 路由（HWR）利用 `IHypERC20` 代币接口。HWR 代币实现此接口，该接口扩展了标准的 `ERC20` 接口。
+
+```solidity
+/// @notice ERC20 接口的跨链扩展
+interface IHypERC20 is IERC20 {
+    /**
+     * @notice 将代币转移到远程链上的指定接收者
+     * @param _destination 目标链的域 ID
+     * @param _recipient 接收者的地址，编码为 bytes32
+     * @param _amount 要转移的代币数量
+     */
+    function transferRemote(
+        uint32 _destination,
+        bytes32 _recipient,
+        uint256 _amount
+    ) external payable;
+}
+```
+
+## 部署您的 HWR
+
+准备部署您的 HWR？这很简单，请遵循[分步指南](/zh/docs/guides/quickstart/deploy-warp-route)。

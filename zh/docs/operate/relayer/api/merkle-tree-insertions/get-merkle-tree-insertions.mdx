@@ -1,0 +1,67 @@
+---
+title: '获取 Merkle Tree 插入'
+api: 'GET http://localhost:9090/merkle_tree_insertions'
+---
+
+获取 relayer 数据库中的 merkle tree 插入。
+
+<Expandable title="查询参数">
+  <ParamField query="domain_id" type="number" required>
+    链 domain ID (u32)
+  </ParamField>
+  <ParamField query="leaf_index_start" type="number" required>
+    起始叶子索引（包含）(u32)
+  </ParamField>
+  <ParamField query="leaf_index_end" type="number" required>
+    结束叶子索引（包含）(u32)
+  </ParamField>
+</Expandable>
+
+<Expandable title="响应正文">
+  <ResponseField name="merkle_tree_insertions" type="MerkleTreeInsertion[]">
+    merkle tree 插入数据数组
+    <Expandable title="merkle_tree_insertions">
+      <ParamField query="insertion_block_number" type="u64" required>
+        merkle tree 插入的区块号
+      </ParamField>
+      <ParamField query="leaf_index" type="u32" required>
+        叶子索引
+      </ParamField>
+      <ParamField query="message_id" type="string" required>
+        消息 ID
+      </ParamField>
+    </Expandable>
+  </ResponseField>
+</Expandable>
+
+<ResponseExample>
+```json Response
+{
+  "merkle_tree_insertions": [
+    {
+      "insertion_block_number": null,
+      "leaf_index": 100,
+      "message_id": "0xabc..."
+    }
+  ]
+}
+```
+</ResponseExample>
+
+<RequestExample>
+```bash curl
+curl localhost:9090/merkle_tree_insertions?domain_id=1&leaf_index_start=100&leaf_index_end=200
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/merkle_tree_insertions');
+const insertions = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get('http://localhost:9090/merkle_tree_insertions')
+insertions = response.json()
+```
+</RequestExample>
