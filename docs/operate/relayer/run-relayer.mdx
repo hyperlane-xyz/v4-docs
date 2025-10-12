@@ -83,12 +83,12 @@ Hyperlane Validators and Relayers can use **multiple RPC URLs** to improve relia
   </Tab>
   
   <Tab title="SVM Chains">
-    SVM-based chains support configuring multiple RPC endpoints, but **only a single RPC is used**.
+    SVM-based chains support configuring multiple RPC endpoints. Agents automatically use **fallback mode**: if the current RPC fails or times out, they switch to the next available endpoint.
 
     - **Configure RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
 
     <Warning>
-      For **SVM chains**, only a **single RPC URL** is used. There is no fallback or quorum-based selection mechanism.
+      For **SVM chains**, only **Fallback mode** is supported. SVM agents will automatically switch between configured RPC URLs when encountering errors or timeouts.
     </Warning>
 
     <Warning>

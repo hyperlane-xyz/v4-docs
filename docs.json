@@ -794,5 +794,10 @@
       "source": "/docs/applications/interchain-account",
       "destination": "/docs/applications/interchain-account/overview"
     }
-  ]
+  ],
+  "integrations": {
+    "plausible": {
+      "domain": "docs.hyperlane.xyz"
+    }
+  }
 }
