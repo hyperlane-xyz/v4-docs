@@ -429,6 +429,22 @@
     {
       "source": "/docs/applications/interchain-account",
       "destination": "/docs/applications/interchain-account/overview"
+    },
+    {
+      "source": "/docs/resources/docs/applications/interchain-account",
+      "destination": "/docs/applications/interchain-account/overview"
+    },
+    {
+      "source": "/docs/reference/applications/warp-routes",
+      "destination": "/docs/applications/warp-routes/overview"
+    },
+    {
+      "source": "/docs/deploy-hyperlane",
+      "destination": "/docs/guides/chains/deploy-hyperlane"
+    },
+    {
+      "source": "/docs/your-first-message",
+      "destination": "/docs/guides/quickstart/local-testnet-setup"
     }
   ],
   "integrations": {
