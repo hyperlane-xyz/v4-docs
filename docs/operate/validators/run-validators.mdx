@@ -87,18 +87,20 @@ Cosmos-based chains require both **RPC and gRPC endpoints** for proper operation
 - **Fallback Mechanism:** Cosmos agents always use **fallback mode**.
 
 </Tab>
-<Tab title="SVM Chains">
+  <Tab title="SVM Chains">
+    SVM-based chains support configuring multiple RPC endpoints. Agents automatically use **fallback mode**: if the current RPC fails or times out, they switch to the next available endpoint.
 
-SVM-based chains support configuring multiple RPC endpoints, but **only a single RPC is used**.
+    - **Configure RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
 
-- **Configure RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
+    <Warning>
+      For **SVM chains**, only **Fallback mode** is supported. SVM agents will automatically switch between configured RPC URLs when encountering errors or timeouts.
+    </Warning>
 
-<Warning>
-  For **SVM chains**, only a **single RPC URL** is used. There is no fallback or
-  quorum-based selection mechanism.
-</Warning>
+    <Warning>
+      **SVM Relayer Funding**: When relaying messages to SVM chains, make sure your Relayer key has sufficient funds on the destination chain. The Relayer performs view calls via simulations that require the sender to have funds for successful simulation, even for read operations. Without sufficient funds, you may encounter `No return data from InboxGetRecipientIsm instruction` errors.
+    </Warning>
 
-</Tab>
+  </Tab>
 </Tabs>
 
 #### Configuration Settings
