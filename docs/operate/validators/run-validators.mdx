@@ -68,25 +68,23 @@ As a recap - before running a production Validator you need to have:
 Hyperlane Validators and Relayers can use **multiple RPC URLs** to improve reliability and redundancy. The setup varies based on the chain type.
 
 <Tabs>
-<Tab title="EVM Chains">
+  <Tab title="EVM Chains">
+    EVM-based chains support configuring multiple RPC endpoints for redundancy and can specify how they are used.
 
-EVM-based chains support configuring multiple RPC endpoints for redundancy and can specify how they are used.
+    - **Configure multiple RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
+    - **RPC Selection Mode ([`rpcConsensusType`](/docs/operate/config/config-reference#chains-<chain-name>-rpcconsensustype))**:
+      - **Fallback**: The agent tries the first URL and switches to the next if needed.
+      - **Quorum**: Requires a majority of the URLs to agree with the exception of submitting transactions; it will automatically coordinate the "latest" block if not specified to reduce sync errors.
 
-- **Configure multiple RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
-- **RPC Selection Mode ([`rpcConsensusType`](/docs/operate/config/config-reference#chains-<chain-name>-rpcconsensustype))**:
-  - **Fallback**: The agent tries the first URL and switches to the next if needed.
-  - **Quorum**: Requires a majority of the URLs to agree with the exception of submitting transactions; it will automatically coordinate the "latest" block if not specified to reduce sync errors.
+  </Tab>
+  <Tab title="Cosmos Chains">
+    Cosmos-based chains require both **RPC and gRPC endpoints** for proper operation.
 
-</Tab>
-<Tab title="Cosmos Chains">
+    - **Configure multiple RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
+    - **Configure gRPC endpoints:** Use [`customGrpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
+    - **Fallback Mechanism:** Cosmos agents always use **fallback mode**.
 
-Cosmos-based chains require both **RPC and gRPC endpoints** for proper operation.
-
-- **Configure multiple RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
-- **Configure gRPC endpoints:** Use [`customGrpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
-- **Fallback Mechanism:** Cosmos agents always use **fallback mode**.
-
-</Tab>
+  </Tab>
   <Tab title="SVM Chains">
     SVM-based chains support configuring multiple RPC endpoints. Agents automatically use **fallback mode**: if the current RPC fails or times out, they switch to the next available endpoint.
 
