@@ -1783,42 +1783,43 @@
     protobufjs "^7.2.5"
     yargs "^17.7.2"
 
-"@hyperlane-xyz/core@9.0.10":
-  version "9.0.10"
-  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/core/-/core-9.0.10.tgz#3aa8f877f217bcf7a2f10bd91abeaf31b58d3d4b"
-  integrity sha512-AqoFMuETUy5bKkIA7qAbquESvx9qARrKc3C9Zo+lNWOMIduKrpXZEtbMM03Y+LmPsJmAr5EXcrSuTbxmGDyvng==
+"@hyperlane-xyz/core@9.0.15":
+  version "9.0.15"
+  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/core/-/core-9.0.15.tgz#da35b47edf8a171f92a178b75aca3db2d4b5bc65"
+  integrity sha512-O7q+sWkM+vdehbXCloaDjA71Svbb4Za+SGWHfuwuIRV9GdGSPRRXe+xSWUKXE6lhmTOycIzEBGOya+d1hMR2zQ==
   dependencies:
     "@arbitrum/nitro-contracts" "^1.2.1"
     "@chainlink/contracts-ccip" "^1.5.0"
     "@eth-optimism/contracts" "^0.6.0"
-    "@hyperlane-xyz/utils" "18.3.0"
+    "@hyperlane-xyz/utils" "19.3.0"
     "@matterlabs/hardhat-zksync-solc" "1.2.5"
     "@matterlabs/hardhat-zksync-verify" "1.7.1"
     "@openzeppelin/contracts" "^4.9.3"
     "@openzeppelin/contracts-upgradeable" "^4.9.3"
 
-"@hyperlane-xyz/cosmos-sdk@18.3.0":
-  version "18.3.0"
-  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/cosmos-sdk/-/cosmos-sdk-18.3.0.tgz#f87c77fa9e6f831776d7cb6d0701b2bfa7b4706d"
-  integrity sha512-qdWFLZzHIdmpyrt+b7yBwmicrtSGvk1IaA1Un2CZ2mmWRNMEXEIsBcoTQ8saZmsmOMS44sXe+R/10TJ5isPAgg==
+"@hyperlane-xyz/cosmos-sdk@19.3.0":
+  version "19.3.0"
+  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/cosmos-sdk/-/cosmos-sdk-19.3.0.tgz#9287e8c1fddecfb84698846cf1c4bca271c7170c"
+  integrity sha512-8Aae3U3lM/H3MV0cYWZFX42EuKn0a0p4LCGMjix5b5SKCE7s9xB4nwVSIOz8VW2qLOmeQ3pTH4oGZuDYkCfJVA==
   dependencies:
     "@cosmjs/stargate" "^0.32.4"
-    "@hyperlane-xyz/cosmos-types" "18.3.0"
+    "@hyperlane-xyz/cosmos-types" "19.3.0"
+    "@hyperlane-xyz/utils" "19.3.0"
 
-"@hyperlane-xyz/cosmos-types@18.3.0":
-  version "18.3.0"
-  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/cosmos-types/-/cosmos-types-18.3.0.tgz#5e4ff3e9aff82f2ba9fcb86b67965d04afb2bd7e"
-  integrity sha512-IE6fAkCRag/fUjRX+67iGYYFPXw+80dU9YTrAG83EU7M2UCVtWVl9pLlsjevGvdVCOGHrj+XB9Tf46h7eCuvhQ==
+"@hyperlane-xyz/cosmos-types@19.3.0":
+  version "19.3.0"
+  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/cosmos-types/-/cosmos-types-19.3.0.tgz#a914630f2087d97f792177ab2c27fcddf595a15d"
+  integrity sha512-RPwsjNiQnimR6SK78/TSEmJiFNVGOZjtr+LNCa+bIz8UMmHAoEzrJMMq6HJB6Mt2ZW18Eh78i4DgoKh2RYpx9g==
   dependencies:
     long "^5.2.4"
     protobufjs "^7.4.0"
 
-"@hyperlane-xyz/radix-sdk@18.3.0":
-  version "18.3.0"
-  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/radix-sdk/-/radix-sdk-18.3.0.tgz#c5a3f7ec4abb6b66b25cdbcd5dc29bba57d33f15"
-  integrity sha512-uOMnefByHxKrqq5W9X6/DnMCnibWrnZfp3CIUmiGQulEtZQ6X7jiivbJtS6KMzc9kt0tzEsiXltgAN15qDtjxg==
+"@hyperlane-xyz/radix-sdk@19.3.0":
+  version "19.3.0"
+  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/radix-sdk/-/radix-sdk-19.3.0.tgz#33a3ccab4e52f0c2d73894748e196f3465a28190"
+  integrity sha512-FxWO17ButRuZx5du688tDTTbccRxGGyJ6SVR8V1fK27EmRNQwckp2qLC+eIyoP/h1a54sYSp1k3WeQB8p2UW7A==
   dependencies:
-    "@hyperlane-xyz/utils" "18.3.0"
+    "@hyperlane-xyz/utils" "19.3.0"
     "@radixdlt/babylon-core-api-sdk" "^1.3.0"
     "@radixdlt/babylon-gateway-api-sdk" "^1.10.1"
     "@radixdlt/radix-engine-toolkit" "^1.0.5"
@@ -1833,10 +1834,10 @@
     yaml "2.4.5"
     zod "^3.21.2"
 
-"@hyperlane-xyz/sdk@18.3.0":
-  version "18.3.0"
-  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/sdk/-/sdk-18.3.0.tgz#59ea76434bb4d1b06cb1ba2671e31228d7a60f3e"
-  integrity sha512-rTG4Nd3Qpz0LlC1+7UmlDXlLIdfmvl6xoS3qyesfKWYEnlZG7fzG136k6aXUQ4/6z++Xxo/rNTHb16+k8kpheQ==
+"@hyperlane-xyz/sdk@19.3.0":
+  version "19.3.0"
+  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/sdk/-/sdk-19.3.0.tgz#249213c5eaee52f2fbfc6d919391d1eac1c7e9d9"
+  integrity sha512-lLEssXlcCamwt7x1+ImQBzghEIyf+3flZF28EnBnyTwFC2Wu7clcL/MeiZmSZSQ8fhYthHSyxycvAN/olDSeBQ==
   dependencies:
     "@arbitrum/sdk" "^4.0.0"
     "@aws-sdk/client-s3" "^3.577.0"
@@ -1844,11 +1845,11 @@
     "@cosmjs/cosmwasm-stargate" "^0.32.4"
     "@cosmjs/proto-signing" "^0.32.4"
     "@cosmjs/stargate" "^0.32.4"
-    "@hyperlane-xyz/core" "9.0.10"
-    "@hyperlane-xyz/cosmos-sdk" "18.3.0"
-    "@hyperlane-xyz/radix-sdk" "18.3.0"
-    "@hyperlane-xyz/starknet-core" "18.3.0"
-    "@hyperlane-xyz/utils" "18.3.0"
+    "@hyperlane-xyz/core" "9.0.15"
+    "@hyperlane-xyz/cosmos-sdk" "19.3.0"
+    "@hyperlane-xyz/radix-sdk" "19.3.0"
+    "@hyperlane-xyz/starknet-core" "19.3.0"
+    "@hyperlane-xyz/utils" "19.3.0"
     "@safe-global/api-kit" "1.3.0"
     "@safe-global/protocol-kit" "1.3.0"
     "@safe-global/safe-core-sdk-types" "2.3.0"
@@ -1866,17 +1867,17 @@
     zksync-ethers "^5.10.0"
     zod "^3.21.2"
 
-"@hyperlane-xyz/starknet-core@18.3.0":
-  version "18.3.0"
-  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/starknet-core/-/starknet-core-18.3.0.tgz#eebc8e526f44afb71d6f0328d51119cc2df5ff79"
-  integrity sha512-+Q5JBpKbSsp/9uM4QpLymrAVR+gm/WkW7nA/k5XF+FWrTeLRtWz48NPS8WueebUT3pFDYaO0D9Xg/zRolXdpcQ==
+"@hyperlane-xyz/starknet-core@19.3.0":
+  version "19.3.0"
+  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/starknet-core/-/starknet-core-19.3.0.tgz#d8fe30f0a66d114aa1a448e6da8b9dd3d7f9b894"
+  integrity sha512-yo1Mq+5uH2DWNnrz0WFaYbrQQ+p1M9DXtRES3InoV1PTzLtkGmVLwv6ps8784DOJ7WJF79REIUy3xchN0RSbvw==
   dependencies:
     starknet "^7.4.0"
 
-"@hyperlane-xyz/utils@18.3.0":
-  version "18.3.0"
-  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/utils/-/utils-18.3.0.tgz#f46bd6ab808ff352d58ebfa38982aecf70ca167c"
-  integrity sha512-M3swiYfCdGy5Q3otXObcXk9kj0mtFLN0+8d+A0lVQMkEOjlaeyqCC9VqEmHLP4TYCcc/VWepHtbVmxfVr0bktA==
+"@hyperlane-xyz/utils@19.3.0":
+  version "19.3.0"
+  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/utils/-/utils-19.3.0.tgz#0b17bc885d8a0aaa287ad729ae4e313b607231dd"
+  integrity sha512-mHv8kUHLEiQHQ2V5Tz/ijwsvdOXfUpMWHEpMr/ao1HwdZ8dwZjXQMbwnYIvsVVNYHJD3/vbumP6T5z0QBohf5Q==
   dependencies:
     "@cosmjs/encoding" "^0.32.4"
     "@solana/web3.js" "^1.95.4"
