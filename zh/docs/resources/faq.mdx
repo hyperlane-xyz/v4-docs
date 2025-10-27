@@ -1,0 +1,111 @@
+---
+title: "常见问题"
+---
+
+## 一般问题
+
+**什么是 Hyperlane？**
+
+Hyperlane 是为模块化区块链栈构建的第一个通用且无需许可的互操作性框架。任何人都可以[部署 Hyperlane](/zh/docs/guides/chains/deploy-hyperlane) 到任何区块链环境，无论是一层、rollup 还是应用链，允许该链与已部署 Hyperlane 的任何其他链无缝通信。
+
+**使用 Hyperlane 对区块链开发者有什么好处？**
+
+Hyperlane 为区块链和 dapp 开发者都提供了好处。
+
+- 对于区块链开发者，Hyperlane 部署扩展了对用户、资产和来自已部署 Hyperlane 的其他连接区块链的宝贵状态的可访问性。
+- 对于 dapp 开发者，Hyperlane 提供跨多个区块链的无缝连接，允许开发者创建跨链网络效应和流动性，用户可以从其首选链与应用程序交互。
+
+**什么是 Abacus Works？**
+
+Abacus Works 是致力于 Hyperlane 的法律实体名称。您可能在较旧的帖子和代码库中遇到一些对 Abacus 的引用。Hyperlane 在 2022 年秋季从 Abacus 更名为 Hyperlane。
+
+**我可以用 Hyperlane 构建什么？**
+
+Hyperlane 的[消息传递接口](/zh/docs/protocol/core/mailbox)允许 dapp 开发者在不同链上的智能合约之间发送任意字节。这可以用来创建跨链应用程序，即跨越多个链的 dapp。
+
+为了灵感，看看一些构建在 Hyperlane 之上的预构建应用程序，包括：
+
+- **Hyperlane Warp 路由 (HWR)**：让用户将代币从一条链移动到另一条链。
+- **跨链账户**：让用户进行跨链函数调用。
+- **跨链查询**：让用户进行跨链视图调用。
+
+**我是开发者。我的团队如何使用 Hyperlane 构建？** 如果您正在阅读此 FAQ，您已经找到了文档，这是一个很好的开始地方。也就是说，我们知道在实施过程中会出现问题，我们很乐意在您的路上帮助您。Hyperlane 社区在 [Discord](https://discord.gg/hyperlane) 中定期活跃。来自开发者的反馈直接影响产品路线图。
+
+## 技术问题
+
+### 消息传递
+
+**当我在 Hyperlane 上发送消息时会发生什么？**
+
+有关更多详细信息，请参见[发送](/zh/docs/reference/messaging/send)和[接收](/zh/docs/reference/messaging/receive)页面。总结：
+
+1. 应用程序在源链上调用 `dispatch()` 函数，将消息插入邮箱的默克尔树中。
+2. Hyperlane 中继器观察调度的消息并为接收者的跨链安全模块（ISM）组装元数据。
+3. 中继器通过调用 `Mailbox.process()` 将消息传递给接收者。
+4. 邮箱使用接收者的 ISM 验证消息并调用 `recipient.handle()` 传递消息。
+
+**如何查看我发送的消息状态？**
+
+将地址或交易哈希粘贴到 [Hyperlane 消息浏览器](https://explorer.hyperlane.xyz/) 的搜索栏中，查看消息状态和历史的详细信息。
+
+如果消息因某种原因发送失败，将有错误消息指示可能出了什么问题。有关更多信息，请参见[浏览器调试](/zh/docs/reference/explorer/explorer-debugging)。
+
+**使用 Hyperlane 发送跨链消息意味着实时聊天和文本吗？**
+
+不，Hyperlane 是一个旨在允许不同链上的智能合约相互交互的协议。当我们提到消息传递时，它是智能合约之间发送任意字节，而不是点对点或文本消息传递。
+
+对于聊天用例，请考虑 [XMTP](https://xmtp.org/)、[Push](https://push.org/) 或 [Orbis](https://useorbis.com/)。
+
+**Hyperlane 是代币桥吗？**
+
+不完全是。Hyperlane 是一个通用消息传递（GMP）协议，允许区块链之间的通信。代币桥只是可以构建在 Hyperlane 之上的众多应用程序类型之一！
+
+### 部署
+
+**Hyperlane 部署在哪里？**
+
+已知部署的列表可以在[合约地址](/zh/docs/reference/addresses/deployments/mailbox)页面找到。
+
+### 高级主题
+
+**Hyperlane 如何保护？**
+
+Hyperlane 由其模块化安全栈保护，具有跨链安全模块（ISM）功能。开发者可以配置各种预构建的 ISM，将它们相互组合，甚至根据其应用程序的需求创建自定义 ISM。模块化的安全方法确保 Hyperlane 将继续跟上安全模型的最新行业进展。
+
+**Hyperlane 有多少验证器，谁运营它们？**
+
+验证器的数量取决于跨链安全模块（ISM）配置。默认 ISM 使用特定的验证器集，您可以在[这里](/zh/docs/reference/addresses/validators/mainnet-default-ism-validators)查看阈值、运营商和地址等详细信息。
+
+**我们如何确保消息完整性？**
+
+Hyperlane 的消息安全由跨链安全模块（ISM）配置驱动。默认情况下，消息依赖于默认 ISM 的验证器集，需要验证器的法定人数签署以确保安全。在验证器泄露的不太可能事件中，消息的安全性可能受到影响。但是，开发者有灵活性配置自己的 ISM，使他们能够定制和加强安全模型以适应其应用程序的需求。
+
+**源链是否接收交易是否在目标链上执行的确认？**
+
+目前，源链不会自动接收来自目标链的执行确认。但是，通过在目标链上自定义 `handle` 函数可以添加此功能。有关更多信息，请参考 [handle 函数](/zh/docs/reference/messaging/receive#handle)。
+
+**为什么出站消息 ID 存储在默克尔树中？**
+
+出站消息 ID 存储在默克尔树中以有效跟踪和验证消息。这种机制确保验证器可以准确检测和签署创建的新消息。
+
+**`为什么验证器调用 MerkleTreeHook.latestCheckpoint()？`**
+
+验证器使用 [`MerkleTreeHook.latestCheckpoint()`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/5e9b8ba7ab0f54e92b3cf32806fae95eb23ad0f8/solidity/contracts/hooks/MerkleTreeHook.sol#L49) 函数来确定何时需要索引新交易。这种轮询机制确保验证器可以立即开始签署新消息，而无需回填整个树。
+
+## 社区和贡献[​](#community--contributions)
+
+**我如何加入 Hyperlane 社区？**
+
+您可以加入 [Discord](https://discord.gg/hyperlane) 或在 [Twitter](https://x.com/hyperlane) 上关注 Hyperlane，在那里您可以找到不断增长的开发者和爱好者社区，讨论跨链未来。
+
+**我有兴趣为 Hyperlane 工作。我在哪里可以看到职位空缺？**
+
+在[这里](https://jobs.lever.co/Hyperlane)查看我们的开放职位。
+
+**我如何贡献改进此文档？**
+
+您可以通过[文档仓库](https://github.com/hyperlane-xyz/v3-docs)直接提交 PR 来编辑此文档。
+
+**我在哪里可以获得支持或询问有关 Hyperlane 的问题？**
+
+您可以在我们的 [Hyperlane Discord](https://discord.com/invite/hyperlane) 上获得支持和提问，社区和团队在那里活跃并准备提供帮助。

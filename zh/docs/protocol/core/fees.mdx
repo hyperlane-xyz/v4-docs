@@ -1,0 +1,44 @@
+---
+title: "转移费用"
+description: "了解 Hyperlane 跨链转移的源费用和跨链费用"
+---
+
+## 费用估算
+
+当使用 Hyperlane GMP 发送跨链转移时，需要两种费用：
+
+1. **源费用** – 在源链上提交交易的 Gas
+2. [**跨链费用**](/zh/docs/protocol/core/interchain-gas-payment) – 在目标链上传递和执行消息的 Gas，包括中继器费用
+
+两种费用都在源链上预先支付给指定的 IGP。
+
+这种费用结构确保：
+
+1. 用户有足够的资金支付源交易
+2. 跨链消息将有足够的 Gas 在目标链上执行并支付消息传递费用
+3. 转移的总成本在执行前对用户透明
+
+#### 费用代币考虑
+
+发送跨链转移时，费用代币因源链类型和 IGP 而异：
+
+1. **EVM 链**
+
+   - 对源费用和跨链费用都使用原生 Gas 代币（例如 ETH）
+
+2. **Sealevel (Solana) 链**
+
+   - 对源费用和跨链费用都使用原生 Gas 代币（例如 SOL）
+
+3. **Cosmos 链**
+
+   - 支持自定义代币；费用使用 IGP 上的 `denom` 参数指定
+   - 费用使用 `denom` 参数指定
+
+<Note>
+阅读更多关于转移费用和计算的信息：
+
+- [跨链 Gas 支付](/zh/docs/protocol/core/interchain-gas-payment) - 处理链间 Gas 支付和中继器费用
+- [调度后钩子](/zh/docs/protocol/core/post-dispatch-hooks-overview) - 消息调度后执行操作的框架
+
+</Note>

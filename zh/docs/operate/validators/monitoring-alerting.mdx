@@ -1,0 +1,51 @@
+---
+title: "监控与告警"
+---
+
+Validator 在参数指定的端口号上公开 metrics。端口是默认的，尽管可以选择任何有效端口。
+
+我们建议使用 Prometheus 来抓取这些 metrics，使用 Grafana 来可视化它们，使用[此仪表板 JSON 模板](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/84e8c5c218ac5d211c766cf4d5a135aee10e508c/tools/grafana/validator-dashboard-template.json)，如下所示。此仪表板的好处是它同时显示多个 validator。屏幕截图显示按链或按 kubernetes pod 分组的 metrics。
+
+![Validator Grafana 仪表板模板](/images/docs/operate/dashboard-template-validator.png)
+
+<Note>
+  如果作为 Docker 镜像运行，请确保转发 metrics 端点端口。例如，要将本地端口 80 上的端口 9090 转发，请将以下标志添加到您的 `docker run` 命令：`-p 9090:80`
+</Note>
+
+## Metrics
+
+仪表板模板包括以下 metrics。
+
+| Metric                                                                | 描述                                                                                                                                                                                                                                                                                                                                                |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `hyperlane_latest_checkpoint`                                         | validator 观察到的最新 checkpoint                                                                                                                                                                                                                                                                                                                   |
+| `hyperlane_block_height`                                              | agent 连接的 RPC 节点的区块高度。此 metric 独立于 validator 的 checkpoint 索引功能定期更新。                                                                                                                                                                                                                                                       |
+| `hyperlane_contract_sync_liveness`                                    | 在 validator 的索引循环的每次迭代中报告的时间戳。                                                                                                                                                                                                                                                                                                  |
+| `hyperlane_contract_sync_block_height`                                | validator 在索引循环中观察到的区块高度。                                                                                                                                                                                                                                                                                                            |
+| `hyperlane_cursor_current_block`                                      | validator 内部游标观察到的区块高度。                                                                                                                                                                                                                                                                                                                |
+| `hyperlane_span_events_total{agent="validator", event_level="error"}` | 记录的错误总数，可视化为 30 分钟增量（"错误日志计数差异"）。如果此 metric 的导数在最后一小时内超过 1，则至少需要低严重性告警。请注意，仪表板查询按 kubernetes pod 名称对 metrics 进行分组，因此如果您不在 kubernetes 环境中运行，可能需要调整此查询。                                                                                           |
+| `hyperlane_span_events_total{agent="validator", event_level="warn"}`  | 记录的警告总数，可视化为 30 分钟增量（"警告日志计数差异"）。如果此 metric 的导数在最后一小时内超过 1，则至少需要低严重性告警。请注意，仪表板查询按 kubernetes pod 名称对 metrics 进行分组，因此如果您不在 kubernetes 环境中运行，可能需要调整此查询。                                                                                           |
+
+## 图表
+
+仪表板模板包括以下图表。
+
+| 图表                                    | 描述                                                                                                                                                                                                                                                                                                                                                    |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `已签名 Checkpoint 差异（30m）`         | validator 观察到的最新 checkpoint，可视化为 30 分钟增量。如果尽管 `最新区块差异（30m）` 稳定，但值不是正数，则可能意味着要么没有新消息，要么 validator 停止签署 checkpoint。                                                                                                                                                                        |
+| `观察到的 - 已处理的 checkpoint 差异`   | validator 在区块链上观察到的 checkpoint 与 validator 签署并发布的 checkpoint 之间的差异。此图表大部分时间应为零，偶尔会出现短暂的正值。如果在很长一段时间内为正数，则意味着 validator 在签署和发布 checkpoint 方面存在问题。                                                                                                                       |
+| `最新区块差异（30m）`                   | agent 连接的 RPC 节点的区块高度，可视化为 30 分钟增量（"最新区块差异"）。如果此 metric 没有增加，则 RPC 可能不健康，需要更换。                                                                                                                                                                                                                       |
+| `合约同步活跃度`                        | 按原样呈现 metric `hyperlane_contract_sync_liveness`。图表应始终上升。如果是常量，则表示存在问题。如果图表包含多条链的 metrics，它们将彼此重叠呈现。当没有问题时这是正常的。如果存在应调查的问题，偏差将可见。                                                                                                                                     |
+| `合约同步区块差异（30m）`               | 将 metric `hyperlane_contract_sync_block_height` 呈现为 30 分钟增量。它应该大致匹配链在最近 30 分钟内产生的区块数。如果 metric 在任一方向显著偏离、变为零，应进行调查。                                                                                                                                                                              |
+| `游标区块差异（30m）`                   | 将 metric `hyperlane_cursor_current_block` 呈现为 30 分钟增量。它应该大致匹配链在最近 30 分钟内产生的区块数。如果 metric 在任一方向显著偏离、变为零，应进行调查。                                                                                                                                                                                    |
+| `错误日志计数差异（30m）`               | 记录的错误总数，可视化为 30 分钟增量（"错误日志计数差异"）。如果此 metric 的导数在最后一小时内超过 1，则至少需要低严重性告警。请注意，仪表板查询按 kubernetes pod 名称对 metrics 进行分组，因此如果您不在 kubernetes 环境中运行，可能需要调整此查询。                                                                                              |
+| `警告日志计数差异（30m）`               | 记录的警告总数，可视化为 30 分钟增量（"警告日志计数差异"）。如果此 metric 的导数在最后一小时内超过 1，则至少需要低严重性告警。请注意，仪表板查询按 kubernetes pod 名称对 metrics 进行分组，因此如果您不在 kubernetes 环境中运行，可能需要调整此查询。                                                                                              |
+
+## 告警
+
+上述所有 metrics 可以组合起来创建最小化误报的告警。一些示例关键告警：
+
+- `hyperlane_latest_checkpoint` 停止增加，但 `hyperlane_block_height` 仍在增加，并且 `error` 和 `warn` 日志计数在过去 6 小时内也一直在增加
+- `hyperlane_block_height` 在过去 30 分钟内没有增加
+
+如果您收到告警，请始终检查日志以了解问题可能是什么。

@@ -1,0 +1,54 @@
+---
+title: "Explorer 调试"
+---
+
+您会知道消息处理失败，因为页面顶部附近的消息状态将显示为"错误"，并且页面右上角部分将指定消息无法处理的原因。
+
+如果您的消息未被传递，可能是由于几个因素。
+
+### 无效的目标
+
+如果 relay 客户端不知道目标域标识符（`uint32`），它们将无法传递您的消息。请参阅 [domains](../../reference/domains) 以了解已知域以及向这些目标发送消息时使用的规范标识符。
+
+### 无效的接收者
+
+如果接收者地址（`bytes32`）不是实现 `IMessageRecipient` 的合约地址，relayer 将无法传递您的消息。
+
+```solidity
+// IMessageRecipient interface
+interface IMessageRecipient {
+    function handle(
+        uint32 _origin,
+        bytes32 _sender,
+        bytes calldata _message
+    ) external;
+}
+```
+
+<Warning>
+  EVM 地址（`address`）必须用零左填充才能符合要求。
+  请参阅 [TypeCasts
+  库](/zh/docs/reference/developer-tools/libraries/typecasts)以获取 `pure
+  addressToBytes32` 实用函数，以及消息
+  [dispatch](../../reference/messaging/send#dispatch) 部分了解其他详情。
+</Warning>
+
+### 无法处理
+
+如果消息接收者的 `IMessageRecipient.handle()` 函数的 gas 估算失败，[relayer](../../protocol/agents/relayer) 将无法传递消息。Relayer 将继续估算消息传递的 gas，因为状态变化可能允许成功传递以前无法传递的消息。
+
+<Info>
+  如果您有此行为无法满足的用例，**请联系我们** [在 Discord 上](https://discord.com/invite/hyperlane)。
+</Info>
+
+### 资金不足
+
+资金不足的消息意味着为传递此消息所进行的[跨链 gas 支付](../../reference/hooks/interchain-gas)不足。
+
+Relayer 在目标链上使用 [`eth_estimateGas`](https://ethereum.github.io/execution-apis/api-documentation/) RPC 来确定中继消息的绝对成本。如果此金额超过源链上支付的 gas 总量，relayer 通常会拒绝传递消息。
+
+您可以[手动支付跨链 gas](../../reference/hooks/interchain-gas#retrying) 来解决此问题。
+
+## 使用 Etherscan
+
+您还可以查看目标链上接收者的 [Etherscan](https://etherscan.io/) 页面，但请注意，处理交易不会像您通常想象的那样显示在交易列表中。原因是 relayer 实际上调用 Mailbox 合约，后者反过来调用接收者上的 `handle` 函数。因此，您会在 `Internal Txns` 选项卡下找到处理的证据。
