@@ -82,16 +82,29 @@ function transferAndCall(
     CallLib.Call[] calldata calls // Array of calls to execute on the destination chain
 ) external payable {
 
-    // Transfer the specified amount of tokens from the sender to this contract
-    asset.transferFrom(msg.sender, address(this), amount);
-
     // Get the interchain account address for the contract on the destination chain
     bytes32 self = interchainAccountRouter
         .getRemoteInterchainAccount(destination, address(this))
         .addressToBytes32();
 
-    // Quote the gas fee for the HWR payment
-    uint256 warpFee = warpRoute.quoteGasPayment(destination);
+    // Quote the fees for the warp route transfer
+    Quote[] memory quotes = warpRoute.quoteTransferRemote(
+        destination,
+        self,
+        amount
+    );
+
+    // Extract the native mailbox dispatch fee (index 0)
+    uint256 warpFee = quotes[0].amount;
+
+    // Extract the total token amount including internal fees (index 1)
+    uint256 totalTokenAmount = quotes[1].amount;
+
+    // Transfer the total token amount from the sender to this contract
+    asset.transferFrom(msg.sender, address(this), totalTokenAmount);
+
+    // Approve the warp route to spend the tokens
+    asset.approve(address(warpRoute), totalTokenAmount);
 
     // Initiate the HWR transfer to send tokens cross-chain
     warpRoute.transferRemote{value: warpFee}(destination, self, amount);

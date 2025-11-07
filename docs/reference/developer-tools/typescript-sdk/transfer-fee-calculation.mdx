@@ -55,3 +55,32 @@ const txs = await warpCore.getTransferRemoteTxs({
 ## How It Works
 
 Under the hood, the SDK uses [`Mailbox.quoteDispatch()`](/docs/reference/messaging/send#quote-dispatch) to compute the interchain fee. This is the same value that must be passed to `dispatch`.
+
+## Contract-Level Fee Quoting
+
+<Info>
+  New in version 10.0.0: Warp route contracts now expose a standardized `quoteTransferRemote` function for on-chain fee quoting.
+</Info>
+
+For contracts interacting directly with warp routes (without using the TypeScript SDK), you can quote fees on-chain using the `quoteTransferRemote` function:
+
+```solidity
+// Quote fees for a warp route transfer
+Quote[] memory quotes = warpRoute.quoteTransferRemote(
+    destinationDomain,
+    recipientAddress,
+    amount  // Exact amount recipient will receive
+);
+
+// quotes[0]: Native mailbox dispatch fee (token: address(0))
+// quotes[1]: Total token amount including internal fees
+// quotes[2]: External bridge fees (if any, else 0)
+```
+
+The quotes array always contains exactly 3 elements:
+
+1. **Native Fee** (`quotes[0]`): Must be sent as `msg.value` to `transferRemote`
+2. **Token Amount** (`quotes[1]`): Total tokens to approve/send, including fees
+3. **External Fee** (`quotes[2]`): Additional bridge fees (already included in `quotes[1]`)
+
+See the [HWR Interface](/docs/applications/warp-routes/interface#fee-quoting-interface) for detailed documentation and examples.
