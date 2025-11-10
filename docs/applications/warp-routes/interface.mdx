@@ -2,22 +2,26 @@
 title: "HWR Interface"
 ---
 
-Hyperlane Warp Routes (HWR) leverage the `IHypERC20` token interface. HWR tokens implement this interface, which extends the standard `ERC20` interface.
+Hyperlane Warp Routes (HWR) implement the `ITokenBridge` interface.
 
 ```solidity
-/// @notice An interchain extension of the ERC20 interface
-interface IHypERC20 is IERC20 {
+interface ITokenBridge {
     /**
      * @notice Transfers tokens to the specified recipient on a remote chain
      * @param _destination The domain ID of the destination chain
      * @param _recipient The address of the recipient, encoded as bytes32
-     * @param _amount The amount of tokens to transfer
+     * @param _amount The amount of tokens the recipient should receive
      */
     function transferRemote(
         uint32 _destination,
         bytes32 _recipient,
         uint256 _amount
     ) external payable;
+
+    struct Quote {
+        address token; // Token address (address(0) for native token)
+        uint256 amount; // Fee amount in the specified token
+    }
 
     /**
      * @notice Quotes the fees required for a remote transfer
@@ -32,37 +36,28 @@ interface IHypERC20 is IERC20 {
         uint256 _amount
     ) external view returns (Quote[] memory quotes);
 }
-
-struct Quote {
-    address token; // Token address (address(0) for native token)
-    uint256 amount; // Fee amount in the specified token
-}
 ```
 
 ## Fee Quoting Interface
 
 <Info>
   New in version 10.0.0: The `quoteTransferRemote` function provides a standardized way to quote fees for warp route transfers.
+  Only applicable to routes that return >= 10.0.0 from `PACKAGE_VERSION()`.
 </Info>
 
 ### Quote Structure
 
-The `quoteTransferRemote` function returns an array of exactly 3 `Quote` structs with the following convention:
+The `quoteTransferRemote` function returns an array of `Quote` structs with the following convention:
 
-1. **Index 0: Native Mailbox Dispatch Fee**
+1. **Index 0: Native Fees**
    - Token: `address(0)` (native token like ETH, MATIC, etc.)
-   - Amount: Fee charged by the Hyperlane mailbox for dispatching the message
+   - Amount: Fees charged by the mailbox for dispatching the message
    - This must be sent as `msg.value` when calling `transferRemote`
 
-2. **Index 1: Internal Token Amount**
-   - Token: The warp route token address (from `token()` function)
+2. **Index 1: Token Fees**
+   - Token: The ERC20 token being bridged.
    - Amount: `_amount + internalFeeAmount`
    - This is the total amount of tokens that must be sent/approved, including any internal fees charged by the warp route
-
-3. **Index 2: External Bridge Fee**
-   - Token: The warp route token address (from `token()` function)
-   - Amount: Additional fees for external bridges (e.g., CCTP, Everclear), or `0` if none
-   - This is included in the total amount required at index 1
 
 ### Exact Amount Out Semantics
 
@@ -82,18 +77,20 @@ Quote[] memory quotes = warpRoute.quoteTransferRemote(
     1000e18  // Recipient will receive exactly 1000 tokens
 );
 
-// quotes[0]: Native fee (e.g., 0.01 ETH)
-// quotes[1]: Token amount (e.g., 1005e18 = 1000 + 5 fee)
-// quotes[2]: External fee (e.g., 0 or included in quotes[1])
+// quotes[0]: Native fee (e.g., 0.00001 ETH)
+uint256 nativeFee = quotes[0].amount;
 
-// Approve total token amount
-IERC20(warpRoute.token()).approve(
+// quotes[1]: Token amount (e.g., 1001e18 = 1000 + 1 fee)
+uint256 tokenFee = quotes[1].amount;
+
+// Approve warp route for token transfer
+IERC20(quotes[1].token).approve(
     address(warpRoute),
-    quotes[1].amount  // 1005e18 total
+    tokenFee  // 1001e18 total
 );
 
 // Transfer with native fee
-warpRoute.transferRemote{value: quotes[0].amount}(
+warpRoute.transferRemote{value: nativeFee}(
     destinationDomain,
     recipientAddress,
     1000e18  // Recipient receives exactly 1000 tokens
@@ -101,7 +98,7 @@ warpRoute.transferRemote{value: quotes[0].amount}(
 ```
 
 <Warning>
-  **Important:** Always query fees on-chain immediately before the transfer, as fees may change based on gas prices, exchange rates, or route configuration.
+  **Important:** Always query fees immediately before the transfer with the consistent parameters, as fees may change based on destination, recipient, amount, gas prices, exchange rates, or warp route configuration.
 </Warning>
 
 ## Deploy your HWR

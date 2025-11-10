@@ -95,22 +95,22 @@ function transferAndCall(
     );
 
     // Extract the native mailbox dispatch fee (index 0)
-    uint256 warpFee = quotes[0].amount;
+    uint256 nativeFee = quotes[0].amount;
 
-    // Extract the total token amount including internal fees (index 1)
-    uint256 totalTokenAmount = quotes[1].amount;
+    // Extract the total token amount charged by the warp route
+    uint256 tokenFee = quotes[1].amount;
 
     // Transfer the total token amount from the sender to this contract
-    asset.transferFrom(msg.sender, address(this), totalTokenAmount);
+    asset.transferFrom(msg.sender, address(this), tokenFee);
 
     // Approve the warp route to spend the tokens
-    asset.approve(address(warpRoute), totalTokenAmount);
+    asset.approve(address(warpRoute), tokenFee);
 
     // Initiate the HWR transfer to send tokens cross-chain
-    warpRoute.transferRemote{value: warpFee}(destination, self, amount);
+    warpRoute.transferRemote{value: nativeFee}(destination, self, amount);
 
     // Execute the specified interchain calls using the remaining gas funds
-    interchainAccountRouter.callRemote{value: msg.value - warpFee}(
+    interchainAccountRouter.callRemote{value: msg.value - nativeFee}(
         destination,
         calls
     );
