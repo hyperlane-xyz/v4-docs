@@ -1,16 +1,14 @@
 ---
-title: "Transfer Fees"
+title: "Dispatch Fees"
 description: "Understanding origin and interchain fees for Hyperlane cross-chain transfers"
 ---
 
 ## Fee Estimation
 
-When sending a cross-chain transfer with Hyperlane GMP, two fees are required:
+When sending a cross-chain message with Hyperlane GMP, two fees are paid:
 
-1. **Origin Fee** – gas to submit the transaction on the origin chain
-2. [**Interchain Fee**](/docs/protocol/core/interchain-gas-payment) – gas to deliver and execute the message on the destination chain, including the relayer fee
-
-Both are paid upfront on the origin chain to the specified IGP.
+1. **Origin Fee** – transaction fee on the origin chain (charged by the blockchain)
+2. [**Interchain Fee**](/docs/protocol/core/interchain-gas-payment) – charged by relayer to cover destination chain transaction fees
 
 This fee structure ensures that:
 
@@ -20,7 +18,7 @@ This fee structure ensures that:
 
 #### Fee Token Considerations
 
-When sending cross-chain transfers, the fee tokens vary by origin chain type and IGP:
+When sending cross-chain messages, the fee tokens vary by origin chain type and IGP:
 
 1. **EVM Chains**
 
@@ -42,3 +40,9 @@ Read more about transfer fees and calculations:
 - [Post Dispatch Hooks](/docs/protocol/core/post-dispatch-hooks-overview) - Framework for executing actions after message dispatch
 
 </Note>
+
+## Warp Route Fees
+
+When using Warp Routes to bridge tokens, there may be additional application fees denominated in the token being bridged.
+
+See [Warp Route Fees](/docs/applications/warp-routes/interface) for more details
