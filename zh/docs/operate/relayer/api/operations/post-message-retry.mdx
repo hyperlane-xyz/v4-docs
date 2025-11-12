@@ -1,0 +1,78 @@
+---
+title: '重试消息'
+api: 'POST http://localhost:9090/message_retry'
+---
+
+触发匹配特定模式的失败消息的重试。这会将重试计数重置为 0 并重新排队消息以进行处理。
+
+<Expandable title="请求正文">
+  <Expandable title="对象数组">
+    <ParamField body="messageid" type="string">
+      要重试的特定消息 ID（十六进制字符串）
+    </ParamField>
+    <ParamField body="origindomain" type="u32">
+      消息源 domain
+    </ParamField>
+    <ParamField body="destinationdomain" type="u32">
+      消息目标 domain
+    </ParamField>
+    <ParamField body="senderaddress" type="string">
+      发送者地址
+    </ParamField>
+    <ParamField body="recipientaddress" type="string">
+      接收者地址
+    </ParamField>
+    <ParamField body="bodyregex" type="string">
+      正文正则表达式
+    </ParamField>
+  </Expandable>
+</Expandable>
+
+<Expandable title="响应正文">
+  <ResponseField name="uuid" type="string">
+    重试请求的 UUID
+  </ResponseField>
+  <ResponseField name="evaluated" type="usize">
+    评估了多少个待处理操作
+  </ResponseField>
+  <ResponseField name="matched" type="u64">
+    有多少待处理操作与重试请求模式匹配
+  </ResponseField>
+</Expandable>
+
+<RequestExample>
+```bash curl
+curl -X POST "http://localhost:9090/message_retry" \
+  -H "Content-Type: application/json" \
+  -d \
+'[
+  {
+    "messageid": "0x123..."
+  }
+]'
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/message_retry', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify([
+    {
+      messageid: "0x123..."
+    }
+  ])
+});
+```
+
+```python Python
+import requests
+
+response = requests.post('http://localhost:9090/message_retry', json=[
+  {
+    'messageid': '0x123...'
+  }
+])
+```
+</RequestExample>

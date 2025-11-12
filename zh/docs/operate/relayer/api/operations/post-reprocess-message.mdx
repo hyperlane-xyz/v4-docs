@@ -1,0 +1,83 @@
+---
+title: '重新处理消息'
+api: 'POST http://localhost:9090/reprocess_message'
+---
+
+按需重新排队消息进行处理。此端点允许外部服务触发消息传递，而不是依赖队列退避，并且可以处理区块链网络重组或手动消息处理等场景。
+
+<Note>
+对于纯粹按需处理而不自动重试，请在您的 relayer 配置中将此端点与 `max_message_retries := 0` 结合使用。这确保消息仅在通过此 API 显式触发时才被处理。
+</Note>
+
+<Expandable title="请求正文">
+  <ParamField body="origin_id" type="u32" required>
+    消息源 Domain/链 ID
+  </ParamField>
+  <ParamField body="message_id" type="string" required>
+    十六进制编码的消息标识符 (H256)
+  </ParamField>
+</Expandable>
+
+<Expandable title="响应正文">
+  <ResponseField name="success" type="boolean">
+    消息是否成功重新排队进行处理
+  </ResponseField>
+  <ResponseField name="message" type="string">
+    有关重新处理操作的详细信息
+  </ResponseField>
+</Expandable>
+
+<RequestExample>
+```bash curl
+curl -X POST "http://localhost:9090/reprocess_message" \
+  -H "Content-Type: application/json" \
+  -d \
+'{
+  "origin_id": 1399811149,
+  "message_id": "0x9484bd5c635b17b28cb382249d7a6fe5ca15debfd4f824247c68d47badc5b7de"
+}'
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/reprocess_message', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    origin_id: 1399811149,
+    message_id: "0x9484bd5c635b17b28cb382249d7a6fe5ca15debfd4f824247c68d47badc5b7de"
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post('http://localhost:9090/reprocess_message', json={
+  'origin_id': 1399811149,
+  'message_id': '0x9484bd5c635b17b28cb382249d7a6fe5ca15debfd4f824247c68d47badc5b7de'
+})
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "success": true,
+  "message": "Message re-queued for processing"
+}
+```
+
+```json Error Response (400 Bad Request)
+{
+  "error": "Invalid message_id format"
+}
+```
+
+```json Error Response (404 Not Found)
+{
+  "error": "Message or context not found"
+}
+```
+</ResponseExample>

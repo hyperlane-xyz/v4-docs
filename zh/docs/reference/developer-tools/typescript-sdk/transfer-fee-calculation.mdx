@@ -1,0 +1,57 @@
+---
+title: "消息转账费用计算"
+---
+
+<Note>
+  有关转账费用的概述，请访问：[GMP 转账
+  费用](/zh/docs/protocol/core/fees)
+</Note>
+
+## 估算费用
+
+要估算两种费用，请使用 `estimateTransferRemoteFees`：
+
+```ts
+const { interchainQuote, localQuote } =
+  await warpCore.estimateTransferRemoteFees({
+    originToken,
+    destination,
+    sender,
+  });
+```
+
+- `interchainQuote`：将消息路由到目标链的费用（通过 IGP）
+- `localQuote`：在源链上发送交易的 gas 成本
+
+每个返回值都是一个 TokenAmount，包括：
+
+- `amount`：所需的代币数量
+- `token`：代币元数据（包括链、小数位数和符号）
+
+## 在转账中使用费用
+
+进行转账时，您可以提供预先计算的费用报价：
+
+```ts
+const txs = await warpCore.getTransferRemoteTxs({
+  originTokenAmount,
+  destination,
+  sender,
+  recipient,
+});
+```
+
+<Warning>
+
+**重要注意事项：**
+
+- 不同链类型之间的费用可能有所不同
+- 某些链需要额外参数
+- 缺少费用或支付不足将导致交易回滚
+- 费用代币可能与转账代币不同
+
+</Warning>
+
+## 工作原理
+
+在底层，SDK 使用 [`Mailbox.quoteDispatch()`](/zh/docs/reference/messaging/send#quote-dispatch) 来计算跨链费用。这是必须传递给 `dispatch` 的相同值。

@@ -1,0 +1,38 @@
+---
+title: "协议概述"
+description: "Hyperlane 跨链消息传递协议和核心组件的概述"
+---
+
+Hyperlane 是第一个[无需许可的互操作性](/zh/docs/get-started-building)层，允许智能合约开发者在区块链之间发送任意数据。
+
+开发者可以使用 Hyperlane 移动代币、执行函数调用以及许多其他功能，从而创建跨链应用程序——用户可以在任何区块链上访问的应用程序。
+
+用户通过[邮箱](/zh/docs/protocol/core/mailbox)智能合约与 Hyperlane 协议交互，该合约提供链上消息传递接口来发送和接收跨链消息。
+
+Hyperlane 采用模块化的安全方法，允许应用程序配置并从一系列[跨链安全模块](/zh/docs/protocol/ISM/modular-security) (ISM) 中选择。应用程序可以指定一个 ISM 来自定义保护其与 Hyperlane 消息传递接口集成的安全模型。
+
+```mermaid
+flowchart TB
+    subgraph Origin
+      Sender
+      M_O[(Mailbox)]
+
+      Sender -- "1.dispatch(destination,<br>recipient, body)" --> M_O
+    end
+
+    M_O -. "2.emit dispatch(sender,<br>destination, recipient,<br>body)" .-> Relayer
+
+    subgraph Destination
+      Recipient
+      M_D[(Mailbox)]
+      ISM[InterchainSecurityModule]
+
+      M_D -. "4.interchainSecurityModule()" .-> Recipient
+      M_D -- "5.verify(metadata,<br>message)" --> ISM
+      M_D -- "6.handle(origin, sender,<br>body)" --> Recipient
+    end
+
+    Relayer((Relayer)) -- "3.process(metadata,<br>message)" --> M_D
+
+    style Sender fill:#efab17
+    style Recipient fill:#efab17

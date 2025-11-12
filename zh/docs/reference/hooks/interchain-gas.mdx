@@ -1,0 +1,202 @@
+---
+title: "Post-Dispatch 跨链 Gas"
+description: "使用 InterchainGasPaymaster 合约配置跨链消息传递的 gas 支付"
+---
+
+在 post-dispatch hook 期间，如果支付不足以覆盖 relayer 的_预期_成本，`InterchainGasPaymaster` 合约将回滚。在 `dispatch` 时计算的 gas 报价必须与 relayer 的预期成本一致。
+
+## Gas 限制
+
+`gasLimit` 是根据给定消息在目标链上调用 `handle` 的成本设置的。这可能因消息内容和处理器的逻辑而异。
+
+用于计量 handle 调用的默认 `gasLimit` 是静态默认值 `50_000` gas。这对于简单操作来说足够了，但对于更复杂的 `handle` 函数可能不够。
+
+如果您的 `handle` 函数执行复杂操作或需要更多 gas，您必须覆盖[元数据中的默认 `gasLimit`](#metadata) 以避免交易回滚。在单元测试中对您的 [`handle` 实现](../messaging/receive#handle)进行基准测试，以确定要使用的合理 `gasLimit`。
+
+### 元数据
+
+此 hook 期望元数据采用 `StandardHookMetadata` 的**打包编码**。有关如何传递元数据覆盖的信息，请参阅 Mailbox [dispatch 重载](../messaging/send#overriding-default-hook-metadata)。
+
+```solidity
+struct StandardHookMetadata {
+    uint16 variant;
+    uint256 msgValue;
+    uint256 gasLimit;
+    address refundAddress;
+}
+```
+
+`StandardHookMetadata` 结构定义了元数据编码所需的字段：
+
+- `variant`：指定元数据格式版本。
+- `msgValue`：随消息发送的原生代币数量。
+- `gasLimit`：目标链上 `handle` 函数的 gas 限制。确保这与您的模拟结果匹配。
+- `refundAddress`：退还未使用 gas 支付的地址。
+
+要编码此元数据，请使用 `StandardHookMetadata.formatMetadata` 库函数。Solidity 不支持使用 `abi.encodePacked` 直接编码结构体。
+
+#### 使用示例
+
+```solidity
+// 示例：使用 StandardHookMetadata 编码元数据
+bytes memory metadata = StandardHookMetadata.formatMetadata(
+    0,               // ETH 消息值
+    200000,          // 自定义 gas 限制
+    address(this),   // 退款地址
+    bytes("")        // 可选的自定义元数据
+);
+```
+
+### 确定并覆盖 Gas 限制
+
+1. **模拟和基准测试 Gas 使用**：
+
+- 使用 Tenderly 或 Foundry 等工具模拟消息接收者上的 `handle` 函数。确保 `from` 地址设置为您链上的 Mailbox 合约。
+- 如果 gas 使用超过 `50,000` gas，计算适当的 `gasLimit` 并更新您的元数据。
+- 使用 [Hyperlane Explorer 中的操作提示](https://github.com/hyperlane-xyz/hyperlane-explorer/blob/03634076049bfce1611b4e41d1aa81910eab2962/src/features/messages/cards/TransactionCard.tsx#L326-L333)从消息详情模拟交易。
+
+2. **更新您的元数据**：
+
+- 根据模拟计算所需的 `gasLimit`。
+- 在元数据中传递更新的 `gasLimit`，以确保 relayer 将传递您的消息。
+
+## 目标 Gas 配置
+
+对于每个远程域，InterchainGasPaymaster 设置域 gas 配置。
+
+```solidity
+struct DomainGasConfig {
+    IGasOracle gasOracle;
+    uint96 gasOverhead;
+}
+```
+
+### Gas 开销
+
+gas 开销作为目标 gas 配置的一部分设置。这对应于在目标链上处理消息的操作成本。
+
+<Info>
+  - 您应确保 `gasOverhead` 充分覆盖目标链上的 ISM 范围。- 由于您可以为不同的消息类型配置不同的 ISM，每个 ISM 的 `verify` 函数可能有不同的 gas 开销。
+</Info>
+
+## Gas Oracle
+
+跨链 Gas 支付要求是使用源链和目标链之间的预言机化 gas 价格和汇率计算的。
+
+IGP 合约可以配置 gas oracle，负责跟踪远程代币 gas 价格和汇率。开发者应使用 Mailbox 合约上的 [`quoteDispatch`](/zh/docs/protocol/core/post-dispatch-hooks-overview#quote-dispatch-fees) 函数来计算 gas 费用。`quoteDispatch` 考虑了系统级开销，并确保整个 `dispatch` 过程的准确费用计算。
+
+<Info>
+  汇率和 gas 价格由 relayer 决定。可能会收取价差以考虑漂移和运营成本。
+</Info>
+
+最终，relayer 将能够自动更新其 gas oracle，以确保其 IGP 始终为远程 gas 报出公平价格。
+
+### `getExchangeRateAndGasPrice`
+
+```solidity
+function getExchangeRateAndGasPrice(
+    uint32 destinationDomain
+) external view returns (uint128 tokenExchangeRate, uint128 gasPrice);
+```
+
+**参数**
+
+- `destinationDomain`：消息的目标域
+
+**返回值**
+
+- `tokenExchangeRate`：源链和目标链 gas 代币之间的汇率
+- `gasPrice`：目标链的 gas 价格
+
+### `quoteGasPayment`
+
+`quoteGasPayment` 函数计算 relayer 预期成本的费用。
+
+```solidity
+function quoteGasPayment(
+    uint32 destinationDomain,
+    uint256 gasLimit
+) external view returns (uint256 fee);
+```
+
+**参数**
+
+- `destinationDomain`：消息的目标域
+- `gasLimit`：用于计量 `handle` 调用的 gas 限制
+
+**返回值**
+
+- `fee`：`postDispatch` 成功所需的支付
+
+<Info>
+`quoteGasPayment` 根据 `destinationDomain` 和 `gasLimit` 给出估算费用。但是，它**不**包括 Interchain Gas Paymaster（IGP）为默认 ISM 支付添加的额外 gas 成本。
+
+要获得完整费用，请使用 Mailbox 合约的 `quoteDispatch()`。它提供包括这些额外成本的完整报价。
+
+👉 有关更多详情，请参阅 [Quote Dispatch](/zh/docs/reference/messaging/send#quote-dispatch)。
+
+</Info>
+
+## 重试
+
+如果 `handle` 调用消耗的 gas 超过报价，relayer 将不会提交处理交易。此问题通常是由于初始 `dispatch` 期间 gas 支付不足造成的。
+
+在这种情况下，可以使用 `payForGas` 函数支付额外的 gas。
+
+```solidity
+function payForGas(
+    bytes32 messageId,
+    uint32 destinationDomain,
+    uint256 gasAmount,
+    address refundAddress
+) external payable;
+```
+
+**参数**
+
+- `messageId`：从 `dispatch` 调用返回的消息标识符
+- `destinationDomain`：消息的目标域
+- `gasAmount`：要支付的额外 gas 数量
+- `refundAddress`：退还多余支付的地址
+
+## 使用 Hyperlane Explorer 进行调试
+
+Hyperlane Explorer 是调试跨链消息问题（包括 gas 支付和 relayer 行为）的强大工具。
+
+### 关键功能
+
+- **消息状态**：查看消息的当前状态（例如，"Retry: GasPaymentRequirementNotMet"）。
+- **Gas 支付详情**：检查已支付的 gas 数量（源 IGP gas 数量）和 relayer 所需的数量。
+- **模拟 Calldata**：使用"查看 calldata 详情"选项在 Tenderly 等工具上模拟交易。
+
+## 故障排除
+
+本节涵盖开发者在跨链 Gas 支付中遇到的常见问题及潜在解决方案。
+
+### `GasPaymentRequirementNotMet` 警告
+
+- **原因：** 当 `dispatch` 期间提供的 gas 支付不满足 relayer 的计算要求时发生。
+
+- **解决方案：**
+  - 使用 `quoteDispatch` 计算 `dispatch` 调用成功所需的总费用。
+  - 验证元数据中的 `msg.value` 覆盖 relayer 的报价费用。
+  - 在 Hyperlane Explorer 中检查消息状态。查找：`Retry(GasPaymentRequirementNotMet)`。
+
+### 回退路由和超额支付警告
+
+- **原因：** `msg.value` 超过所需的 gas 支付，触发回退路由 hook。
+
+- **解决方案：**
+  - 验证您的报价逻辑（`quoteDispatch`）与 relayer 的预期费用匹配。
+  - 避免在未首先对 `handle` 函数进行基准测试的情况下高估 `gasLimit` 值。
+  - 模拟交易以确认适当的支付。
+
+### 意外大的 Gas 报价
+
+- **原因：** 设置了非常高的 `gasLimit`，导致过高的 gas 报价。
+
+- **解决方案：**
+
+  - 仔细检查元数据中指定的 `gasLimit`。
+  - 验证您的报价逻辑（`quoteDispatch`）与 relayer 的预期费用匹配。
+  - 调整 `gasLimit` 以匹配 `handle` 函数的估计 gas 消耗。
