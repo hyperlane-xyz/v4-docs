@@ -1,0 +1,124 @@
+---
+title: "创建您自己的 ISM"
+---
+
+开发者可以通过在其应用程序中实现 `ISpecifiesInterchainSecurityModule` 接口来指定或覆盖默认 ISM。
+
+<Note>
+  如果未指定 ISM，或者指定的 ISM 是空地址，则将使用目标链的 Mailbox 上配置的默认 ISM。
+</Note>
+
+## ISM 接口
+
+ISM 必须实现 `InterchainSecurityModule` 接口。此实现可以根据应用程序的需求进行配置、组合和自定义。
+
+具体来说，此接口必须在实现 `handle()` 的同一个智能合约中实现。
+
+该接口由两个函数组成：`verify` 和 `moduleType`。
+
+<Accordion title="InterchainSecurityModule 接口">
+
+```solidity Solidity
+// SPDX-License-Identifier: MIT OR Apache-2.0
+pragma solidity >=0.8.0;
+
+enum ModuleType {
+UNUSED,
+ROUTING,
+AGGREGATION,
+LEGACY_MULTISIG,
+MERKLE_ROOT_MULTISIG,
+MESSAGE_ID_MULTISIG,
+NULL, // used with relayer carrying no metadata
+CCIP_READ,
+ARB_L2_TO_L1,
+POLYGON_POS,
+OP_STACK
+}
+
+interface InterchainSecurityModule {
+/\*\*
+_ @notice 返回表示此 ISM 编码的安全模型类型的枚举。
+_ @dev Relayer 推断如何获取和格式化 metadata。
+_/
+function moduleType() external view returns (uint8);
+
+    /**
+     * @notice 定义负责根据提供的 metadata 验证跨链消息的安全模型。
+     * @param _metadata Relayer 提供的链下 metadata，特定于
+     * 模块编码的安全模型（例如 validator 签名）
+     * @param _message Hyperlane 编码的跨链消息
+     * @return 如果消息已验证则返回 True
+     */
+    function verify(
+        bytes calldata _metadata,
+        bytes calldata _message
+    ) external returns (bool);
+
+}
+
+```
+
+</Accordion>
+
+## Verify
+
+```solidity
+/**
+ * @notice 定义负责根据提供的 metadata 验证跨链消息的安全模型。
+ * @param _metadata Relayer 提供的链下 metadata，特定于
+ * 模块编码的安全模型（例如 validator 签名）
+ * @param _message Hyperlane 编码的跨链消息
+ * @return 如果消息已验证则返回 True
+ */
+function verify(
+    bytes calldata _metadata,
+    bytes calldata _message
+) external returns (bool);
+```
+
+ISM 必须实现的主要函数是 `verify()`。[Mailbox](/zh/docs/protocol/core/mailbox) 在将消息传递给其接收者之前会调用 `IInterchainSecurityModule.verify()`。如果 `verify()` 回退或返回 `false`，消息将不会被传递。
+
+### 参数
+
+- `_metadata`：由 [Relayer](/zh/docs/protocol/agents/relayer) 提供的任意字节组成。通常，这些字节特定于 ISM。例如，[Multisig ISM](/zh/docs/protocol/ISM/standard-ISMs/multisig-ISM) 的 `_metadata` 必须包含 validator 签名。
+
+- `_message`：由正在验证的 Hyperlane 消息组成。ISM 可以使用它来检查有关正在验证的消息的详细信息。例如，[Multisig ISM](/zh/docs/protocol/ISM/standard-ISMs/multisig-ISM) 可以根据消息的源链更改 validator 集。
+
+<Warning>
+  有关传递给 `verify()` 的 Hyperlane 消息格式的更多信息，请参阅 [`Message.sol`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/libs/Message.sol) 库。
+</Warning>
+
+## Module Type
+
+ISM 必须实现的第二个函数是 `moduleType()`。
+
+```solidity
+function moduleType() external view returns (uint8);
+```
+
+这用于向 [Relayer](/zh/docs/protocol/agents/relayer) 发出信号，指示 `_metadata` 中应包含什么。ISM **必须**返回支持的模块类型之一。
+
+```solidity
+enum ModuleType {
+    UNUSED,
+    ROUTING,
+    AGGREGATION,
+    LEGACY_MULTISIG,
+    MERKLE_ROOT_MULTISIG,
+    MESSAGE_ID_MULTISIG,
+    NULL, // used with relayer carrying no metadata
+    CCIP_READ,
+    ARB_L2_TO_L1,
+    POLYGON_POS,
+    OP_STACK
+}
+```
+
+<Note>
+
+- 所有 ISM 合约都必须实现 ISM 接口，该接口要求定义 `moduleType`。Relayer 根据此类型进行分支，以确定该 ISM 所需的 metadata。有关模块类型及其 metadata 格式的更多信息，请参阅 [Protocol](/zh/docs/protocol/ISM/modular-security#core-concepts)。
+
+- 有关可用模块类型及其各自 metadata 的更多信息，请访问本节中概述的 ISM 文档，例如 [Multisig ISM](/zh/docs/protocol/ISM/standard-ISMs/multisig-ISM)。
+
+</Note>

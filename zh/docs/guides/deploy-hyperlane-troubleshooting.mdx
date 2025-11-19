@@ -1,0 +1,208 @@
+---
+title: "故障排查指南"
+---
+
+## 常规故障排查
+
+<AccordionGroup>
+
+<Accordion title="日志记录">
+
+可以使用以下两个环境变量为 Hyperlane 工具配置日志记录级别和格式：
+
+- `LOG_LEVEL`：要过滤的日志级别。默认为 `info`。选项：`debug | info | warn | error | off`
+- `LOG_FORMAT`：日志输出的格式。默认为 `pretty`。选项：`pretty | json`
+
+[Hyperlane CLI](/zh/docs/reference/developer-tools/cli) 还允许通过 `--log` 和 `--verbosity` 标志配置日志记录。
+
+</Accordion>
+
+<Accordion title="链配置">
+
+在您的工作目录中，您可能会找到按链名称组织的 `chains/` yaml 文件。这些 `metadata.yaml` 文件描述了在 Hyperlane 部署和应用程序中使用链所需的信息。
+
+您可以在此文件中为任何新链定义完整配置。可配置的 metadata 在此[示例配置](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/cli/examples/chain-config.yaml)中定义。您还可以在 [chainMetadataTypes.ts](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/sdk/src/metadata/chainMetadataTypes.ts) 找到链 metadata schema。
+
+以下是两个本地 anvil 链的示例配置：
+
+```yaml
+anvil1:
+  chainId: 31337
+  domainId: 31337
+  name: anvil1
+  protocol: ethereum
+  rpcUrls:
+    - http: http://localhost:8545
+  nativeToken:
+    name: Ether
+    symbol: ETH
+    decimals: 18
+anvil2:
+  chainId: 31338
+  domainId: 31338
+  name: anvil2
+  protocol: ethereum
+  rpcUrls:
+    - http: http://localhost:8555
+```
+
+您还可以通过提供要覆盖的字段来扩展核心链配置：
+
+```yaml
+sepolia:
+  blocks:
+    confirmations: 2
+```
+
+</Accordion>
+
+<Accordion title="覆盖 RPC URL">
+
+您可以通过扩展核心链配置来覆盖 RPC URL。
+
+示例：定义 RPC URL 数组并调整重试设置
+
+```yaml
+demochain:
+  name: demochain
+  chainId: 123456
+  domainId: 123456
+  protocol: ethereum
+  rpcUrls:
+    - http: https://rpc-testnet.demochain.gg
+sepolia:
+  rpcUrls:
+    - http: https://rpc2.sepolia.org
+    - http: https://some-other-sepolia-rpc.gg
+      retry:
+        maxRequests: 10
+```
+
+</Accordion>
+
+<Accordion title="覆盖交易设置">
+
+交易覆盖是形成交易请求时要包含的任何属性。例如：
+
+- `gasPrice`: number | string
+- `maxFeePerGas`: number | string
+- `maxPriorityFeePerGas`: number | string
+- `nonce`: number | string
+- `type`: number
+- `ccipReadEnabled`: boolean
+
+在下面的示例中，我们使用 7 gwei 的 gas 价格，硬编码 nonce，并为基础费用和优先费用设置最大值。
+
+```yaml
+sepolia:
+  transactionOverrides:
+    gasPrice: 7000000000 # 7 gwei
+    maxFeePerGas: 150000000000 # 150 gwei
+    maxPriorityFeePerGas: 40000000000 # 40 gwei
+    nonce: 1337
+```
+
+<Warning>
+  如果您在链配置中覆盖了 nonce，请确保在成功交易时更新该值。
+</Warning>
+
+</Accordion>
+
+<Accordion title="消息传递时间长或超时">
+
+消息传递中的延迟或超时通常是由 RPC 问题引起的，例如端点过载，或来自仅按需生成区块的链。
+
+要识别问题，请检查指示 RPC 相关问题的日志，例如：`Deprioritizing an inner provider in FallbackProvider`
+
+要解决这些延迟：
+
+- **检查 RPC 健康状况：** 确保 RPC 端点响应正常。
+- **为按需生成区块的链配置：** 对于这些链，将 reorgPeriod 设置为 0。这确保 agent 始终查看链的顶端，避免由区块最终确定过程引起的延迟。
+
+</Accordion>
+
+</AccordionGroup>
+
+## Agent 故障排查
+
+<AccordionGroup>
+
+<Accordion title="Validator 尚未宣布任何存储位置警告">
+
+- **原因**：当 relayer 无法检索处理消息所需的 validator 签名时会发生这种情况。
+- **解决方案**：
+  - 确保 validator 已宣布其存储位置。检查 validator 日志中是否有如下消息：
+    `Validator has announced signature storage location, locations: ["file:///tmp/hyperlane-validator-signatures-local"]`
+  - 验证每个 validator 都有唯一的签名存储路径（`--checkpointSyncer.path`）以防止覆盖。
+  - 确认 relayer 对存储路径具有读取访问权限。
+
+</Accordion>
+
+<Accordion title="找不到源链的 ISM 错误">
+
+- **原因**：当跨链安全模块（ISM）无法识别源链时会发生这种情况。
+- **解决方案**：
+  - 确保 ISM 配置包含源链的 Validator。
+  - 如果没有，请将源链的 validator 添加到您的 ISM。
+  - 更新 ISM 配置后重启 relayer。
+
+</Accordion>
+
+<Accordion title="检查队列中的待处理消息">
+
+如果消息卡在 relayer 队列中或未被处理，请使用 `list_operations` 端点检查 relayer 的队列：
+
+```shell
+curl http://0.0.0.0:9090/list_operations?destination_domain=<destination_domain_id>
+```
+
+此端点提供队列中消息的状态，可以帮助确定它们为什么没有被传递。
+
+</Accordion>
+
+<Accordion title="使用日志调试">
+
+要获得详细的洞察，请启用调试日志记录并监控 relayer 的活动：`HYP_LOG_LEVEL=debug`。捕获日志后，您可以使用它们来定位特定消息 ID 的问题。
+
+</Accordion>
+
+<Accordion title="重试消息">
+
+查看日志后，您可以使用 `message_retry` 端点触发所有待处理消息的立即重试：
+
+```shell
+curl --location 'http://127.0.0.1:9090/message_retry' \
+--header 'Content-Type: application/json' \
+--data '[{"messageid": "*", "origindomain": "*", "senderaddress": "*", "destinationdomain": "*", "recipientaddress": "*"}]'
+```
+
+确保您使用最新版本的 relayer 并捕获所有日志以进行调试。
+
+</Accordion>
+
+<Accordion title="Relayer 选择了错误的 ISM">
+
+确保您链上的跨链安全模块（ISM）配置正确。错误的 ISM 可能导致消息无法处理。验证配置中的 ISM 地址，并确保它与您的部署设置匹配。
+
+</Accordion>
+
+</AccordionGroup>
+
+## 高级故障排查
+
+<AccordionGroup>
+
+<Accordion title="eth_getStorageAt() 兼容性">
+
+某些链原生不支持 [`eth_getStorageAt()`](https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getstorageat) API。如果您在这些链之一上部署并遇到问题，请查看此 [commit](https://github.com/hyperlane-xyz/hyperlane-monorepo/commit/871df7a4dce203ff5cf23ae654d03743dc00ea61) 中对 Hyperlane 代码库所做的更改。
+
+要在这些链上部署 Hyperlane，请按照以下步骤操作：
+
+1. 克隆 [repo](https://github.com/hyperlane-xyz/hyperlane-monorepo)
+2. 应用 [commit](https://github.com/hyperlane-xyz/hyperlane-monorepo/commit/871df7a4dce203ff5cf23ae654d03743dc00ea61) 中的更改。
+3. 从根目录构建项目：`yarn build`
+4. 从根目录运行 Hyperlane CLI：`yarn workspace @hyperlane-xyz/cli hyperlane`
+
+</Accordion>
+
+</AccordionGroup>
