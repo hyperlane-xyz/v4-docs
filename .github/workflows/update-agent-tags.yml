@@ -48,7 +48,7 @@ jobs:
       - name: Update agent tags in documentation
         run: |
           # Find the current agent tag version in the docs
-          CURRENT_TAG=$(grep -oP 'gcr\.io/abacus-labs-dev/hyperlane-agent:\K(agents-v[0-9]+\.[0-9]+\.[0-9]+)' docs/ -r | head -1)
+          CURRENT_TAG=$(grep -ohP 'gcr\.io/abacus-labs-dev/hyperlane-agent:\K(agents-v[0-9]+\.[0-9]+\.[0-9]+)' docs/ -r | head -1)
           NEW_TAG="${{ steps.get-tag.outputs.tag }}"
 
           echo "Current tag: $CURRENT_TAG"
