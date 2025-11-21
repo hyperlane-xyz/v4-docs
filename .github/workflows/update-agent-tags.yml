@@ -30,20 +30,15 @@ jobs:
       - name: Get latest agent release tag
         id: get-tag
         run: |
-          # Fetch all releases and find the latest non-prerelease that starts with "agents-v"
+          # Fetch releases from GitHub API and filter using same pattern as monorepo
+          # Only stable releases matching agents-vX.Y.Z (no prerelease suffixes)
           LATEST_TAG=$(curl -s https://api.github.com/repos/hyperlane-xyz/hyperlane-monorepo/releases \
             | jq -r '.[] | select(.prerelease == false and .draft == false) | .tag_name' \
-            | grep '^agents-v' \
+            | grep -E "^agents-v[0-9]+\.[0-9]+\.[0-9]+$" \
             | head -1)
 
           if [ -z "$LATEST_TAG" ]; then
             echo "Error: Could not find a production release starting with 'agents-v'"
-            exit 1
-          fi
-
-          # Validate the tag format (should be agents-vX.Y.Z)
-          if [[ ! "$LATEST_TAG" =~ ^agents-v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Error: Tag format is invalid: $LATEST_TAG (expected agents-vX.Y.Z)"
             exit 1
           fi
 
@@ -53,7 +48,7 @@ jobs:
       - name: Update agent tags in documentation
         run: |
           # Find the current agent tag version in the docs
-          CURRENT_TAG=$(grep -oP 'gcr\.io/abacus-labs-dev/hyperlane-agent:(agents-v[0-9]+\.[0-9]+\.[0-9]+)' docs/ -r | head -1 | grep -oP 'agents-v[0-9]+\.[0-9]+\.[0-9]+')
+          CURRENT_TAG=$(grep -oP 'gcr\.io/abacus-labs-dev/hyperlane-agent:\K(agents-v[0-9]+\.[0-9]+\.[0-9]+)' docs/ -r | head -1)
           NEW_TAG="${{ steps.get-tag.outputs.tag }}"
 
           echo "Current tag: $CURRENT_TAG"
@@ -77,7 +72,7 @@ jobs:
           fi
 
           # Update all occurrences in markdown files
-          find docs -name "*.mdx" -type f -exec sed -i "s|gcr\.io/abacus-labs-dev/hyperlane-agent:$CURRENT_TAG|gcr.io/abacus-labs-dev/hyperlane-agent:$NEW_TAG|g" {} +
+          find docs -name "*.mdx" -type f -print0 | xargs -0 sed -i "s|gcr\.io/abacus-labs-dev/hyperlane-agent:$CURRENT_TAG|gcr.io/abacus-labs-dev/hyperlane-agent:$NEW_TAG|g"
 
           echo "Updated agent tags from $CURRENT_TAG to $NEW_TAG"
 
