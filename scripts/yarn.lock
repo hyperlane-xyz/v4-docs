@@ -1838,10 +1838,10 @@
     "@radixdlt/radix-engine-toolkit" "^1.0.5"
     bignumber.js "^9.1.1"
 
-"@hyperlane-xyz/registry@23.5.0":
-  version "23.5.0"
-  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/registry/-/registry-23.5.0.tgz#707a6120dd3f5edbb90684b602a885f784b585db"
-  integrity sha512-0bY3Fdh17f5Xqg3RlVyfXvWojw8pfw3ybTbwg2oB9Cairc78Z6qlIUGzslvU48SI85rTBVrCT6xfduJ8CUJgEQ==
+"@hyperlane-xyz/registry@23.6.0":
+  version "23.6.0"
+  resolved "https://registry.yarnpkg.com/@hyperlane-xyz/registry/-/registry-23.6.0.tgz#ac0b20f90c39b9603c7c3cfdeaccdfb6e78e384e"
+  integrity sha512-13T/ija3CBnWhzEtDavU1K3HzFwCL1M3LHvSEUuCuyvIOjO+KMRWWR5aVpvWHQwuN6AijWi6Tst18yE+j+tB/w==
   dependencies:
     jszip "^3.10.1"
     yaml "2.4.5"
