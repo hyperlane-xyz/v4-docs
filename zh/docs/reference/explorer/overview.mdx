@@ -1,0 +1,37 @@
+---
+title: "概述"
+description: "本指南可用于在任何部署了 Hyperlane 的网络上查找消息。深入了解消息的详细属性和状态。"
+---
+
+来往[核心链](/zh/docs/reference/domains)的消息可通过交易哈希、消息 ID 或发送者/接收者地址进行搜索。对于其他链，可以通过提供链配置来配置 explorer 以搜索消息。
+
+### 搜索消息
+
+[Hyperlane Explorer](https://explorer.hyperlane.xyz/) 支持使用以下任一值搜索消息：
+
+- 发起消息的交易哈希（源交易）
+- 传递消息的交易哈希（目标交易）
+- 发送源交易的账户地址
+- 发送目标交易的账户地址
+- 消息发送者地址
+- 消息接收者地址
+- 消息 ID
+
+要搜索，请在顶部搜索栏中输入您的查询。您可以使用源链、目标链和时间筛选选项来缩小搜索范围。
+
+![Explorer search bar](/images/docs/guides/explorer/explorer-search-bar.png)
+
+<Info>
+  注意，默认情况下，explorer 只会在[核心 Hyperlane 链](/zh/docs/reference/domains)上查找消息。
+
+要查看发送到其他链和/或从其他链发送的消息，请参阅[配置 PI 链](/zh/docs/reference/explorer/configuring-pi-chains)。
+
+</Info>
+
+### 无需许可的互操作性[​](#permissionless-interoperability "Direct link to Permissionless Interoperability")
+
+可以配置 explorer 以在任何部署了 Hyperlane 的链上搜索消息。详情请参阅[配置 PI 链](/zh/docs/reference/explorer/configuring-pi-chains)。
+
+### 调试消息[​](#debugging-messages "Direct link to Debugging Messages")
+
+如果您正在尝试调试消息传递问题，[explorer 调试](/zh/docs/reference/explorer/explorer-debugging)页面有有用的提示。

@@ -1,0 +1,41 @@
+---
+title: '列出操作'
+api: 'GET http://localhost:9090/list_operations'
+---
+
+列出操作队列中的待处理消息。返回 relayer 当前正在处理的消息。
+
+<ResponseField type="PendingOperation[]">
+  待处理操作数组
+</ResponseField>
+
+<ResponseExample>
+```json Response
+[
+  {
+    "message_id": "0x123...",
+    "status": "pending",
+    "attempts": 1,
+    "last_attempt": "2024-01-01T12:00:00Z"
+  }
+]
+```
+</ResponseExample>
+
+<RequestExample>
+```bash curl
+curl "http://localhost:9090/list_operations"
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/list_operations');
+const operations = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get('http://localhost:9090/list_operations')
+operations = response.json()
+```
+</RequestExample>

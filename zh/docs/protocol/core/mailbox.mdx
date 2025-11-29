@@ -1,0 +1,189 @@
+---
+title: "邮箱"
+description: "在 Hyperlane 中用于发送和接收跨链消息的核心智能合约接口"
+---
+
+import SimpleMessagingDiagram from "/snippets/core/simple-messaging-diagram.mdx";
+
+Hyperlane `邮箱` 智能合约公开了用于发送和接收跨链消息的链上 API。在 Hyperlane 支持的每条链上都部署了一个 `邮箱` 合约。
+
+`邮箱` 网络为开发者提供了区块链之间的连接组织，开发者利用它来创建跨链应用程序，并为其现有应用程序添加跨链功能。
+
+<SimpleMessagingDiagram />
+
+- 要[**发送**](/zh/docs/reference/messaging/send)跨链消息，请调用 `dispatch` 函数。
+- 要[**接收**](/zh/docs/reference/messaging/receive)跨链消息，请实现 `handle` 函数。
+
+## 接口
+
+[`IMailbox`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/interfaces/IMailbox.sol) 接口公开了两个状态变更函数；`dispatch()` 和 `process()`，分别用于发送和接收消息。
+
+<Accordion title="IMailbox 接口">
+
+```solidity
+// SPDX-License-Identifier: MIT OR Apache-2.0
+pragma solidity >=0.8.0;
+
+import {IInterchainSecurityModule} from "./IInterchainSecurityModule.sol";
+import {IPostDispatchHook} from "./hooks/IPostDispatchHook.sol";
+
+interface IMailbox {
+    // ============ 事件 ============
+    /**
+     * @notice 通过 Hyperlane 调度新消息时发出
+     * @param sender 调度消息的地址
+     * @param destination 消息的目标域
+     * @param recipient `destination` 上的消息接收者地址
+     * @param message 消息的原始字节
+     */
+    event Dispatch(
+        address indexed sender,
+        uint32 indexed destination,
+        bytes32 indexed recipient,
+        bytes message
+    );
+
+    /**
+     * @notice 通过 Hyperlane 调度新消息时发出
+     * @param messageId 唯一消息标识符
+     */
+    event DispatchId(bytes32 indexed messageId);
+
+    /**
+     * @notice 处理 Hyperlane 消息时发出
+     * @param messageId 唯一消息标识符
+     */
+    event ProcessId(bytes32 indexed messageId);
+
+    /**
+     * @notice 传递 Hyperlane 消息时发出
+     * @param origin 消息的源域
+     * @param sender `origin` 上的消息发送者地址
+     * @param recipient 处理消息的地址
+     */
+    event Process(
+        uint32 indexed origin,
+        bytes32 indexed sender,
+        address indexed recipient
+    );
+
+    function localDomain() external view returns (uint32);
+
+    function delivered(bytes32 messageId) external view returns (bool);
+
+    function defaultIsm() external view returns (IInterchainSecurityModule);
+
+    function defaultHook() external view returns (IPostDispatchHook);
+
+    function requiredHook() external view returns (IPostDispatchHook);
+
+    function latestDispatchedId() external view returns (bytes32);
+
+    function dispatch(
+        uint32 destinationDomain,
+        bytes32 recipientAddress,
+        bytes calldata messageBody
+    ) external payable returns (bytes32 messageId);
+
+    function quoteDispatch(
+        uint32 destinationDomain,
+        bytes32 recipientAddress,
+        bytes calldata messageBody
+    ) external view returns (uint256 fee);
+
+    function dispatch(
+        uint32 destinationDomain,
+        bytes32 recipientAddress,
+        bytes calldata body,
+        bytes calldata defaultHookMetadata
+    ) external payable returns (bytes32 messageId);
+
+    function quoteDispatch(
+        uint32 destinationDomain,
+        bytes32 recipientAddress,
+        bytes calldata messageBody,
+        bytes calldata defaultHookMetadata
+    ) external view returns (uint256 fee);
+
+    function dispatch(
+        uint32 destinationDomain,
+        bytes32 recipientAddress,
+        bytes calldata body,
+        bytes calldata customHookMetadata,
+        IPostDispatchHook customHook
+    ) external payable returns (bytes32 messageId);
+
+    function quoteDispatch(
+        uint32 destinationDomain,
+        bytes32 recipientAddress,
+        bytes calldata messageBody,
+        bytes calldata customHookMetadata,
+        IPostDispatchHook customHook
+    ) external view returns (uint256 fee);
+
+    function process(
+        bytes calldata metadata,
+        bytes calldata message
+    ) external payable;
+
+    function recipientIsm(
+        address recipient
+    ) external view returns (IInterchainSecurityModule module);
+}
+```
+
+</Accordion>
+
+### 消息头
+
+邮箱在消息体前添加包含以下字段的头部：
+
+| **字段**     | **描述**                                                |
+| ------------- | -------------------------------------------------------------- |
+| `version`     | 邮箱合约的版本                            |
+| `nonce`       | 从给定邮箱发送的每条消息的唯一标识符 |
+| `origin`      | 源链的域                                 |
+| `sender`      | 源链上发送者的地址                  |
+| `destination` | 目标链的域                            |
+| `recipient`   | 目标链上接收者的地址          |
+
+有关消息编码的更多信息，请参见 [`Message` 库](/zh/docs/reference/messaging/send)。
+
+### 唯一性
+
+`nonce` 是从给定邮箱发送的每条消息的单调递增整数。每次调度消息时都会递增，用作其他相同消息的分隔符。
+
+<CodeGroup>
+
+```solidity Solidity
+function delivered(bytes32 messageId) external view returns (bool);
+```
+
+</CodeGroup>
+
+`messageId` 是全局唯一的消息标识符，从 `dispatch` 调用返回，计算为消息（带头部）的 `keccak256` 哈希。
+
+### 重放保护
+
+邮箱维护已传递的 `messageId` 值的映射，以防止重放攻击。如果接收到的消息的 `messageId` 已经传递，该消息将被拒绝。
+
+## 调度
+
+要发送跨链消息，开发者调用 `Mailbox.dispatch()`。
+
+此函数接受消息内容、目标链 ID 和接收者地址作为参数。每条消息都作为叶子插入到由 `邮箱` 存储的[增量默克尔树](https://medium.com/@josephdelong/ethereum-2-0-deposit-merkle-tree-13ec8404ca4f)中。
+
+Hyperlane 的权益证明协议使用此默克尔树来验证欺诈证明。
+
+## 处理
+
+要传递跨链消息，[中继器](/zh/docs/protocol/agents/relayer)调用 `Mailbox.process()`。
+
+此函数接受要传递的消息以及中继器可以指定的任意元数据作为参数。
+
+`邮箱` 将消息和元数据传递给接收者的跨链安全模块进行验证。如果 ISM 成功验证消息，`邮箱` 通过调用 `recipient.handle()` 将消息传递给接收者。
+
+<Note>
+  有关 Hyperlane 消息编码的更多详细信息，请参见
+  [`Message.sol`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/libs/Message.sol)
+</Note>

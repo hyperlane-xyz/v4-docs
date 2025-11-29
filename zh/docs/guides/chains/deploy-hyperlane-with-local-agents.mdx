@@ -1,0 +1,409 @@
+---
+title: "使用本地代理部署Hyperlane"
+description: "使用本地验证器和中继器部署Hyperlane的高级指南"
+---
+
+<Tip>
+  此指南面向最终可能打算在类生产环境中运行Hyperlane代理的高级用户。它将涵盖如何手动配置和运行代理的基础知识，但**这不是生产环境设置指南**。
+</Tip>
+
+## 概述
+
+本指南包含六个步骤：
+
+1. **设置密钥**，您将使用这些密钥来部署合约并运行验证器和中继器
+2. **部署合约**到本地链以及本地链将能够发送和接收消息的每个远程链
+3. **运行验证器**为您部署的跨链安全模块提供所需的签名
+4. **运行中继器**在您部署合约的链之间发送和接收消息
+5. **发送测试消息**以确认您的中继器能够在每对链之间传递消息
+6. **部署Hyperlane Warp路由(HWR)**以发送代币价值，而不仅仅是消息，跨链
+
+## 开始使用
+
+## 1. 设置密钥
+
+设置您用于部署合约和运行代理的密钥。
+
+## 2. 部署合约
+
+将Hyperlane合约部署到您的链。
+
+## 3. 运行验证器
+
+验证器为从您的链发送到远程链的消息提供安全性。只有在使用[Multisig ISM](/zh/docs/protocol/ISM/standard-ISMs/multisig-ISM)时才需要它们。了解更多关于验证器的作用，请参阅[这里](/zh/docs/protocol/agents/validators)。
+
+### 设置目录
+
+首先，将`CONFIG_FILES`环境变量设置为在[部署合约](#2-deploy-contracts)步骤中生成的代理配置文件路径。例如：
+
+```bash
+export CONFIG_FILES=/full/path/to/configs/agent-config-{timestamp}.json
+```
+
+接下来，为您的验证器创建一个本地目录以写入其签名。记住路径，因为在配置验证器时您需要它。
+
+<Warning>
+  验证器签名路径将作为[验证器公告交易](/zh/docs/alt-vm-implementations/implementation-guide#validator-announce)的一部分写入链上。**请小心不要泄露任何安全敏感或个人信息！**
+</Warning>
+
+```bash
+# 选择一个特定于您验证的链的信息性名称
+export VALIDATOR_SIGNATURES_DIR=/tmp/hyperlane-validator-signatures-<your_chain_name>
+
+# 创建目录
+mkdir -p $VALIDATOR_SIGNATURES_DIR
+```
+
+<Note>
+在Mac上通过Docker运行代理时，您将无法挂载`/tmp`中的任何内容。为了解决这个问题，请创建一个本地`tmp`目录来挂载。
+
+```bash
+# 创建一个可被docker访问的本地tmp目录
+mkdir tmp
+
+# 选择一个特定于您验证的链的信息性名称
+export VALIDATOR_SIGNATURES_DIR=tmp/hyperlane-validator-signatures-<your_chain_name>
+
+# 创建目录
+mkdir -p $VALIDATOR_SIGNATURES_DIR
+```
+
+</Note>
+
+### 配置
+
+验证器可以配置许多参数。对于本指南，我们只关注少数几个：
+
+| 参数                      | 描述                                                                                      |
+| ------------------------- | ----------------------------------------------------------------------------------------- |
+| `--db`                    | 将持久数据写入磁盘的路径。                                                                |
+| `--originChainName`       | 正在验证的链的名称（例如`ethereum`）。                                                    |
+| `--checkpointSyncer.type` | 对于本指南设置为`localStorage`。                                                          |
+| `--checkpointSyncer.path` | 验证器签名将写入的本地目录路径。与`$VALIDATOR_SIGNATURES_DIR`相同的路径。                 |
+| `--validator.key`         | 您验证器的十六进制私钥。                                                                  |
+
+<Info>
+  确保验证器密钥对应于设置MultisigIsmConfig时提供的地址。否则，您在上一步中部署的Multisig ISM将无法验证从您的链发送的消息。
+</Info>
+
+要了解更多关于您可以更改的所有参数，请阅读[代理配置参考](/zh/docs/operate/config/config-reference)。
+
+<Tabs>
+  <Tab title="使用Docker">
+    **更新代理配置**
+
+    除非您在Linux上运行Docker，否则您还需要更新网络的代理配置。这是因为Docker在Mac、Windows或Windows Server上不支持[`host`网络模式](https://docs.docker.com/network/drivers/host/)。
+
+    要做到这一点，导航到`$CONFIG_FILES`的代理配置文件，并将所有"localhost"或"127.0.0.1"实例替换为`host.docker.internal`。例如：
+
+    ```json
+    ...
+    "localnet1": {
+      ...
+      "rpcUrls": [
+        {
+          // "http": "http://localhost:8545"
+          // "http": "http://127.0.0.1:8545"
+          "http": "http://host.docker.internal:8545"
+        }
+      ],
+      ...
+    },
+    ...
+    ```
+
+    **挂载目录**
+
+    使用Docker运行会增加额外的复杂性，因为配置文件需要从Docker容器内部访问，验证器签名需要从容器外部访问，以便中继器读取。这样中继器就可以构造消息成功通过Multisig ISM验证所需的元数据。
+
+    为了解决这个问题，您可以将文件系统上的目录挂载到容器中。在下面的参数中，我们：
+
+    1. 将`$CONFIG_FILES`环境变量设置为容器内的固定路径。
+    2. 将代理配置文件挂载到此固定路径并使其只读。
+    3. 将持久数据目录挂载到容器内的固定路径。
+    4. 将验证器签名目录挂载到容器内的固定路径。
+
+    ```bash
+    ...
+    -e CONFIG_FILES=/config/agent-config.json \
+    --mount type=bind,source=$CONFIG_FILES,target=/config/agent-config.json,readonly \
+    --mount type=bind,source="$(pwd)"/hyperlane_db_validator_<your_chain_name>,target=/hyperlane_db \
+    --mount type=bind,source="$(pwd)"/$VALIDATOR_SIGNATURES_DIR,target=/tmp/validator-signatures \
+    ...
+    ```
+
+    硬编码这些路径可以在为不同源链运行验证器的docker实例之间去重配置。这使得在运行容器时更容易传递正确的参数。请参阅下面的示例，其中为不同链配置的唯一项目是链名称和验证器密钥。
+
+    ```bash
+    ...
+    ./validator \
+    --db /hyperlane_db \
+    --originChainName <your_chain_name> \
+    --checkpointSyncer.type localStorage \
+    --checkpointSyncer.path /tmp/validator-signatures \
+    --validator.key <your_validator_key>
+    ...
+    ```
+
+  </Tab>
+  <Tab title="从源代码构建">
+    **克隆和设置**
+
+    首先，克隆Hyperlane monorepo：
+
+    ```bash
+    git clone git@github.com:hyperlane-xyz/hyperlane-monorepo.git
+    ```
+
+    然后按照`rust`目录中的[设置说明](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/rust/README.md)进行操作。如果您使用的是Apple Silicon，这应该会设置`rustup`以及Rosetta 2。
+
+    ```bash
+    # 安装rustup
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+    # (仅限apple silicon) 安装rosetta 2
+    softwareupdate --install-rosetta --agree-to-license
+    ```
+
+  </Tab>
+</Tabs>
+
+### 运行
+
+<Tabs>
+  <Tab title="使用Docker">
+    现在您已了解更多关于配置验证器参数的信息，请拉取最新的docker镜像：
+
+    ```bash
+    docker pull --platform linux/amd64 gcr.io/abacus-labs-dev/hyperlane-agent:agents-v1.4.0
+    ```
+
+    在运行之前，确保您需要挂载的所有目录都存在。这可能涉及创建`hyperlane_db_validator_<your_chain_name>`（如果它还不存在）。
+
+    ```bash
+    mkdir -p hyperlane_db_validator_<your_chain_name>
+    ```
+
+    最后，运行验证器：
+
+    ```bash
+    docker run \
+      -it \
+      -e CONFIG_FILES=/config/agent-config.json \
+      --mount type=bind,source=$CONFIG_FILES,target=/config/agent-config.json,readonly \
+      --mount type=bind,source="$(pwd)"/hyperlane_db_validator_<your_chain_name>,target=/hyperlane_db \
+      --mount type=bind,source="$(pwd)"/$VALIDATOR_SIGNATURES_DIR,target=/tmp/validator-signatures \
+      gcr.io/abacus-labs-dev/hyperlane-agent:agents-v1.4.0 \
+      ./validator \
+      --db /hyperlane_db \
+      --originChainName <your_chain_name> \
+      --checkpointSyncer.type localStorage \
+      --checkpointSyncer.path /tmp/validator-signatures \
+      --validator.key <your_validator_key>
+    ```
+
+  </Tab>
+  <Tab title="从源代码构建">
+    按照设置说明进行操作后，您现在应该能够使用`cargo`运行验证器：
+
+    ```bash
+    cargo run --release --bin validator -- \
+        --db ./hyperlane_db_validator_<your_chain_name> \
+        --originChainName <your_chain_name> \
+        --checkpointSyncer.type localStorage \
+        --checkpointSyncer.path $VALIDATOR_SIGNATURES_DIR \
+        --validator.key <your_validator_key>
+    ```
+
+    <Note>
+    **可选：直接运行二进制文件**
+
+    您也可以构建代理：
+
+    ```bash
+    cargo build --release --bin validator
+    ```
+
+    并直接运行二进制文件：
+
+    ```bash
+    ./target/release/validator \
+        --db ./hyperlane_db_validator_<your_chain_name> \
+        --originChainName <your_chain_name> \
+        --checkpointSyncer.type localStorage \
+        --checkpointSyncer.path $VALIDATOR_SIGNATURES_DIR \
+        --validator.key <your_validator_key>
+    ```
+    </Note>
+
+  </Tab>
+</Tabs>
+
+<Tip>
+  更多信息，请查看[验证器指南](/zh/docs/operate/validators/run-validators)。要了解运行多个验证器，请参阅[此部分](/zh/docs/operate/validators/run-validators#running-multiple-validators)。
+</Tip>
+
+## 4. 运行中继器
+
+<Tip>
+  - **单中继器建议**：一般来说，单个中继器就足够了，可以有效地处理100多个链的消息传递。您不需要为每个网络运行单独的中继器 - 这种方法实际上会增加操作复杂性而不会提供性能优势。
+</Tip>
+
+<Warning>
+
+- **可信中继器ISM密钥管理**：如果您使用可信中继器ISM（不推荐用于生产），请避免在多个中继器实例中使用相同的中继器密钥，因为这可能导致nonce冲突和交易失败。要么运行单个中继器，要么为每个中继器使用不同的密钥。
+- 对于生产部署，使用multisig ISM而不是可信中继器ISM。
+
+</Warning>
+
+中继器在本地和远程链之间传递跨链消息。了解更多关于中继器的作用，请参阅[这里](/zh/docs/protocol/agents/relayer)。
+
+您应该已经将`CONFIG_FILES`环境变量设置为在[代理配置](#agent-configs)步骤中生成的代理配置路径。如果没有，现在就这样做。
+
+```bash
+export CONFIG_FILES=/full/path/to/configs/agent-config.json
+```
+
+### 配置
+
+中继器可以配置许多参数。对于本指南，我们只关注少数几个：
+
+| 参数                            | 描述                                                                                         |
+| ------------------------------- | -------------------------------------------------------------------------------------------- |
+| `--db`                          | 将持久数据写入磁盘的路径。                                                                   |
+| `--relayChains`                 | 要在其间中继的链的逗号分隔名称。例如`ethereum,polygon,avalanche`。                           |
+| `--allowLocalCheckpointSyncers` | 允许中继器在本地文件系统上查找验证器签名。                                                   |
+| `--defaultSigner.key`           | 用于为所有链签署交易的十六进制私钥。                                                         |
+| `--metrics-port`                | 可选。暴露prometheus指标的端口，默认为`9090`。                                               |
+
+<Tip>
+  您的中继链集应该包括源链和目标链。
+</Tip>
+
+要了解更多关于您可以更改的所有参数，请阅读[代理配置参考](/zh/docs/operate/config/config-reference)。
+
+<Tabs>
+  <Tab title="使用Docker">
+    **挂载目录**
+
+    对于中继器，我们向Docker提供与验证器几乎相同的参数：
+
+    1. 将`$CONFIG_FILES`环境变量设置为容器内的固定路径。
+    2. 将代理配置文件挂载到此固定路径并使其**只读**。
+    3. 将持久数据目录挂载到容器内的固定路径。
+    4. 将验证器签名目录挂载到容器内的固定路径并使其**只读**。
+
+    ```bash
+    ...
+    -e CONFIG_FILES=/config/agent-config.json \
+    --mount type=bind,source=$CONFIG_FILES,target=/config/agent-config.json,readonly \
+    --mount type=bind,source="$(pwd)"/hyperlane_db_relayer,target=/hyperlane_db \
+    --mount type=bind,source="$(pwd)"/$VALIDATOR_SIGNATURES_DIR,target=/tmp/validator-signatures,readonly \
+    ...
+    ```
+
+    硬编码这些路径可以在为不同链集运行中继器的docker实例之间去重配置。这使得在运行容器时更容易传递正确的参数。请参阅下面的示例，其中为不同链配置的唯一项目是要在其间中继的链列表和中继器密钥。
+
+  </Tab>
+  <Tab title="从源代码构建">
+    **克隆和设置**
+
+    如果您还没有这样做，请克隆Hyperlane monorepo并按照`rust`目录中的[设置说明](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/rust/README.md)进行操作。
+
+    ```bash
+    # 克隆hyperlane monorepo
+    git clone git@github.com:hyperlane-xyz/hyperlane-monorepo.git
+
+    # 安装rustup
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+    # (仅限apple silicon) 安装rosetta 2
+    softwareupdate --install-rosetta --agree-to-license
+    ```
+
+  </Tab>
+</Tabs>
+
+### 运行
+
+<Tabs>
+  <Tab title="使用Docker">
+    如果您还没有拉取Docker镜像，现在通过运行以下命令来拉取：
+
+    ```bash
+    docker pull --platform linux/amd64 gcr.io/abacus-labs-dev/hyperlane-agent:agents-v1.4.0
+    ```
+
+    在运行之前，确保您需要挂载的所有目录都存在。这可能涉及创建`hyperlane_db_relayer`（如果它还不存在）。
+
+    ```bash
+    mkdir -p hyperlane_db_relayer
+    ```
+
+    最后，运行中继器：
+
+    ```bash
+    docker run \
+      -it \
+      -e CONFIG_FILES=/config/agent-config.json \
+      --mount type=bind,source=$CONFIG_FILES,target=/config/agent-config.json,readonly \
+      --mount type=bind,source="$(pwd)"/hyperlane_db_relayer,target=/hyperlane_db \
+      --mount type=bind,source="$(pwd)"/$VALIDATOR_SIGNATURES_DIR,target=/tmp/validator-signatures,readonly \
+      gcr.io/abacus-labs-dev/hyperlane-agent:agents-v1.4.0 \
+      ./relayer \
+      --db /hyperlane_db \
+      --relayChains <chain_1_name>,<chain_2_name> \
+      --allowLocalCheckpointSyncers true \
+      --defaultSigner.key <your_relayer_key> \
+    ```
+
+  </Tab>
+  <Tab title="从源代码构建">
+    按照设置说明进行操作后，您现在应该能够使用`cargo`运行中继器：
+
+    ```bash
+    cargo run --release --bin relayer -- \
+        --db ./hyperlane_db_relayer \
+        --relayChains <chain_1_name>,<chain_2_name> \
+        --allowLocalCheckpointSyncers true \
+        --defaultSigner.key <your_relayer_key> \
+        --metrics-port 9091
+    ```
+
+    指标端口被覆盖以避免与验证器冲突。
+
+    <Note>
+    **可选：直接运行二进制文件**
+
+    您也可以构建代理：
+
+    ```bash
+    cargo build --release --bin relayer
+    ```
+
+    并直接运行二进制文件：
+
+    ```bash
+    ./target/release/relayer \
+        --db ./hyperlane_db_relayer \
+        --relayChains <chain_1_name>,<chain_2_name> \
+        --allowLocalCheckpointSyncers true \
+        --defaultSigner.key <your_relayer_key> \
+        --metrics-port 9091
+    ```
+    </Note>
+
+  </Tab>
+</Tabs>
+
+<Tip>
+  更多信息，请查看[中继器指南](/zh/docs/operate/relayer/run-relayer)。
+</Tip>
+
+## 5. 发送测试消息
+
+发送测试消息以验证您的设置是否正常工作。
+
+## 6. (可选) 部署Hyperlane Warp路由
+
+要使用您的新Hyperlane部署连接代币，请参阅[Hyperlane Warp路由部署指南](/zh/docs/guides/quickstart/deploy-warp-route)。
