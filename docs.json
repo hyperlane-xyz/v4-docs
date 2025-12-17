@@ -445,6 +445,10 @@
     {
       "source": "/docs/your-first-message",
       "destination": "/docs/guides/quickstart/local-testnet-setup"
+    },
+    {
+      "source": "/docs/protocol/interchain-gas-payment",
+      "destination": "/docs/protocol/core/interchain-gas-payment"
     }
   ],
   "integrations": {
