@@ -38,19 +38,24 @@ jobs:
           git config user.name "${{ steps.generate-token.outputs.app-slug }}[bot]"
           git config user.email "${{ steps.get-user-id.outputs.user-id }}+${{ steps.generate-token.outputs.app-slug }}[bot]@users.noreply.github.com"
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'yarn'
-          cache-dependency-path: 'scripts/yarn.lock'
+          cache: 'pnpm'
+          cache-dependency-path: 'scripts/pnpm-lock.yaml'
 
       - name: Get latest SDK and Registry versions
         id: get-versions
         run: |
           cd scripts
-          LATEST_SDK=$(yarn info @hyperlane-xyz/sdk version --json | jq -r '.data')
-          LATEST_REGISTRY=$(yarn info @hyperlane-xyz/registry version --json | jq -r '.data')
+          LATEST_SDK=$(npm view @hyperlane-xyz/sdk version)
+          LATEST_REGISTRY=$(npm view @hyperlane-xyz/registry version)
           echo "sdk=$LATEST_SDK" >> $GITHUB_OUTPUT
           echo "registry=$LATEST_REGISTRY" >> $GITHUB_OUTPUT
           echo "Latest SDK: $LATEST_SDK"
@@ -65,7 +70,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd scripts
-          yarn install
+          pnpm install
 
       - name: Run generate-all script
         run: |
@@ -98,7 +103,7 @@ jobs:
 
           **Changes include:**
           - Updated \`scripts/package.json\` with latest SDK and Registry versions
-          - Updated \`scripts/yarn.lock\` via \`yarn install\`
+          - Updated \`scripts/pnpm-lock.yaml\` via \`pnpm install\`
           - Regenerated all documentation artifacts via \`generate-all.js\`
 
           ---
