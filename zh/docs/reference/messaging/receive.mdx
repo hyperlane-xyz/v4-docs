@@ -1,0 +1,92 @@
+---
+title: "接收消息"
+description: "如何使用 Hyperlane 的邮箱合约处理和验证传入的跨链消息"
+---
+
+要传递跨链消息，[中继器](/zh/docs/operate/relayer/run-relayer)调用 `Mailbox.process()`。
+
+此函数接受要传递的消息以及中继器可以指定的任意元数据作为参数。
+
+`邮箱` 将消息和元数据传递给接收者的跨链安全模块（ISM）进行验证。如果 ISM 成功验证消息，`邮箱` 通过调用 `recipient.handle()` 将消息传递给接收者。
+
+<Info>
+  有关 Hyperlane 消息编码的更多详细信息，请参见
+  [`Message.sol`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/libs/Message.sol)
+</Info>
+
+## 处理
+
+此函数由 `邮箱` 合约在接收到消息时调用。
+
+<Warning>
+  为确保只接受有效的跨链消息，限制对邮箱地址的[访问控制](#access-control)非常重要。
+</Warning>
+
+### Solidity
+
+```solidity
+function handle(
+    uint32 _origin,
+    bytes32 _sender,
+    bytes calldata _messageBody
+) external;
+```
+
+**参数**
+
+- `origin`：源链的域
+- `sender`：源链上发送者的地址，以 bytes32 格式
+- `messageBody`：消息体的原始字节内容
+
+<Info>
+发送者地址左填充为 `bytes32`，以兼容地址不同的虚拟机。为方便起见，在 [`TypeCasts` 库](/zh/docs/reference/developer-tools/libraries/typecasts)中提供了以下实用工具。
+
+```solidity
+function bytes32ToAddress(bytes32 _bytes32) internal pure returns (address) {
+    return address(uint160(uint256(_bytes32)));
+}
+```
+
+</Info>
+
+### 访问控制
+
+如果合约应该只接受来自跨链消息的调用，`handle` 函数应该限制为邮箱地址。
+
+为方便起见，在 [`MailboxClient` 库](/zh/docs/reference/developer-tools/libraries/mailbox-client)中提供了以下实用工具。
+
+```solidity
+modifier onlyMailbox() {
+    require(
+        msg.sender == address(mailbox),
+        "MailboxClient: sender not mailbox"
+    );
+    _;
+}
+```
+
+### 示例
+
+```solidity
+function handle(
+    uint32 _origin,
+    bytes32 _sender,
+    bytes calldata _messageBody
+) external override onlyMailbox {
+    lastSender = _sender;
+    lastData = _messageBody;
+    emit ReceivedMessage(_origin, _sender, _messageBody);
+}
+```
+
+## 验证
+
+当接收到消息时，邮箱将在调用消息接收者的 `handle` 之前使用[跨链安全模块](/zh/docs/protocol/ISM/modular-security)验证安全性。
+
+### 默认安全
+
+要查询默认 ISM 地址，您可以调用 `defaultIsm` 函数。
+
+### 模块化安全
+
+为了利用 Hyperlane 的模块化安全性，消息接收者可以指定自定义跨链安全模块来**验证传入消息的任何内容**。指定时，邮箱将遵从此 ISM。

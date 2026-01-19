@@ -1,0 +1,93 @@
+---
+title: "Arbitrum L2 to L1 Hook"
+---
+
+Arbitrum 的 Outbox 系统允许在乐观挑战期之后进行任意的 L2 到 L1 合约调用，即在 L2 链上发起的消息最终在 L1 上执行。更多详情请参阅[这里](https://docs.arbitrum.io/how-arbitrum-works/arbos/l2-l1-messaging)。Hyperlane 可以封装 Outbox 系统，利用 Arbitrum L2 的乐观安全性（具有 7 天提款期和可操作的欺诈证明）来保护来自任何 Arbitrum Nitro rollup 的 L2 到 L1 消息。我们已经实现了 [ArbL2ToL1Hook](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/hooks/ArbL2ToL1Hook.sol) 和 [ArbL2ToL1Ism](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/hook/ArbL2ToL1Ism.sol)。
+
+## 工作原理
+
+<Note>
+  来自 L2 的出站消息无法提供协议内自动 L1 执行，
+  因为 Ethereum 不通过 L1
+  节点提供计划执行功能。
+</Note>
+
+`ArbL2ToL1Hook` 将带有 `messageId` 的编码函数调用发送到 L2 上的 `ArbSys` 预编译合约。等待提款期后，您可以在 L2 上使用 `getOutboxProof()` 获取消息的默克尔证明。从这里开始，您有两个选项：
+
+- **选项 A.** 您可以通过 `mailbox.process()` 调用 `ArbL2ToL1Ism` 的 verify 函数，使用证明和其他编码数据，这反过来会调用 `outbox.executeTransaction()` 检查消息发送者和消息数据的有效性。
+- **选项 B.** 您可以直接使用证明和其他编码数据调用 `outbox.executeTransaction()`。但是，您需要第二次调用 `ArbL2ToL1Ism` 的 verify 函数来传递消息。此选项还允许您将消息值传递给接收者合约。
+
+### 选项 A
+
+```mermaid
+flowchart TB
+    subgraph Origin L2
+      Sender
+      M_O[(Mailbox)]
+      Hook[ArbL2ToL1Hook]
+      L_2[(ArbSys)]
+
+      Sender -- "dispatch(...)" --> M_O
+      M_O -- "postDispatch(message)" --> Hook
+      Hook -- "sendMessage(messageId)" --> L_2
+    end
+
+    M_O -. "process (relayer)
+    after 7 days" .-> M_D
+    L_2 -. "executeTransaction(3rd party relayer)
+    after 7 days" .-> L_1
+
+    subgraph Destination L1
+      Recipient
+      M_D[(Mailbox)]
+      ISM{ArbL2ToL1Ism}
+      L_1[(ArbOutbox)]
+
+      M_D -- "verify(..., message)" --> ISM
+      M_D -- "handle(...)" --> Recipient
+      ISM -. "interchainSecurityModule()" .- Recipient
+
+      L_1 -- "verifyMessageId(messageId)" --> ISM
+    end
+
+    style L_1 fill: #162c4f
+    style L_2 fill: #162c4f
+```
+
+### 选项 B
+
+注意：在这里，relayer 负责从 `arbSys.getOutboxProof()` 编码消息证明并调用 `outbox.executeTransaction()` 函数。
+
+```mermaid
+flowchart TB
+    subgraph Origin L2
+      Sender
+      M_O[(Mailbox)]
+      Hook[ArbL2ToL1Hook]
+      L_2[(ArbSys)]
+
+      Sender -- "dispatch(...)" --> M_O
+      M_O -- "postDispatch(message)" --> Hook
+      Hook -- "sendMessage(messageId)" --> L_2
+    end
+
+    M_O -. "process(relayer)
+    after 7 days" .-> M_D
+    M_O -. "getOutboxProof()" .-> L_2
+
+    subgraph Destination L1
+      Recipient
+      M_D[(Mailbox)]
+      ISM{ArbL2ToL1Ism}
+      L_1[(ArbOutbox)]
+
+      M_D -- "verify(..., message)" --> ISM
+      M_D -- "handle(...)" --> Recipient
+      ISM -. "interchainSecurityModule()" .- Recipient
+
+      L_1 -- "verifyMessageId(messageId)" --> ISM
+    end
+
+    style L_1 fill: #162c4f
+    style L_2 fill: #162c4f
+```

@@ -1,0 +1,106 @@
+---
+title: "Relayer"
+---
+
+Relayer 通过将消息从源链传递到目标链来运行 Hyperlane 协议的传输层。根据接收者指定的[跨链安全模块 (ISM)](/zh/docs/protocol/ISM/modular-security)，可能需要元数据来证明消息的安全性，例如[多重签名 ISM](/zh/docs/protocol/ISM/standard-ISMs/multisig-ISM) 的 Validator 签名、merkle 证明、零知识证明等。因此在尝试传递之前，Relayer 会收集任何 ISM 特定的元数据。
+
+<Tip>
+  Relayer 将定期重试元数据收集和消息提交。这对于提高对中断的弹性很重要，例如：未支付用于传递的 gas 费用、Relayer 余额不足、目标链上交易费用临时飙升、Validator 宕机。
+</Tip>
+
+### Relayer 激励机制
+
+消息发送者在源链上为传递付费，Relayer 运营商有责任将收入重新平衡到目标链账户，以便始终可以支付传递交易费用。Relayer 不会从协议中获得直接的代币激励，但运营商可以配置其费用结构以提供关键服务。有关更多信息，请查看[跨链 Gas 支付 (IGP)](/zh/docs/protocol/core/interchain-gas-payment)。
+
+### 运营 Relayer
+
+Relayer 可以轻松配置它们希望处理的消息。目前，Relayer 将支持：
+
+1. 发送者/接收者白名单。
+2. 发送者/接收者黑名单。
+3. 接受[源链上的支付](../../reference/messaging/send#quote-dispatch)以处理目标链上的消息的能力。
+
+虽然运行是无需许可的，但由消息发送者决定为传递支付哪个 Relayer。[Mailbox](/zh/docs/protocol/core/mailbox) 集成通常默认总是支付给同一个 Relayer，但消息发送者可以选择退出。为方便起见，Hyperlane 将运行一个开源且可配置的 Relayer agent，作为 Rust 二进制文件实现。如果您想运行自己的 Relayer，我们已经开源了[二进制文件](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/rust/main/agents/relayer)。
+
+运行自己的 Relayer 涉及部署 [IGP 合约](/zh/docs/protocol/core/interchain-gas-payment)并维护其中的代币汇率和 gas 价格，以准确收取消息传递费用。
+
+<Info>
+  想要运行 Relayer？请遵循 [Relayer](/zh/docs/operate/relayer/run-relayer) 指南。
+</Info>
+
+## 更多细节
+
+Relayer 由两个主要任务组成：每个源链的 Indexer 和每个目标链的 Submitter。
+
+![High-level Relayer Architecture](/images/docs/operate/relayer-architecture-high-level.png)
+
+### Indexer
+
+通过使用 RPC 查询 [Mailbox](/zh/docs/protocol/core/mailbox) 合约事件来索引新消息和历史消息。[Gas 支付](/zh/docs/protocol/core/interchain-gas-payment)也会被索引以确认发送者已支付传递费用，某些 ISM 使用额外的源链数据。多重签名 ISM 就是这种情况，它依赖 Merkle Tree Hook 合约来告知 Relayer 哪个 Validator 签名对应哪条消息。为每种事件类型（Messages、IGP、Merkle Tree insertion）都会生成一个独立的索引任务。
+
+Indexer 写入本地数据库 (RocksDB) 作为缓存手段，以及与 Submitter 任务通信 - 后者定期轮询数据库以检查是否调度了新消息。
+
+Relayer 优先处理新消息而不是旧消息，假设旧消息更有可能已被传递。这意味着在（重新）启动时，会创建两个指针：一个向前的和一个向后的，两者都初始化为区块链尖端，并使用消息的单调递增 `nonce` 字段进行迭代。类似的方法用于索引其他事件，但有些缺少序列号，如果收到不正确的 RPC 响应可能会被遗漏 - 这种情况经常发生。因此，消息索引任务将找到事件的交易 ID 发送给其他索引任务，保证只要事件发生在与 `Mailbox.dispatch()` 调用相同的交易中，就不会遗漏任何 Hyperlane 事件。
+
+### Submitter
+
+消息作为 Submitter 的一部分经历四个阶段，这些阶段作为独立任务生成，如下所述。
+
+<table>
+  <thead>
+    <tr>
+      <th>Submitter 任务</th>
+      <th>描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Message Processor</td>
+      <td>
+        轮询本地数据库以检查是否有任何未传递的消息，并将它们推送到 Prepare 步骤的队列。
+      </td>
+    </tr>
+    <tr>
+      <td>Prepare Task</td>
+      <td>
+        从其队列中弹出消息，确保已支付 gas，获取任何元数据并模拟消息传递交易。如果模拟成功，消息将被推送到 Submit 步骤的队列。否则，消息将被推回 Prepare 队列。
+      </td>
+    </tr>
+    <tr>
+      <td>Submit Task</td>
+      <td>
+        从其队列中弹出消息，并在链上发送传递交易。只要可能就会批量传递。如果广播交易没有错误，消息将被推送到 Confirm 步骤的队列。否则，消息将被推回 Prepare 队列。
+      </td>
+    </tr>
+    <tr>
+      <td>Confirm Task</td>
+      <td>
+        等待最终确定；如果发生链重组或传递交易回滚，消息将被推回 Prepare 队列。
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+通过在目标链上使用上述元数据调用 `Mailbox.process()` 将消息传递给其接收者。
+
+消息的重试计数根据指数退避策略确定其下一次传递尝试。目前，没有固定的最大重试次数，超过该次数后 Relayer 将停止尝试处理消息。但是，这并不保证无限重试，运营商不应将此作为服务级别协议 (SLA) 依赖。
+
+#### 重试策略
+
+如果传递尝试不成功，Relayer 使用自适应退避策略重试传递。此策略经过优化，可支持具有较长最终确定时间或处理时间的 ISM，并确保重试持续足够长的时间以从临时问题中恢复。
+
+| 重试次数范围  | 重试之间的延迟                                   |
+| ------------- | ------------------------------------------------ |
+| 1             | 5 秒                                             |
+| 2             | 10 秒                                            |
+| 3             | 30 秒                                            |
+| 4             | 1 分钟                                           |
+| 5–24          | 3 分钟                                           |
+| 25–39         | 从 5 分钟开始，线性增加（每次重试增加 1.5 分钟）|
+| 40–44         | 30 分钟                                          |
+| 45–49         | 1 小时                                           |
+| 50+           | 逐渐增加到几个小时，最终达到几天                 |
+
+您可以在[此处](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/1d8ada64736b09d9878d2a11568c04d522f515b8/rust/main/agents/relayer/src/msg/pending_message.rs#L733)查看实现。
+
+_注意：这些值是近似值，可能会更改。_

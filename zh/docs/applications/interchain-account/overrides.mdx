@@ -1,0 +1,47 @@
+---
+title: "覆盖"
+---
+
+跨链账户允许开发者覆盖在`InterchainAccountRouter`中配置的默认链和安全模型。
+
+这些功能适用于：
+
+- 在`InterchainAccountRouter`中未配置的链上调用ICA。
+- 使用与`InterchainAccountRouter`中配置的默认值不同的ISM
+- 调整IGP支付的燃气限制或设置其他参数。
+
+## 接口
+
+`callRemoteWithOverrides`函数看起来与`callRemote`函数类似，但接受三个额外的参数。
+
+首先，开发者可以覆盖`_router`，即远程链上`InterchainAccountRouter`的地址。这允许开发者在本地`InterchainAccountRouter`上未配置的远程链上控制ICA。
+
+其次，开发者可以覆盖`_ism`，即用于保护其ICA的远程跨链安全模块(ISM)的地址。此ISM将用于验证在本地和远程`InterchainAccountRouters`之间传递的跨链消息。这允许开发者使用最适合其需求的自定义安全模型。
+
+第三，开发者可以覆盖`_hookMetadata`，即传递给每个ICA调用的消息钩子的[StandardHookMetadata](/zh/docs/reference/developer-tools/libraries/hookmetadata)元数据（例如，覆盖IGP支付的燃气限制）。
+
+```solidity
+    /**
+     * @notice Dispatches a sequence of remote calls to be made by an owner's
+     * interchain account on the destination domain
+     * @dev Recommend using CallLib.build to format the interchain calls
+     * @param _destination The remote domain of the chain to make calls on
+     * @param _router The remote router address
+     * @param _ism The remote ISM address
+     * @param _calls The sequence of calls to make
+     * @param _hookMetadata The hook metadata to override with for the hook set by the owner
+     * @return The Hyperlane message ID
+     */
+    function callRemoteWithOverrides(
+        uint32 _destination,
+        bytes32 _router,
+        bytes32 _ism,
+        CallLib.Call[] calldata _calls,
+        bytes memory _hookMetadata
+    ) public payable returns (bytes32)
+
+    function getRemoteInterchainAccount(
+        address _owner,
+        address _router,
+        address _ism
+    ) public view returns (address)

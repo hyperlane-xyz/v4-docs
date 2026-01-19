@@ -1,0 +1,161 @@
+---
+title: "桥接代币"
+---
+
+<Info>
+  **本指南适用于基于 EVM 的链。** 对于其他环境，请查看：
+- [SVM Hyperlane Warp 路由指南](/zh/docs/guides/warp-routes/svm/svm-warp-route-guide)
+- [EVM ↔ SVM Hyperlane Warp 路由指南](/zh/docs/guides/warp-routes/evm-svm-warp-route-guide)
+
+</Info>
+
+本节提供了通过部署 Hyperlane Warp 路由（HWR）合约创建跨链代币桥的分步演练。
+
+## 先决条件
+
+- [Hyperlane CLI](/zh/docs/reference/developer-tools/cli)
+- 用于合约交易签名的私钥
+
+## 1. 配置
+
+### HWR 部署配置
+
+要部署路由，您需要一个 HWR 部署配置文件。有效的配置将指定：
+
+- 此 HWR 是为哪个链上的哪个代币创建的？
+- _可选：_ Hyperlane 连接详细信息，例如[邮箱](/zh/docs/reference/addresses/deployments/mainnet/mailbox)、[跨链 Gas](/zh/docs/reference/hooks/interchain-gas) 和[跨链安全模块](/zh/docs/protocol/ISM/modular-security#core-concepts)的合约地址。
+- _可选：_ 代币标准，包括 ERC20（可替代代币）、ERC721（NFT）和 ERC4626（收益代币）。请注意，ERC721 支持是实验性的，一些 Hyperlane 工具还无法用于 NFT。
+
+创建 HWR 部署配置文件最简单的方法是使用 CLI 的配置命令：
+
+```
+hyperlane warp init
+```
+
+此命令提供一个演练，直接在终端中提示您进行配置选择。您将被要求为配置的每个部分选择特定选项，例如网络类型、要连接的链、代币类型以及是否使用受信任的 ISM。
+
+<Info>
+
+- 如果您的配置看起来正确，现在可以跳转到[步骤 2：部署](#2-deployment)。或者查看下面的详细信息，了解如何手动定义配置。
+- 如果您需要设置代币桥的任何帮助，请在 Discord 的 #developers 频道联系我们或[取得联系](https://forms.gle/KyRTaWvo4XNmNvrq6)。
+
+</Info>
+
+#### 部署配置架构
+
+您的配置包含链名称到部署配置的映射。每个配置设置关于您要为其创建 HWR 的代币的详细信息。
+
+- **type**:
+
+  - 设置为 `collateral` 以为 ERC20/ERC721 代币创建基本 HWR
+  - 设置为 `collateralVault` 以为 ERC20 代币创建收益 HWR，该代币存入现有的 ERC4626 资金库
+  - 设置为 `native` 以为原生代币（例如以太币）创建 HWR
+
+- **address:**
+
+  - 如果使用 `collateral`，要为其创建路由的 ERC20/ERC721 合约地址
+  - 如果使用 `collateralVault`，要将抵押品存入的现有 ERC4626 资金库地址
+
+- **isNft:** 如果为 ERC721 合约使用 `collateral`，设置为 `true`。
+
+#### 可选字段[​](#optional-fields "Direct link to Optional fields")
+
+您可以在配置条目中指定以下可选值。如果未提供值，部署者将尝试从其他地方获取这些值。对于元数据（符号、名称、小数位），它将查询合约。对于地址（mailbox、ISM），它将检查注册表，您的注册表（如果提供）或[默认注册表](/zh/docs/reference/registries#default-registry)。
+
+- **symbol:** 代币符号
+- **name:** 代币名称
+- **decimals:** 代币的小数位数
+- **mailbox:** 用于发送和接收消息的[邮箱](/zh/docs/reference/addresses/deployments/mainnet/mailbox)合约地址
+- **interchainSecurityModule:** 用于验证跨链消息的[跨链安全模块](/zh/docs/protocol/ISM/modular-security#core-concepts)地址
+
+#### 示例[​](#example "Direct link to Example")
+
+有关使用本地 anvil 链的最小 Warp 部署配置示例，请参见 [`warp-route-deployment.yaml`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/cli/examples/warp-route-deployment.yaml)。
+
+<Info>
+  * 在以下部分了解更多关于 HWR 类型和不同配置的信息：
+
+    * [HWR 类型](/zh/docs/protocol/warp-routes/warp-routes-types)
+    * [HWR 示例用法](/zh/docs/protocol/warp-routes/warp-routes-example-usage)
+
+</Info>
+
+### 链配置
+
+部署将需要关于任何将与其交互的链的基本信息。如果目标链不在 [Hyperlane 注册表](https://github.com/hyperlane-xyz/hyperlane-registry)中，您必须为它们指定链元数据。有关详细信息，请参见 [CLI 参考](/zh/docs/reference/developer-tools/cli)。
+
+要查看当前已知的链，运行以下命令：
+
+```
+hyperlane registry list
+```
+
+要为任何其他链创建链元数据配置，运行以下命令：
+
+```
+hyperlane registry init
+```
+
+或者您可以手动定义配置。有关其架构，请参见 [ChainMetadata 类型](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/sdk/src/metadata/chainMetadataTypes.ts#L62)。有关示例，请参见 [chain-config.yaml](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/cli/examples/chain-config.yaml)。
+
+<Warning>
+  尽可能确保在您的 HWR 配置中**重用注册表/CLI 中的任何现有链**，而不是设置新的邮箱。
+</Warning>
+
+## 2. 部署 HWR
+
+配置准备就绪后，使用以下命令启动 HWR 部署：
+
+```
+hyperlane warp deploy
+```
+
+在部署期间，CLI 需要访问您的私钥来签署交易。您可以通过以下两种方式之一设置：
+
+1. **环境变量**：将您的私钥设置为 HYP_KEY 以避免每次都输入：
+
+   ```
+   export HYP_KEY=<your_private_key>
+   ```
+
+2. **手动输入**：或者，您可以在部署期间提示时直接输入私钥。
+
+`hyperlane warp deploy` 命令将创建两个新的构件文件：
+
+1. `otherchain-yourchain-addresses.yaml`：包含新部署的 HWR 合约地址。
+2. `otherchain-yourchain-config.yaml`：用于通过 CLI 和 Warp UI 与 HWR 交互的配置文件。
+
+这些文件将位于 `$HOME/.hyperlane/deployments/warp_routes/` 下。
+
+3. 测试
+
+您可以使用以下命令启动单个 wei 的测试转移：
+
+```
+hyperlane warp send --relay --symbol TOKEN
+```
+
+`--relay` 标志是可选的，将消息中继到目标链。
+
+您还可以在后台运行仅为您的 HWR 传递的中继器：
+
+```
+hyperlane relayer --symbol TOKEN
+```
+
+您可以在设置 HWR 的任一方向上进行测试。但是，如果您部署了 `native` 或 `collateral` HWR，您必须选择与部署该 `native` 或 `collateral` 类型相对应的源。默认情况下，发送的数量是代币最小单位的 `1`。
+
+<Info>
+  **下一步**
+
+- 如果您正在遵循[将 Hyperlane 部署到新链](/zh/docs/guides/chains/deploy-hyperlane#3-warp-route)指南并希望连接其他链或与 Abacus Works 一起进入生产环境，请继续[提交到注册表](/zh/docs/guides/chains/deploy-hyperlane#4-submit-to-registry)指南。
+
+- 有关通过 UI 与 HWR 交互，请继续查看 [Warp UI 文档](/zh/docs/guides/warp-routes/bridge-ui-guide)。
+
+</Info>
+
+## 了解更多
+
+- 查看 [HWR](/zh/docs/applications/warp-routes/overview) 参考页面，了解有关 HWR 接口和安全影响的更多信息。[接口](/zh/docs/applications/warp-routes/overview#interface)部分涵盖调用 `transferRemote` 将代币转移到目标链上的指定接收者。请注意，在调用 `transferRemote` 之前，您必须提示进行代币批准。
+
+- HWR 是一种[路由器](/zh/docs/reference/developer-tools/libraries/router)应用程序，这是一种使您能够跨链链接多个合约的模式。

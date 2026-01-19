@@ -1,0 +1,78 @@
+---
+title: "Hyperlane 跨链路由"
+---
+
+Hyperlane 跨链路由（HWR）是模块化的跨链资产桥接方案，支持使用 Hyperlane 在链之间转移代币。开发者可以使用 Hyperlane 无需许可地部署 HWR，在链之间移动资产。
+
+它们支持多种资产类型，包括：
+
+- ERC20 和 ERC721 代币（用于 EVM 兼容链）
+- SVM 基础资产（用于 SVM 兼容链）
+- 原生代币（如 ETH 或其他 gas 代币）
+
+您可以将 HWR 与 Hyperlane 部署相结合，在任何链与通过 Hyperlane 已连接的其他链之间创建经济路由。
+
+## 模块化安全[​](#modular-security "直接链接到模块化安全")
+
+与所有基于 Hyperlane 构建的应用一样，HWR 通过[跨链安全模块](/zh/docs/protocol/ISM/modular-security)具有可定制的安全性。
+
+HWR 的部署者可以指定用于验证跨链转移消息的 ISM。这意味着每个 HWR 可能具有独特的安全配置。转移跨链代币的用户应在使用之前了解路由的信任假设。
+
+<Note>
+  同样，Warp 前端应手动筛选其 HWR，以避免
+  支持不安全的路由。详情请参阅 [Warp UI 部署
+  文档](/zh/docs/guides/warp-routes/bridge-ui-guide)。
+</Note>
+
+## HWR 架构
+
+HWR 让部署者选择代币如何在链之间转移。根据 HWR 的类型，合约将锁定代币、铸造包装代币、销毁包装代币或释放原始代币。
+
+例如：
+
+1. **抵押品 → 合成**：代币在原始（抵押品）链上被锁定，发送消息，然后在目标（合成）链上铸造包装代币。
+2. **原生 → 合成**：原生 gas 代币（例如 ETH）在原始链上被锁定，发送消息，然后在目标链上铸造合成代币。
+3. **原生 → 抵押品**：原生代币在原始链上被锁定，发送消息，然后在目标链上释放抵押品代币。
+
+每个 HWR 都需要在其所在的每条链上部署一个合约，充当进出点。这些合约使用[邮箱合约](/zh/docs/protocol/core/mailbox)相互发送跨链消息。
+
+### HWR 类型
+
+此表格提供了 HWR 类型的高级概述。详细说明请参见：[Hyperlane 跨链路由类型](/zh/docs/protocol/warp-routes/warp-routes-types)。
+
+| **Hyperlane 跨链路由类型** | **描述**                                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------------------------------ |
+| 原生代币 HWR              | 支持原生 gas 代币（如 ETH）在链间直接转移，无需包装。        |
+| 抵押品支持的 ERC20       | 在源链上锁定 ERC20 代币作为抵押品，用于跨链转移。                  |
+| 合成 ERC20               | 在目标链上铸造新的 ERC20 代币以代表原始代币。                |
+| Hyperlane 跨链路由 2.0     | 允许从多个抵押品代币中获取流动性。                                  |
+| 专用 HWR               | 添加高级功能或集成特定用例（例如，金库、法币支持的代币）。 |
+
+### 架构示例[​](#example-architecture "直接链接到架构示例")
+
+让我们通过一个使用锁定和铸造模型在两条链之间转移 ERC20 代币的**抵押品**到**合成** HWR 来演示：
+
+1. 用户在抵押品链（例如 Ethereum）的 HWR 合约中锁定他们的代币。
+2. 通过 Hyperlane 的邮箱合约发送消息并中继到合成链（例如 Base）。
+3. 在目标链上，HWR 合约为用户铸造包装代币。
+
+在下图中，ISM 是一个[多签 ISM](/zh/docs/protocol/ISM/standard-ISMs/multisig-ISM)，它使用一组验证者来批准消息。（注意：并非所有 ISM 都需要验证者，这取决于所选的安全模型。）
+
+以下是流程的简化视图：
+
+![跨链路由图](/images/docs/protocol/warp-routes/warp-route.png)
+
+## 部署 HWR
+
+HWR 可以在任何拥有 Hyperlane 部署的链之间进行部署。
+
+要部署 HWR，请参阅以下指南：
+
+- [基于 EVM 的 HWR](/zh/docs/guides/quickstart/deploy-warp-route)
+- [基于 SVM 的 HWR](/zh/docs/guides/warp-routes/svm/svm-warp-route-guide)
+- [EVM-SVM HWR](/zh/docs/guides/warp-routes/evm-svm-warp-route-guide)
+
+<Check>
+  如果您想要创建一个包含 Hyperlane 尚未部署的链的 HWR，
+  欢迎您自行[部署 Hyperlane](/zh/docs/guides/chains/deploy-hyperlane)！
+</Check>

@@ -1,0 +1,88 @@
+---
+title: "多重签名 ISM"
+---
+
+`MultisigISM` 是最常用的 ISM 类型之一。这些 ISM 验证 `n` 个 [Validator](/zh/docs/protocol/agents/validators) 中的 `m` 个已证明特定跨链消息的有效性。
+
+## 多重签名模块类型
+
+有两种类型的 `MultisigISM` 模块：
+
+```solidity
+enum Types {
+    ...
+    MERKLE_ROOT_MULTISIG,
+    MESSAGE_ID_MULTISIG,
+    ...
+}
+```
+
+### MerkleRootMultisigIsmMetadata
+
+**类型：`Types.MERKLE_ROOT_MULTISIG`**
+
+**元数据格式：**
+
+| **组件**                                     | **长度（字节）**   | **描述**                                    |
+| -------------------------------------------- | ------------------ | ------------------------------------------- |
+| 第 1 个组件                                  | 32                 | 源 merkle tree 地址                         |
+| 第 2 个组件                                  | 4                  | merkle tree 中消息 ID 的索引                |
+| 第 3 个组件                                  | 32                 | 已签名的 checkpoint 消息 ID                 |
+| 第 4 个组件                                  | 1024               | Merkle 证明                                 |
+| 第 5 个组件                                  | 4                  | 已签名的 checkpoint 索引（从证明和索引计算）|
+| 第 6 个组件（len == threshold \* 65 字节）   | threshold \* 65    | Validator 签名                              |
+
+### MessageIdMultisigIsmMetadata
+
+**类型：`Types.MESSAGE_ID_MULTISIG`**
+
+**元数据格式：**
+
+| **组件**                                     | **长度（字节）**   | **描述**                    |
+| -------------------------------------------- | ------------------ | --------------------------- |
+| 第 1 个组件                                  | 32                 | 源 merkle tree 地址         |
+| 第 2 个组件                                  | 32                 | 已签名的 checkpoint root    |
+| 第 3 个组件                                  | 4                  | 已签名的 checkpoint 索引    |
+| 第 4 个组件（len == threshold \* 65 字节）   | threshold \* 65    | Validator 签名              |
+
+## 接口
+
+`MultisigISMs` 必须实现 `IMultisigIsm` 接口。
+
+```solidity
+// SPDX-License-Identifier: MIT OR Apache-2.0
+pragma solidity >=0.8.0;
+
+import {IInterchainSecurityModule} from "../IInterchainSecurityModule.sol";
+
+interface IMultisigIsm is IInterchainSecurityModule {
+    /**
+     * @notice Returns the set of validators responsible for verifying _message
+     * and the number of signatures required
+     * @dev Can change based on the content of _message
+     * @param _message Hyperlane formatted interchain message
+     * @return validators The array of validator addresses
+     * @return threshold The number of validator signatures needed
+     */
+    function validatorsAndThreshold(
+        bytes calldata _message
+    ) external view returns (address[] memory validators, uint8 threshold);
+}
+```
+
+## 配置
+
+hyperlane-monorepo 包含 [`MultisigISM` 实现](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/solidity/contracts/isms/multisig)（包括[旧版本](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/multisig/LegacyMultisigIsm.sol)和可通过工厂部署的更节省 gas 的[版本](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/multisig/StaticMultisigIsm.sol)），应用程序开发者可以开箱即用地部署，指定其所需的配置。
+
+要配置 `MultisigISM` 实例：
+
+1. 开发者在每个源链上定义 `n` 个 Validator 的集合。
+2. 设置阈值，指定确认消息所需的 Validator 签名数量（`m`）。
+
+Validator 签名**不是** ISM 特定的。换句话说，开发者可以配置其 `MultisigISM` 以使用在 Hyperlane 上运行的**任何** Validator。
+
+## 自定义
+
+对于更具体的用例，开发者可以 fork Hyperlane monorepo 中提供的抽象 `MultisigISM` 实现。主要自定义涉及实现 `validatorsAndThreshold()` 函数。
+
+自定义实现允许开发者调整安全模型以满足其应用程序的需求。例如，自定义实现可以根据正在验证的消息内容来改变所需的签名数量。

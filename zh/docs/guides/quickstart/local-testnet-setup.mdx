@@ -1,0 +1,161 @@
+---
+title: "本地设置：在 Anvil 节点间发送消息"
+description: "本指南将引导您使用 Hyperlane CLI 在两个本地 Anvil 节点之间发送跨链消息。"
+---
+
+## 前置条件[​](#prerequisites "直接链接到前置条件")
+
+- **[Hyperlane CLI](https://docs.hyperlane.xyz/docs/reference/developer-tools/cli)：** 确保您已安装最新版本的 Hyperlane CLI。
+
+  ```
+  npm install -g @hyperlane-xyz/cli
+  ```
+
+- **[Anvil (foundry)](https://book.getfoundry.sh/getting-started/installation)：** 用于运行本地链。通过以下命令安装：
+
+  ```
+  curl -L https://foundry.paradigm.xyz | bash
+  ```
+
+- **Node.js** (v18 或更高版本)
+
+- **部署钱包私钥**：您需要一个有资金的钱包来部署合约。这将用作 HYP_KEY。
+
+  ```
+  export HYP_KEY=<YOUR_PRIVATE_KEY>
+  ```
+
+## 分步指南[​](#step-by-step-guide "直接链接到分步指南")
+
+### 1. 环境设置
+
+为 Hyperlane 配置创建工作目录：[​](#1-environment-setup-create-a-working-directory-for-the-hyperlane-configuration "直接链接到 1. 环境设置：为 Hyperlane 配置创建工作目录：")
+
+```
+mkdir hyperlane-local-test && cd hyperlane-local-test
+```
+
+### 2. 启动两个不同的 Anvil 节点[​](#2-start-two-distinct-anvil-nodes "直接链接到 2. 启动两个不同的 Anvil 节点")
+
+我们将运行两个具有唯一链 ID 的 Anvil 节点。
+
+- 在第一个终端中，启动第一个 Anvil 节点：
+
+  ```
+  anvil --port 8545 --chain-id 31337 --block-time 1
+  ```
+
+  - 运行在 `http://localhost:8545`。
+  - 链 ID：`31337`。
+
+- 在新终端中，启动第二个 Anvil 节点：
+
+  ```
+  anvil --port 8546 --chain-id 31338 --block-time 1
+  ```
+
+  - 运行在 `http://localhost:8546`。
+  - 链 ID：`31338`。
+
+### 3. 初始化 Hyperlane Registry (注册表)[​](#3-initialize-the-hyperlane-registry "直接链接到 3. 初始化 Hyperlane Registry")
+
+在新终端中，使用 Hyperlane CLI 为两个 Anvil 节点创建配置：
+
+```
+hyperlane registry init
+```
+
+按照提示设置 `anvilnode1`。CLI 会询问您的链详细信息，包括 chainId 和 RPC URLs。对 `anvilnode2` 重复此过程。
+
+此过程将在 `$HOME/.hyperlane/chains/anvilnode1` 和 `$HOME/.hyperlane/chains/anvilnode2` 下创建 `metadata.yaml` 文件。
+
+元数据示例：
+
+- **anvilnode1**
+
+```
+chainId: 31337displayName: Anvilnode1domainId: 31337isTestnet: truename: anvilnode1nativeToken:  decimals: 18  name: ETH  symbol: ETHprotocol: ethereumrpcUrls:  - http: http://localhost:8545
+```
+
+- **anvilnode2**
+
+```
+chainId: 31338displayName: Anvilnode2domainId: 31338isTestnet: truename: anvilnode2nativeToken:  decimals: 18  name: ETH  symbol: ETHprotocol: ethereumrpcUrls:  - http: http://localhost:8546
+```
+
+### 4. 部署核心合约[​](#4-deploy-core-contracts "直接链接到 4. 部署核心合约")
+
+我们将配置并部署 Hyperlane 核心合约。
+
+<Check>
+  您需要部署钱包私钥来部署核心合约。您可以使用 `export HYP_KEY='<YOUR_PRIVATE_KEY>'` 将私钥设置为环境变量。
+</Check>
+
+```
+hyperlane core init
+```
+
+部署配置将保存到 `./configs/core-config.yaml`。
+
+接下来，部署核心合约：
+
+```
+hyperlane core deploy
+```
+
+按照提示选择 `anvilnode1`。CLI 将部署 Mailbox (消息邮箱)、Interchain Security Modules (跨链安全模块) 和其他必需的合约。对 `anvilnode2` 重复此过程。
+
+完成后，您将在 `$HOME/.hyperlane/chains/anvilnode1` 和 `$HOME/.hyperlane/chains/anvilnode2` 中找到 `addresses.yaml`，其中包含已部署的合约地址。
+
+<Check>
+  您应该能够在运行本地节点的终端中看到合约部署的消息。
+</Check>
+
+### 5. 发送测试消息[​](#5-send-a-test-message "直接链接到 5. 发送测试消息")
+
+使用 Hyperlane CLI 从 `anvilnode1` 向 `anvilnode2` 发送消息。
+
+```
+hyperlane send message --relay
+```
+
+CLI 将提示您提供源链（`anvilnode1`）和目标链（`anvilnode2`）。
+
+<Check>
+  对于本地测试，`--relay` 标志会自动将消息中继到目标链。
+</Check>
+
+发送消息后，检查以下内容：
+
+- Validator (验证器) 日志：查找表明已生成并存储签名的条目。
+- Relayer (中继器) 日志：查找成功的元数据检索和消息处理。
+- Anvil 日志：确保区块已挖掘以处理交易。
+
+<Check>
+  🎉 您已成功使用 Hyperlane 在两个本地 Anvil 节点之间发送了消息！
+</Check>
+
+## 故障排除[​](#troubleshooting "直接链接到故障排除")
+
+1. "Could not fetch metadata" 警告：
+
+   - **原因：** 当 relayer (中继器) 无法检索处理消息所需的 validator (验证器) 签名时发生。常见原因：
+
+     - validator (验证器) 密钥缺乏测试网资金。
+     - validator (验证器) 尚未宣布其存储位置。
+
+   - **解决方案：**
+
+     - 确保 validators (验证器) 已宣布其存储位置。检查 validator (验证器) 日志中的消息，如：`Validator has announced signature storage location, locations: ["file:///tmp/hyperlane-validator-signatures-local"].`
+     - 验证每个 validator (验证器) 都有唯一的签名存储路径（`--checkpointSyncer.path`）以防止覆盖。
+     - 确认 relayer (中继器) 对存储路径具有读取权限。
+
+2. 消息超时：
+
+   - **原因：** Anvil 默认不自动挖掘区块，导致 validators (验证器) 或 relayers (中继器) 无限期等待新区块。
+   - **解决方案：** 确保在启动 Anvil 时使用 `--block-time 1` 标志，以每秒自动挖掘区块。
+
+3. Validator (验证器) 不匹配或配置错误：
+
+   - **原因：** 目标链上的 ISM 配置与源链使用的 validator (验证器) 密钥不匹配。
+   - **解决方案：** 检查 ISM 配置是否包含正确的 validator (验证器) 地址。Validator (验证器) 日志可帮助识别已宣布的地址。

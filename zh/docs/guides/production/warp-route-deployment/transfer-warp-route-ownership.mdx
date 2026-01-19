@@ -1,0 +1,123 @@
+---
+title: "转移所有权"
+---
+
+import PrerequisitesPartial from "/snippets/warp-routes/prerequisites-config-symbol.mdx";
+import WarpReadSymbolChainPartial from "/snippets/warp-routes/warp-read-symbol-chain.mdx";
+import WarpApplySymbolConfigDefaultPartial from "/snippets/warp-routes/warp-apply-symbol-config-default.mdx";
+
+本指南提供了转移Hyperlane Warp路由(HWR)所有权的分步指南。它还解释了拥有HWR所带来的责任、安全考虑和配置选项。
+
+## HWR所有权概述
+
+在转移HWR所有权之前，了解此所有权的含义很重要。所有权授予对配置设置的控制权，例如跨链安全模块(ISM)、验证器选项以及对安全至关重要的其他参数。
+
+<Note>
+  一旦在链上设置了邮箱，任何人都可以部署HWR。HWR通常由几个不同的群体部署——Abacus Works团队、资产发行方、链团队或应用程序团队。
+</Note>
+
+### 所有权概述
+
+- **责任**：作为所有者，您承担的责任包括管理安全配置，如ISM和验证器设置，以满足您特定的安全和运营目标。
+- **安全与自主权**：所有权选择通常归结于安全和控制偏好。我们强烈建议对任何生产设置使用多重签名，如Gnosis Safe。团队可以选择**完全所有权**以获得完全自主权，或在多重签名上选择**联合所有权**以共享安全管理。联合所有权允许在关键更新上进行协作决策，这可以增加用户和开发者的信任。
+
+### ISM、验证器和中继器选项
+
+在配置或转移HWR时，所有者在管理ISM、验证器和中继器设置方面具有灵活性：
+
+- **ISM自定义**：每个HWR可能需要根据安全需求定制ISM配置。所有者可以设置自定义ISM或使用Hyperlane的默认设置。
+- **验证器选项**：所有权允许您选择或管理您的验证器集。Hyperlane默认可以处理验证器责任，使运行自己的验证器成为可选项。
+- **中继器支持**：Hyperlane默认提供中继器服务，但团队可以操作自己的中继器以获得对安全、可靠性和成本的更多控制。此自定义使团队能够定制消息处理以满足特定的性能、合规或运营要求。
+
+## HWR所有权转移指南
+
+### 使用Hyperlane CLI
+
+转移HWR所有权的最快方法之一是使用[Hyperlane CLI](https://docs.hyperlane.xyz/docs/reference/developer-tools/cli)。
+
+<PrerequisitesPartial />
+
+<Info>
+  如果您遵循了[部署Warp路由](/zh/docs/guides/quickstart/deploy-warp-route)指南，您可能已部署了一个所有者设置为单个私钥的HWR。在生产环境中，建议使用多重签名。
+</Info>
+
+要使用Hyperlane CLI确认，请找到您的代币符号及其部署的链：
+
+<WarpReadSymbolChainPartial />
+
+您应该能够选择要更新所有权的HWR。
+
+运行`warp read`后，您应该看到类似的配置，其中`owner`设置为私钥地址：
+
+```yaml {3}
+yourchain:
+  mailbox: "0x979Ca5202784112f4738403dBec5D0F3B9daabB9"
+  owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  ...
+```
+
+默认情况下，`warp read`将输出保存到`CURRENT_DIR/configs/warp-route-deployment.yaml`。按照这些步骤使用CLI将现有所有权转移到另一个地址。
+
+## 步骤1：配置
+
+在`warp-route-deployment.yaml`中更新`owner`地址
+
+```diff title="warp-route-deployment.yaml"
+yourchain:
+  mailbox: '0x979Ca5202784112f4738403dBec5D0F3B9daabB9'
+- owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
++ owner: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+  IInterchainSecurityModule:
+    address: '0xd54d32cD6a62482497252D59E6cCC1445fF0b92d'
+    type: staticAggregationIsm
+    modules:
+      - owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+        address: '0xcE512189fF1BD41186E9eDda02BF321Fb1FC6eAc'
+        type: defaultFallbackRoutingIsm
+        domains: {}
+    threshold: 1
+  name: Ether
+  symbol: ETH
+  decimals: 18
+  totalSupply: 0
+  type: native
+
+```
+
+## 步骤2：应用
+
+使用CLI执行，提供代币符号和HWR配置：
+
+<WarpApplySymbolConfigDefaultPartial />
+
+您应该看到在链上执行的一批交易，以及指示warp配置已更新的最终消息。
+
+## 步骤3：确认
+
+要使用Hyperlane CLI确认所有者已成功更新，请使用您的代币符号及其部署的链运行以下命令：
+
+<WarpReadSymbolChainPartial />
+
+运行`warp read`后，您应该看到类似的配置，现在已更新的`owner`：
+
+```yaml {3}
+yourchain:
+  mailbox: "0x979Ca5202784112f4738403dBec5D0F3B9daabB9"
+  owner: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+  IInterchainSecurityModule:
+    address: "0x8af9445d8A3FbFBd1D5dF185B8a4533Ab060Cf36"
+    type: staticAggregationIsm
+    modules:
+      - owner: "0xe738d6e51aad88F6F4ce6aB8827279cffFb94876"
+        address: "0xBe0232d5d45f9aD8322C2C4F84c39e64302Cd996"
+        type: defaultFallbackRoutingIsm
+        domains: {}
+    threshold: 1
+  name: Ether
+  symbol: ETH
+  decimals: 18
+  totalSupply: 0
+  type: native
+```
+
+通过完成这些步骤，您已成功转移并验证了HWR所有权到新地址。

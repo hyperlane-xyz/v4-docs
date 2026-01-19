@@ -1,0 +1,266 @@
+---
+title: "Hyperlane 协议经济学"
+---
+
+Hyperlane 是一个无需许可的跨链通信互操作性协议，使消息能够在不同区块链之间移动。
+
+HYPER 是 Hyperlane 的原生代币，旨在协调 Hyperlane 生态系统内的激励并赋能社区。它用于通过质押保护跨链通信，并奖励网络参与者对协议活动的贡献。
+
+## HYPER 代币概述
+
+### HYPER
+
+HYPER 是 Hyperlane 协议的原生代币。它存在于多个网络上，包括以太坊主网、Base、OP Mainnet、Arbitrum One 和 BSC。
+
+HYPER 用于通过质押保护 Hyperlane 协议。验证器部分基于质押 HYPER 被选择提供默认消息安全。
+
+| 代币     | 网络          | 合约地址                                                                                                               |
+| --------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **HYPER** | 以太坊主网 | [0x93A2Db22B7c736B341C32Ff666307F4a9ED910F5](https://etherscan.io/token/0x93A2Db22B7c736B341C32Ff666307F4a9ED910F5)            |
+| **HYPER** | Arbitrum One     | [0xC9d23ED2ADB0f551369946BD377f8644cE1ca5c4](https://arbiscan.io/token/0xC9d23ED2ADB0f551369946BD377f8644cE1ca5c4)             |
+| **HYPER** | Base             | [0xC9d23ED2ADB0f551369946BD377f8644cE1ca5c4](https://basescan.org/token/0xC9d23ED2ADB0f551369946BD377f8644cE1ca5c4)            |
+| **HYPER** | OP Mainnet       | [0x9923DB8d7FBAcC2E69E87fAd19b886C81cd74979](https://optimistic.etherscan.io/token/0x9923DB8d7FBAcC2E69E87fAd19b886C81cd74979) |
+| **HYPER** | BSC              | [0xC9d23ED2ADB0f551369946BD377f8644cE1ca5c4](https://bscscan.com/token/0xC9d23ED2ADB0f551369946BD377f8644cE1ca5c4)             |
+
+### stHYPER
+
+stHYPER 是用户将 HYPER 锁定到 [Symbiotic 资金库](https://docs.symbiotic.fi/modules/vault/introduction/)时获得的流动性质押代币。stHYPER 在以太坊主网和 BSC 上可用。
+
+它充当收据代币，代表用户质押的 HYPER。在 stHYPER 存在的地方可以申请奖励。
+
+| 代币       | 网络          | 合约地址                                                                                                    |
+| ----------- | ---------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **stHYPER** | 以太坊主网 | [0xE1F23869776c82f691d9Cb34597Ab1830Fb0De58](https://etherscan.io/token/0xE1F23869776c82f691d9Cb34597Ab1830Fb0De58) |
+| **stHYPER** | BSC              | [0x6E9804a08092D8ba4E69DaCF422Df12459F2599E](https://bscscan.com/token/0x6e9804a08092d8ba4e69dacf422df12459f2599e)  |
+
+### HYPER 与 stHYPER
+
+| 代币       | 它是什么                                | 存在于哪里                               | 奖励 |
+| ----------- | ----------------------------------------- | --------------------------------------------- | ------- |
+| **HYPER**   | Hyperlane 协议的原生代币    | 以太坊、Base、OP Mainnet、Arbitrum One、BSC | -       |
+| **stHYPER** | 来自 Symbiotic 资金库的流动性质押代币 | 以太坊、BSC                                 | ✅ 是  |
+
+## 质押
+
+质押是参与者为 Hyperlane 协议的经济安全做出贡献并获得奖励的方式。
+
+要质押，用户将 HYPER 代币锁定到以太坊上的 Symbiotic 资金库中。这会生成 stHYPER，一个代表用户质押头寸的流动性质押代币。
+
+<Note>
+  **Symbiotic 上的 HYPER 资金库**：HYPER 资金库不会重新质押到其他协议或网络。它只委托给 Symbiotic 上的 Hyperlane 网络，减少外部削减风险。
+</Note>
+
+### 质押工作原理
+
+- **质押流程**：HYPER 持有者可以通过选择 HYPER 资金库并锁定其 HYPER 代币在 Symbiotic 应用程序上质押其代币。
+- **周期长度**：奖励按算法计算并按周期自动分发，目前设置为约 1 个月。此持续时间反映了默认[跨链安全模块（ISM）](/zh/docs/protocol/ISM/modular-security)验证器集链上的最大结算延迟。
+- **解质押流程**：解质押需要用户对下面概述的步骤采取行动。要提取 HYPER，您必须：
+  1. 在 Symbiotic 用户界面上启动解质押操作。
+  2. 周期开始和结束日期由协议定义，这意味着一旦您启动解质押，您需要等待大约一个完整周期（约 30 到 60 天，最多约 0.99 + 1 周期）才能使您的提取可用。
+  3. 在周期结束后从 UI 中的质押合约手动完成提取。
+
+### 经济安全分配
+
+Symbiotic 上 HYPER 资金库中的 HYPER 基于经济安全分配算法委托给验证器。
+
+分配算法旨在相对于域（链）的经济活动将经济安全分配给域。这意味着具有更高经济活动的域会获得委托给其验证器集的质押 HYPER 的更大份额。
+
+这些验证器集负责保护每个域的默认跨链安全模块（ISM）。ISM 是负责验证在目标链上传递的消息是在源链上发送的智能合约模块。ISM 中的验证器验证消息以确保它们在处理之前是有效和可信的。
+
+分配算法输出每个域的分配百分比，用于在每个域的验证器集之间分配总质押 HYPER。_有关此过程的更多详细信息将随后提供。_
+
+## Hyperlane 验证器选择和注册
+
+虽然 Hyperlane 的 ISM 模型能够完全自定义安全性，但每个提供的邮箱上都有一个默认 ISM。被选入此 ISM 的验证器（且仅这些验证器）将获得验证器奖励。
+
+### 选择过程
+
+潜在验证器（在 Symbiotic 网络中称为运营商）必须完成 [Hyperlane 验证器调查](https://docs.google.com/forms/d/e/1FAIpQLSfLo8D5GcrQVtR_ug3QcgVrXDgfdGPpz30ZLq7J9t2tHnB5xQ/viewform)。
+
+Hyperlane 协议的验证器负责证明从某个源链发送的消息。因此，实体将基于围绕运营实践和正常运行时间的一组加权标准进行评估。
+
+这包括但不限于：
+
+- **运营最佳实践**
+  - 链节点运营（例如，RPC 设置、管理等）
+  - 运营安全实践（监控/警报、安全秘密管理、工程值班轮换等）
+- **运营历史**
+  - 历史正常运行时间
+  - 运营历史
+  - 运行的 Hyperlane 验证器数量
+- **经济安全**
+  - 在 Hyperlane Symbiotic 资金库中的 HYPER 自质押
+
+验证器基于运营历史和性能持续评估，这决定了它们在默认 ISM 集中维持位置的能力。
+
+_注意：验证器只有在被选为 Hyperlane 默认 ISM 的一部分时才会获得奖励。_
+
+### 注册为 Symbiotic 运营商并选择加入
+
+一旦被选为默认 ISM，验证器必须注册为 Symbiotic 上的运营商以接收委托（质押）和奖励。
+
+#### 运营商注册
+
+请参考 Symbiotic 文档，了解通过 [Symbiotic CLI](https://github.com/symbioticfi/cli) 注册为运营商的步骤：
+
+- [运营商注册](https://docs.symbiotic.fi/handbooks/operators-handbook#through-cli)
+- [运营商 CLI 写入命令指南](https://docs.symbiotic.fi/guides/cli/#write-commands---for-operators)
+
+#### 元数据提交
+
+完成注册后，向 [Symbiotic 主网元数据仓库](https://github.com/symbioticfi/metadata-mainnet) 提交包含您的运营商/网络详细信息和图标的拉取请求。使用与上一步注册时相同的地址。
+
+<Warning>
+  元数据必须满足 Symbiotic 文档中概述的几个要求。请注意，不满足这些要求的拉取请求无法被接受。
+</Warning>
+
+<Note>
+  元数据可以稍后调整，但任何更改都需要 Symbiotic 团队审查后才能应用。
+</Note>
+
+#### 选择加入 Hyperlane 的网络和资金库
+
+在运营商可以开始接收委托和奖励之前，他们必须完成两个选择加入步骤：
+
+1. 在 Symbiotic 上选择加入 [Hyperlane 网络](https://app.symbiotic.fi/network/0x59cf937Ea9FA9D7398223E3aA33d92F7f5f986A2)：
+   1. 使用 [CLI 选择加入命令](https://docs.symbiotic.fi/guides/cli/#opt-in-network)。
+   2. 使用 [CLI 检查命令](https://docs.symbiotic.fi/guides/cli#check-opt-in-network) 验证选择加入。
+2. 在 Symbiotic 上选择加入 [HYPER 资金库](https://app.symbiotic.fi/vault/0xE1F23869776c82f691d9Cb34597Ab1830Fb0De58)：
+   1. 使用 [CLI 选择加入命令](https://docs.symbiotic.fi/guides/cli/#opt-in-vault)。
+   2. 使用 [CLI 检查命令](https://docs.symbiotic.fi/guides/cli/#check-opt-in-vault) 验证选择加入。
+
+### 加入 Hyperlane 的默认 ISM
+
+一旦验证器提交了 Hyperlane 验证器调查，并完成了 Symbiotic 运营商注册/选择加入，当默认 ISM 验证器位置变得可用时，验证器可以被选择。
+
+默认 ISM 位置在以下情况下开放：
+
+- Hyperlane 扩展到新链。
+- 现有链上的验证器位置由于以下原因变得可用：
+  1. 验证器被轮换出去。
+  2. 由于安全要求验证器位置扩展。
+
+一旦通过共享通信渠道建立了相互利益，验证器可以继续部署（如果他们选择，也可以更早部署）。请参见[运行验证器](/zh/docs/operate/validators/run-validators)。
+
+<Note>
+  有关验证器奖励申请，请前往[验证器奖励部分](#validator-rewards)。
+</Note>
+
+## 削减
+
+削减是一种旨在鼓励在 Hyperlane 协议中诚实参与的机制。
+
+质押 HYPER 以保护 Hyperlane 协议的参与者在安全违规情况下承担削减风险。如果验证器的法定人数签署导致安全违规的消息（例如，如果法定人数签署了未包含在规范链状态中的消息），委托给该链的 HYPER 的一部分可以被削减。这意味着质押者的质押 HYPER 将被削减。
+
+削减发生在验证器被证明欺诈时。
+
+### 欺诈和链上欺诈归因
+
+欺诈通过智能合约在默认 ISM 集中的所有链上得到证明。这些合约通过 [`AttributeCheckpointFraud` 合约](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/AttributeCheckpointFraud.sol) 实现欺诈归因系统。该合约定义了特定类型的欺诈行为。
+
+`AttributeCheckpointFraud` 合约使用特定的 `attribute` 函数将欺诈归因于验证器，具体取决于违规类型。然后这些归因用于触发 HYPER 资金库中的削减逻辑。
+
+**欺诈类型**
+
+`AttributeCheckpointFraud` 合约中定义了四种欺诈类型：
+
+1. **白名单：** 验证器使用了无效的默克尔树实现。
+2. **过早：** 验证器过早签署并提交了检查点。
+3. **消息 ID：** 检查点提交了错误的消息 ID，与实际消息不匹配。
+4. **根：** 检查点中的默克尔根无效。
+
+### 削减惩罚和过程
+
+削减惩罚在所有 HYPER 质押者之间社会化。例如，如果由于故障削减了 5% 的 HYPER，那么所有 HYPER 质押者将失去其质押 HYPER 的 5%。
+
+在启动时，削减由 Hyperlane 基金会和安全委员会监督，他们可以批准或否决削减决定。随着时间的推移，这个过程预计将通过无信任 ISM 等模块过渡到链上执行。
+
+## 奖励
+
+奖励是协议如何协调激励并维持积极参与的核心部分。Hyperlane 协议根据不同参与者的贡献向他们分发奖励。这些包括保护网络、发送消息和运营验证器。
+
+有三种主要类型的接收者：
+
+| **接收者**                                                         | **奖励**            |
+| --------------------------------------------------------------------- | --------------------- |
+| **质押者**（stHYPER 持有者）                                         | **质押者奖励**    |
+| **验证器**（默认 ISM 验证器集）                            | **验证器奖励** |
+| **用户**（签署发送跨链消息交易的 EOA） | **扩展奖励** |
+
+### 质押者奖励
+
+协议向在 Symbiotic 资金库中质押 HYPER 的参与者分发奖励。这些奖励旨在激励对 Hyperlane 经济安全的贡献。
+
+- **资格**：任何持有 stHYPER 的人都有资格获得奖励。
+- **分发**：奖励按每个周期（约 30 天）的固定费率发放。
+- **奖励计算**：奖励基于总质押金额和它保持质押的时间。在支付验证器奖励佣金后，质押者将按其质押比例获得奖励。
+
+这种奖励流有助于激励用户为 Hyperlane 协议提供经济安全。
+
+### 验证器奖励
+
+协议向作为默认跨链安全模块（ISM）验证器集一部分的参与者分发奖励。这些参与者通过验证跨链消息帮助保护协议。验证器奖励作为质押奖励的佣金支付。
+
+- **资格**：默认 ISM 验证器集中的验证器。
+- **分发**：奖励通过 Symbiotic UI 分配。
+  - 验证器可以通过 ['claimRewards()'](https://github.com/symbioticfi/rewards/blob/7844a6ceaf4d740c7083a37e410194c1ef7867d3/src/contracts/defaultOperatorRewards/DefaultOperatorRewards.sol#L75) 函数使用可通过 [Symbiotic CLI](https://github.com/symbioticfi/rewards/blob/main/specs/OperatorRewards.md#cli) 获得的默克尔证明申请奖励。有关详细信息，请参考：[Symbiotic 运营商奖励](https://docs.symbiotic.fi/modules/extensions/rewards/#default-operator-rewards)。
+  - 验证器奖励将在注册期间直接分配给运营商密钥。
+- **成为 Hyperlane 默认 ISM 验证器集的一部分**：验证器基于包括运营安全实践、历史性能和质押的 HYPER 数量在内的标准进行评估。有关此的更多详细信息在验证器选择部分提供。_请注意，作为其他 ISM（如应用程序特定 ISM）一部分的验证器不会直接由 Hyperlane 协议奖励。_
+
+这种奖励流有助于激励运营 Hyperlane 验证器。
+
+### 扩展奖励
+
+协议向通过发送跨链消息推动协议活动的用户分发奖励。用户是签署发送 Hyperlane 消息交易的任何外部拥有账户（EOA）。
+
+- **资格**：扩展奖励将基于线性基础分发给生成超过设定阈值费用的所有 Hyperlane 用户和应用程序（即，stHYPER 将基于用户或应用程序的费用占超过阈值的总费用的百分比作为相对份额分发）。有关更多信息，请参考 Hyperlane 基金会资源。
+- **工作原理**：扩展奖励基于协议使用情况，每季度向 Hyperlane 协议用户回溯分发。
+- **申请奖励**：符合条件的地址将能够通过用户界面申请奖励。
+- **频率**：奖励每 3 个月分发一次。
+
+这种奖励流有助于激励协议的真实使用和采用。
+
+### 连续倍数：HyperStreak
+
+通过 Hyperlane 奖励，Hyperlane 引入了一种新的激励模型，旨在奖励与协议的长期一致性。这个模型的核心部分是 **HyperStreak** 机制。
+
+#### 什么是 HyperStreak？
+
+HyperStreak 是一个奖励在连续时间段内持续质押和持有 stHYPER 的用户的系统。拥有 HyperStreak 的用户将有资格基于其连续获得提升的奖励。
+
+HyperStreak 不要求用户预先锁定其代币，而是跟踪用户维持其 stHYPER 的时间长度，鼓励持续参与。
+
+#### 工作原理
+
+- **资格**：用户必须持有 stHYPER 才有资格累积 HyperStreak。
+- **连续累积**：用户每天持有 stHYPER 而不移动或提取，其 HyperStreak 增长一天。如果用户提取或转移其质押的 HYPER，其连续重置（受宽限期政策约束）。
+- **连续等级**：HyperStreak 有 4 个等级。用户维持连续的时间越长，他们达到的等级越高（等级 4）。每个等级为用户的奖励提供提升。
+- **等级分配**：系统使用动态方法分配等级。用户基于最大可能连续的比例进行排名。在早期阶段（启动后前 90 天），任何质押并持有 stHYPER 而不中断的用户都有资格获得最高等级。最初获得等级 4 的方法是质押并保持在启动日收到或购买的代币闲置。这种等级分配用于确定额外奖励。
+
+#### 奖励分发和分配
+
+奖励与扩展奖励一起基于加权系统分发，该系统根据每个用户的权重按比例分配季度扩展奖励池。
+
+这些额外奖励来自同一个固定的季度扩展奖励池。因此，具有更长连续的用户获得按比例更大的份额，这减少了那些没有连续的人可用的数量。
+
+用户的权重由连续等级确定。
+
+| 等级         | B（奖励百分比） | 权重 |
+| ------------- | -------------------- | ------ |
+| **等级 4**   | 0.6                  | 1.60   |
+| **等级 3**   | 0.4                  | 1.40   |
+| **等级 2**   | 0.3                  | 1.30   |
+| **等级 1**   | 0.2                  | 1.20   |
+| **无连续** | 0                    | 1.00   |
+
+给定总奖励池 R，每个用户的份额由以下确定：
+
+$$
+\text{用户奖励} = \left( \frac{\text{用户权重}}{\sum_{i=1}^{N} \text{用户}_i\text{权重}} \right) \times R
+$$
+
+HyperStreak 机制鼓励用户与协议持续互动，并奖励那些从一开始就这样做的人。它旨在通过一致的激励支持 Hyperlane 协议的长期可持续性。
+
+## 其他资源
+
+- [Hyperlane 基金会博客文章](https://medium.com/@hyperlane_fdn/introducing-hyper-f3846883f1f5)

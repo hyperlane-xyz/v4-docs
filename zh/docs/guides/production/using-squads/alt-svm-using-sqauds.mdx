@@ -1,0 +1,60 @@
+---
+title: "Alt SVMs：使用Squads"
+description: "在Alt SVMs上的Squads应用中执行和签署交易的分步指南"
+---
+
+## UI设置
+
+主要的Squads UI不支持alt SVMs。请使用：[Squads备份应用](https://backup.app.squads.so/)
+
+### 1. 为Alt-SVM进行配置
+
+<Warning>**您必须配置它以使其与alt-SVM兼容！**</Warning>
+
+转到**设置**并根据链使用以下设置：
+
+<Tabs>
+
+    <Tab title="Eclipse">
+      - **RPC URL:** `https://mainnetbeta-rpc.eclipse.xyz`
+      - **Program ID:**
+      `eSQDSMLf3qxwHVHeTr9amVAGmZbRLY2rFdSURandt6f`
+    </Tab>
+    <Tab title="SOON">
+      - **RPC URL:** `https://rpc.mainnet.soo.network/rpc`
+      - **Program ID:**
+      `Hz8Zg8JYFshThnKHXSZV9XJFbyYUUKBb5NJUrxDvF8PB`
+    </Tab>
+    <Tab title="Sonic SVM">
+      - **RPC URL:** `https://api.mainnet-alpha.sonic.game/`
+      - **Program ID:**
+      `sqdsFBUUwbsuoLUhoWdw343Je6mvn7dGVVRYCa4wtqJ`
+    </Tab>
+    <Tab title="Solana (Fallback)">
+      - **RPC URL:** `https://api.mainnet-beta.solana.com` _(可能需要私有RPC URL以获得更好的性能)_
+      - **Program ID:**
+      `SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf`
+    </Tab>
+
+  </Tabs>
+
+<Note>
+  请注意，这些配置保存在您的浏览器存储中，虽然它们在刷新后可能在UI中消失，但确实会持续存在。![svm squads](/images/docs/guides/squads/altvm-squads1.png)
+</Note>
+
+### 2. 导入多重签名地址
+
+对于此步骤，需要**多重签名账户**。您可以直接导入它，或使用**Vault地址**（代币所有者地址）搜索它。
+
+![svm squads](/images/docs/guides/squads/altvm-squads2.png)
+
+## 提交交易
+
+1. 您将从Abacus Works团队收到一个base58**消息**，该消息是执行步骤3所必需的。
+2. 转到**交易**选项卡，然后点击**导入交易**。
+   ![altvm squads](/images/docs/guides/squads/altvm-squads3.png)
+3. 将base58消息复制到UI中，然后点击**导入**。
+4. 刷新页面。您现在应该看到交易。
+   ![altvm squads](/images/docs/guides/squads/altvm-squads4.png)
+5. 确保**跟踪提议交易的索引/公钥**以及它们的作用。这样，签署者就知道他们正在签署什么。
+   ![altvm squads](/images/docs/guides/squads/altvm-squads5.png)

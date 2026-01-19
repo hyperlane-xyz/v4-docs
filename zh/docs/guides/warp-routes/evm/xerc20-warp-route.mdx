@@ -1,0 +1,84 @@
+---
+title: "创建您的 xERC20 代币桥接器"
+---
+
+本指南将指导您在两个您选择的网络之间部署 xERC20 Hyperlane Warp Route (HWR)。我们将使用 Ethereum 作为源链的示例；但是，您可以选择任何支持的网络作为源链和目标链。
+
+## 前置条件
+
+要完成本操作步骤，您应该具备：
+
+1. **您选择的源网络和目标网络**，您希望在它们之间部署 xERC20 HWR。
+2. **源链和目标链上的 xERC20 或 xERC20Lockbox 地址**。
+3. **已安装 Hyperlane CLI** 和**设置为 `HYP_KEY` 环境变量的钱包私钥**，在源网络和目标网络上都有资金。
+
+### 步骤 1：初始化新的 HWR
+
+运行以下命令生成 HWR 配置：
+
+```bash
+hyperlane warp init
+```
+
+1. 使用空格选择 **Ethereum**（源）和 **YourChain**（目标），然后按回车。
+2. 对于 Ethereum（源），选择 **xERC20** 或 **xERC20Lockbox**，并输入合约地址。
+3. 对于 YourChain（目标），选择 **xERC20** 或 **xERC20Lockbox**，并输入合约地址。
+
+<Info>
+选择 xERC20 和 xERC20Lockbox 之间的区别：
+
+- **xERC20Lockbox**：如果您的代币已经在源链上部署，并且需要封装版本进行跨链转账，请使用此选项。
+- **xERC20**：如果您的代币原生实现 xERC20 且不需要 lockbox，请使用此选项。
+
+如果您不确定，请查看您的代币合约结构或部署历史以确定正确的选择。
+
+</Info>
+
+### 步骤 2：部署 xERC20 HWR
+
+运行以下命令部署 HWR：
+
+```bash
+hyperlane warp deploy
+```
+
+这部署了 \*Hyperlane 适配器合约\*\*，即：
+
+- **HypXERC20Lockbox**（如果使用 xERC20Lockbox）
+- **HypXERC20**（如果使用 xERC20）
+
+_CLI 不部署非 Hyperlane 合约（例如，现有的 xERC20 合约）。那些应该已经部署。_
+
+### 步骤 3：配置铸造权限
+
+一旦部署了 xERC20 HWR 合约，您必须为目标代币配置铸造权限。
+
+使用您 xERC20 合约中的 [`setLimits` 函数](https://github.com/defi-wonderland/xERC20/blob/main/solidity/contracts/XERC20.sol#L85) 为新部署的 HWR 设置铸造限制。
+默认情况下，这些限制位于本地的 `~/.hyperlane` Registry 中。
+
+### 步骤 4：测试跨链转账
+
+使用以下命令测试跨链代币转账：
+
+```bash
+hyperlane warp send --symbol <token_symbol> --amount <amount>
+```
+
+- 将 `<token_symbol>` 替换为您的代币。
+- 将 `<amount>` 替换为要转账的代币数量。
+
+###
+
+🎉 恭喜！您已成功创建了 **xERC20 HWR**。您的 xERC20 代币现在可以跨链移动！
+
+<Warning>
+  请注意，跨链操作依赖于 **Interchain Security Modules
+  (ISMs) (跨链安全模块)**，并且存在固有风险，例如 ISM 信任假设。
+</Warning>
+
+## 资源
+
+有关部署 xERC20 HWRs 的更多资源，请查看：
+
+- [xERC20 Token Standard](https://github.com/defi-wonderland/xERC20/blob/main/solidity/contracts/XERC20.sol)
+- [xERC20 Token transfer limits](./managing-warp-route-limits)

@@ -1,0 +1,51 @@
+---
+title: "代理概述"
+---
+
+Hyperlane 协议将跨链消息传递的传输层与安全层解耦。要运行部署，它依赖链下代理来观察链上活动并执行协议的传输或安全方面。
+
+1. Hyperlane [验证器](#validators)是负责安全的轻量级链下代理——它们观察源链[邮箱](/zh/docs/protocol/core/mailbox)上的消息，如有需要，签署证明邮箱当前状态的默克尔根。
+2. [中继器](#relayer)满足协议的消息传输要求。它们为 [`IInterchainSecurityModule` 接口](/zh/docs/protocol/ISM/modular-security)聚合链下安全元数据，并将消息传递给其接收者。
+
+## 验证器
+
+[验证器](/zh/docs/protocol/agents/validators)满足协议的安全要求，作为[多重签名 ISM](/zh/docs/protocol/ISM/standard-ISMs/multisig-ISM) 或 [Hyperlane AVS](/zh/docs/protocol/ISM/economic-security/hyperlane-avs) 的一部分，通过证明[邮箱](/zh/docs/protocol/core/mailbox)消息的有效性并使其签名可供中继器使用。
+
+此签名被存储并公开可用（例如在 S3 存储桶中），然后由链下中继器和链上跨链安全模块使用。验证器之间_没有_网络连接，不需要达成共识；它们也不定期提交链上交易。
+
+如果希望帮助保护源链，这是社区运营商运行的代理，这是为帮助去中心化 Hyperlane 上的消息传递而可以执行的最重要职责。**请注意，仅运行验证器并不意味着它正在积极为保护消息做出贡献：** 目标链上的多重签名 ISM 必须已注册验证器的检查点签名密钥，并且该 ISM 必须被消息接收者使用。
+
+这些代理用 Rust 实现，并作为 Docker 镜像和二进制文件分发。
+
+<Tip>在[这里](/zh/docs/protocol/agents/validators)了解更多关于验证器的信息</Tip>
+
+## 中继器
+
+Hyperlane [中继器](/zh/docs/protocol/agents/relayer)将跨链消息传递给其接收者。
+
+中继是无需许可的，在链对之间运行一个诚实的中继器足以确保活跃度。
+
+运行中继器：
+
+1. 比验证器操作复杂得多。
+2. 不需要保护网络。
+3. 仅推荐用于 Hyperlane 的无需许可部署。
+
+Hyperlane 中继器被配置为在一个或多个源链和目标链之间中继消息。
+
+每个 Hyperlane 消息涉及两个交易：
+
+1. 在源链上[`dispatch`](/zh/docs/reference/messaging/send)和发送消息。
+2. 在目标链上[`process`](/zh/docs/reference/messaging/receive)和传递消息。
+
+中继器的工作是在目标链上传递消息。为了履行这一责任：
+
+- 中继器跟踪源链上传入的新消息。
+- 它检查接收者指定的[跨链安全模块（ISM）](/zh/docs/protocol/ISM/modular-security)以收集保护消息所需的元数据。例如，它可能从验证器检查点存储中检索多重签名 ISM 签名。
+- 组装安全元数据后，中继器然后将消息发送到目标链上的接收者。
+
+如果消息传递失败（例如由于缺乏流动性从 Hyperlane Warp 路由合约转出），中继器使用指数退避机制重试传递，直到成功。
+
+中继器在 Hyperlane 中没有特殊权限。如果中继器密钥被泄露，只有这些密钥持有的代币面临风险。
+
+<Tip>在[这里](/zh/docs/protocol/agents/relayer)了解更多关于中继器的信息。</Tip>

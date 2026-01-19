@@ -1,0 +1,57 @@
+---
+title: '列出 IGP 规则'
+api: 'GET http://localhost:9090/igp_rules'
+---
+
+获取当前的跨链 Gas 支付（IGP）规则。
+
+<Note>
+仅当配置了 gas 执行器时，此端点才可用。
+</Note>
+
+<Expandable title="响应正文">
+  <ResponseField name="policies" type="HashMap<String, GasEnforcementResponse[]">
+    策略
+    <Expandable title="policies">
+      <ResponseField name="policy" type="GasPaymentEnforcementPolicy">
+        Gas 支付执行策略
+      </ResponseField>
+      <ResponseField name="matching_list" type="String[]">
+        匹配列表
+      </ResponseField>
+    </Expandable>
+  </ResponseField>
+</Expandable>
+
+<ResponseExample>
+```json Response
+{
+  "policies": {
+    "subtensor": [
+      {
+        "policy": "None",
+        "matching_list": []
+      }
+    ]
+  }
+}
+```
+</ResponseExample>
+
+<RequestExample>
+```bash curl
+curl "http://localhost:9090/igp_rules"
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/igp_rules');
+const rules = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get('http://localhost:9090/igp_rules')
+rules = response.json()
+```
+</RequestExample>

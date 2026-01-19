@@ -1,0 +1,10 @@
+---
+title: "概述"
+---
+
+Hyperlane 协议将跨链消息传递的传输层与安全层解耦。要运行部署，它依赖链下代理来观察链上活动并执行协议的传输或安全方面。
+
+这些代理用 Rust 实现，并作为 Docker 镜像和二进制文件分发。
+
+1. [中继器](/zh/docs/protocol/agents/relayer)满足协议的消息传输要求。它们为 [`IInterchainSecurityModule` 接口](/zh/docs/protocol/ISM/modular-security#core-concepts)聚合链下安全元数据，并将消息传递给其接收者。
+2. [验证器](/zh/docs/protocol/agents/validators)满足协议的安全要求，作为[多重签名 ISM](/zh/docs/protocol/ISM/standard-ISMs/multisig-ISM) 或 [Hyperlane AVS](/zh/docs/protocol/ISM/economic-security/hyperlane-avs) 的一部分，通过证明[邮箱](/zh/docs/protocol/core/mailbox)消息的有效性并使其签名可供中继器使用。

@@ -1,0 +1,74 @@
+---
+title: '添加 IGP 规则'
+api: 'POST http://localhost:9090/igp_rules'
+---
+
+添加新的跨链 Gas 支付（IGP）规则。
+
+<Note>
+仅当配置了 gas 执行器时，此端点才可用。
+</Note>
+
+<Expandable title="请求正文">
+  <ParamField body="policy" type="GasPaymentEnforcementPolicy">
+    Gas 支付执行策略
+  </ParamField>
+  <ParamField body="matching_list" type="ListElement[]">
+    匹配列表
+  </ParamField>
+</Expandable>
+
+<RequestExample>
+```bash curl
+curl -X POST "http://localhost:9090/igp_rules" \
+  -H "Content-Type: application/json" \
+  -d \
+'{
+  "policy": "None",
+  "matching_list": [
+    {
+        "messageid": "0x03ae9509ddf792965c98729b43f0988d689ae17c79619e87e6c670f61eb1d4bc"
+    }
+  ]
+}'
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/igp_rules', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    policy: "None",
+    matching_list: [
+      {
+          messageid: "0x03ae9509ddf792965c98729b43f0988d689ae17c79619e87e6c670f61eb1d4bc"
+      }
+    ]
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post('http://localhost:9090/igp_rules', json={
+  "policy": "None",
+  "matching_list": [
+    {
+        "messageid": "0x03ae9509ddf792965c98729b43f0988d689ae17c79619e87e6c670f61eb1d4bc"
+    }
+  ]
+})
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "count": 4,
+  "skipped": []
+}
+```
+</ResponseExample>

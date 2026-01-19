@@ -1,0 +1,144 @@
+---
+title: '插入消息'
+api: 'POST http://localhost:9090/messages'
+---
+
+将新消息插入数据库。
+
+<Expandable title="请求正文">
+  <ParamField body="messages" type="array" required>
+    要插入的消息列表
+    <Expandable title="messages">
+      <ParamField body="dispatched_block_number" type="number" required>
+        消息被调度时的区块号
+      </ParamField>
+      <ParamField body="message" type="HyperlaneMessage" required>
+        消息
+      </ParamField>
+    </Expandable>
+  </ParamField>
+</Expandable>
+
+<Expandable title="响应正文">
+  <ResponseField name="count" type="number">
+    成功插入的消息数
+  </ResponseField>
+  <ResponseField name="skipped" type="HyperlaneMessage[]">
+    被跳过的消息列表
+  </ResponseField>
+</Expandable>
+
+<RequestExample>
+```bash curl
+curl -X POST "http://localhost:9090/messages" \
+  -H "Content-Type: application/json" \
+  -d \
+'{
+  "messages": [
+    {
+      "dispatched_block_number": 10000,
+      "message": {
+        "version": 3,
+        "nonce": 1234,
+        "origin": 1,
+        "destination": 2,
+        "sender": "0xabc...",
+        "recipient": "0xdef...",
+        "body": [0, 3, 0, 23, 43, 65]
+      }
+    },
+    {
+      "dispatched_block_number": 10010,
+      "message": {
+        "version": 3,
+        "nonce": 1235,
+        "origin": 1,
+        "destination": 2,
+        "sender": "0xabc...",
+        "recipient": "0xdef...",
+        "body": [0, 3, 0, 23, 43, 65]
+      }
+    }
+  ]
+}'
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/messages', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    messages: [
+      {
+        dispatched_block_number: 10000,
+        message: {
+          version: 3,
+          nonce: 1234,
+          origin: 1,
+          destination: 2,
+          sender: "0xabc...",
+          recipient: "0xdef...",
+          body: [0, 3, 0, 23, 43, 65]
+        }
+      },
+      {
+        dispatched_block_number: 10010,
+        message: {
+          version: 3,
+          nonce: 1235,
+          origin: 1,
+          destination: 2,
+          sender: "0xabc...",
+          recipient: "0xdef...",
+          body: [0, 3, 0, 23, 43, 65]
+        }
+      }
+    ]
+  })
+});
+```
+
+```python Python
+import requests
+
+response = requests.post('http://localhost:9090/messages', json={
+  "messages": [
+    {
+      "dispatched_block_number": 10000,
+      "message": {
+        "version": 3,
+        "nonce": 1234,
+        "origin": 1,
+        "destination": 2,
+        "sender": "0xabc...",
+        "recipient": "0xdef...",
+        "body": [0, 3, 0, 23, 43, 65]
+      }
+    },
+    {
+      "dispatched_block_number": 10010,
+      "message": {
+        "version": 3,
+        "nonce": 1235,
+        "origin": 1,
+        "destination": 2,
+        "sender": "0xabc...",
+        "recipient": "0xdef...",
+        "body": [0, 3, 0, 23, 43, 65]
+      }
+    }
+  ]
+})
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "count": 4,
+  "skipped": []
+}
+```
+</ResponseExample>

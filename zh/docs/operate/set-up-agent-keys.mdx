@@ -1,0 +1,110 @@
+---
+title: "Agent 密钥"
+---
+
+Hyperlane agent - Validator 和 Relayer - 必须配置私钥才能运行。Validator 使用私钥签名[消息检查点](/zh/docs/resources/glossary#checkpoint)，Relayer 使用私钥签署传递消息的交易。
+
+Hyperlane agent 当前支持以下两种方式配置私钥。
+
+## 1. 十六进制密钥
+
+用于内存签名的原始十六进制私钥。这是最简单和最快的设置方式。
+
+<Warning>十六进制密钥的安全性低于 AWS KMS 密钥。</Warning>
+
+### 生成十六进制密钥
+
+跟踪您的地址和私钥以供 agent 使用。不要丢失或泄露它。
+
+<Tabs>
+  <Tab title="Cast CLI">
+    使用 [Foundry 的 cast](https://book.getfoundry.sh/cast/)，您可以创建新的密钥对：
+
+    ```sh
+    cast wallet new
+    ```
+
+    输出将如下所示：
+
+    ```
+    Successfully created new keypair.
+    Address: 0x32e6d32E7b1C8691Ef4ad3841003371214a0eebC
+    Private Key: 0x2958f0eb2ab71bbfb5ea1422835e20e488778b61e3c107f369572e2b53b578f9
+    ```
+
+  </Tab>
+  <Tab title="使用 privatekeys.pw">
+    您可以访问 [https://privatekeys.pw/keys/ethereum/random](https://privatekeys.pw/keys/ethereum/random)，它会自动显示十六进制私钥及其地址列表。
+
+    <Warning>
+    请注意，由于这些是由网站生成的，这些私钥应被视为不安全，不应用于测试目的以外的任何用途！
+    </Warning>
+
+  </Tab>
+</Tabs>
+
+## 2. AWS KMS
+
+由 AWS 生成并存储在 CloudHSM 中的密钥。这是生产 agent 的推荐设置。
+
+### 创建 IAM 用户
+
+此 IAM 用户将被授予使用您稍后配置的 KMS 密钥进行签名的权限。您的 Hyperlane agent 在签名交易时将使用此身份。
+
+1. 在 [AWS 控制台](https://us-east-1.console.aws.amazon.com/iamv2/home)中进入 AWS 的身份和访问管理（IAM）。
+2. 在左侧的"访问管理"下，点击"用户"。
+3. 点击橙色按钮"添加用户"。
+4. 选择一个友好且有信息量的用户名，例如 `hyperlane-validator-${chain_name}` 或 `hyperlane-relayer-${chain_name}`。此用户名将在后续步骤中引用，因此如果您选择不同的用户名，请务必在将来使用正确的用户名。
+5. 点击"下一步"，您无需为用户分配任何权限。
+6. 点击"创建用户"。
+7. 点击进入您刚创建的用户
+8. 点击"安全凭证"选项卡
+9. 向下滚动到"访问密钥"并点击"创建访问密钥"
+10. 选择"在 AWS 外部运行的应用程序"并点击"下一步"
+11. 点击"下一步"，无需添加描述标签
+12. 点击"创建访问密钥"
+13. 将"访问密钥 ID"和"秘密访问密钥"复制到安全的地方。这些将作为环境变量传递给您的 Hyperlane Relayer。
+
+### 创建 KMS 密钥
+
+此密钥将被您的 agent 用于签名。
+
+1. 在 AWS 控制台中进入 AWS 的密钥管理服务（KMS）。
+2. 确保您位于要创建密钥的区域。这可以通过查看控制台右上角的区域或在 URL 的子域中查找名称来确认（例如 `us-west-2.console.aws.amazon.com` 表示您正在 `us-west-2` 区域中操作）。
+3. 在左侧点击"客户管理的密钥"。
+4. 点击"创建密钥"。
+5. 选择"非对称"密钥类型。
+6. 选择"签名和验证"密钥用途。
+7. 选择 `ECC_SECG_P256K1` 密钥规格。
+8. 点击"下一步"。
+9. 将别名设置为友好且有信息量的名称，例如 `hyperlane-validator-signer-${chain_name}` 或 `hyperlane-relayer-signer-${chain_name}`
+10. 虽然不是必需的，但可以随意编写描述并添加您认为有用的任何标签。
+11. 点击"下一步"。
+12. 密钥管理员不是必需的，但如果您愿意，可以选择一个。
+13. 点击"下一步"。
+14. 将使用权限授予您在第 1 节中创建的 IAM 用户。
+15. 点击"下一步"。
+16. 在审核页面中，滚动到"密钥策略"。生成的密钥策略是可以接受的，但如果您希望，可以通过以下方式使访问权限更少：
+    1. 从"Sid"为"Allow use of the key"的语句中删除 `kms:DescribeKey` 和 `kms:Verify` 操作
+    2. 删除"Sid"为"Allow attachment of persistent resources"的整个语句。
+17. 点击"完成"
+
+<Tip>
+  高级用户可以考虑使用 [IAM/KMS Terraform 模块](/zh/docs/operate/guides/deploy-with-terraform#modules)来创建 IAM 用户和 KMS 密钥。
+</Tip>
+
+### 查询地址
+
+在某些情况下，您可能需要知道与您生成的 KMS 密钥关联的地址。
+
+<CodeGroup>
+```sh With cast
+AWS_ACCESS_KEY_ID=<redacted> AWS_SECRET_ACCESS_KEY=<redacted> AWS_KMS_KEY_ID=alias/your-key-alias cast wallet address --aws
+```
+
+```sh Using a script
+# The script at the following repo will allow you to query this address:
+# https://github.com/tkporter/get-aws-kms-address
+```
+
+</CodeGroup>

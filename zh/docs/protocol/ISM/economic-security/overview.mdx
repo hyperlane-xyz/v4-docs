@@ -1,0 +1,28 @@
+---
+title: "概述"
+description: "Hyperlane 如何确保经济安全"
+---
+
+<Info>
+  Hyperlane 致力于让欺诈付出代价。质押和罚没即将推出，尚未实施。本页面仅供参考。随着设计的成熟，细节可能会发生变化。
+</Info>
+
+质押和罚没允许将经济安全添加到依赖 Validator 签名的 ISM，包括[多重签名 ISM](/zh/docs/protocol/ISM/standard-ISMs/multisig-ISM) 和 Optimistic ISM。
+
+Hyperlane Validator 可以选择参与 Hyperlane 的质押协议。之后，如果这些 Validator 试图伪造或审查跨链消息，他们的质押以及委托给他们的任何质押都可能被罚没。
+
+依赖这些 Validator 签名的[跨链安全模块](/zh/docs/protocol/ISM/modular-security)受益于质押和罚没提供的额外经济安全。
+
+### 可验证的欺诈证明
+
+与许多其他跨链通信协议不同，Hyperlane 的罚没协议使用**可验证的欺诈证明**。
+
+这意味着 Hyperlane 协议能够验证 Validator 是否签署了欺诈性 checkpoint，而无需任何可信方的参与。
+
+这是可能的，因为 Validator 提出的质押与他们正在证明的状态（即 Mailbox merkle root）位于**同一条链**上。罚没智能合约可以将 Validator 签名与最新 root 进行比较，并进行一些复杂的 merkle tree 操作来确认 Validator 签署的 checkpoint 是否是欺诈性的。
+
+在许多其他跨链通信协议中，Validator 的质押通常位于与跨链消息源链**不同的链**上。
+
+这意味着为了让欺诈性 Validator 的质押被罚没，同样的消息传递协议必须将消息中继到质押所在的链。您能看到其中的问题吗？发生欺诈的同一 Validator 集合是传递该欺诈证据的机制，会出什么问题呢？
+
+Hyperlane 不想允许这种可能性，因此在 Hyperlane 中，Validator 必须将其绑定的质押保留在他们正在验证的源链上。这意味着欺诈证明是无需信任地可验证的。用于罚没检查的欺诈记录与要被罚没的质押存在于同一环境中，欺诈证明过程不会出错。
