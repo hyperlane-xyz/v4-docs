@@ -368,8 +368,7 @@
   "footer": {
     "socials": {
       "x": "https://x.com/hyperlane",
-      "github": "https://github.com/hyperlane-xyz",
-      "discord": "https://discord.com/invite/hyperlane"
+      "github": "https://github.com/hyperlane-xyz"
     },
     "links": [
       {
@@ -393,8 +392,8 @@
         "header": "Community",
         "items": [
           {
-            "label": "Discord",
-            "href": "https://discord.gg/hyperlane"
+            "label": "GitHub Discussions",
+            "href": "https://github.com/hyperlane-xyz/hyperlane-monorepo/discussions"
           },
           {
             "label": "Twitter",

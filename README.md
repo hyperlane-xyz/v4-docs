@@ -30,7 +30,6 @@ This documentation is open source and contributions are welcome. To contribute:
 
 For questions about Hyperlane:
 
-- [Discord Community](https://discord.gg/hyperlane)
 - [GitHub Discussions](https://github.com/hyperlane-xyz/hyperlane-monorepo/discussions)
 
 ## Troubleshooting
