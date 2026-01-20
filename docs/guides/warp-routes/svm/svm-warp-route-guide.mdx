@@ -140,7 +140,6 @@ Deploying a HWR requires there to be a core Hyperlane deployment that is connect
 ### Step 4: Deploy the HWR
 
 1. Fund the new keypair on both networks the HWR is being deployed to.
-
    - The public key should be the same across SVM networks, but double check with the wallets recommended by each chain, by loading the private key into them.
 
    - The funding should be enough to cover rent for all accounts related to the HWR, pay for transaction fees, and fund the [ATA](https://www.alchemy.com/overviews/associated-token-account) payer accounts (more on this below). For reference, the observed rent from one HWR account is `2.35 SOL` on Solana and `0.025 ETH` on Eclipse, so it's a good idea to fund the key with at least `5 SOL` / `0.05 ETH`.
@@ -182,13 +181,14 @@ Deploying a HWR requires there to be a core Hyperlane deployment that is connect
   soon as possible, it's not as reliable as we would hope. Please get in touch
   through a [GitHub
   issue](https://github.com/hyperlane-xyz/hyperlane-monorepo/issues) or via the
-  [GitHub Discussions](https://github.com/hyperlane-xyz/hyperlane-monorepo/discussions) if you run into issues.
+  [GitHub
+  Discussions](https://github.com/hyperlane-xyz/hyperlane-monorepo/discussions)
+  if you run into issues.
 </Info>
 
 #### Troubleshooting tips
 
 - The script is unlikely to work from the first try due to network congestion and program size, but the script should be idempotent and skip contracts that were already deployed/initialized.
-
   - Errors like `Error: 11 write transactions failed` or `Error: Custom: Invalid blockhash` can always be retried by re-running the command. If retriable errors persist, consider increasing the compute unit price [here](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/44e0ff0733baf0da4d2b0304915f5f6cce92ffc7/rust/sealevel/client/src/cmd_utils.rs#L76).
 
   - For other error types, you may need to close the buffers and programs of your deployer key and redeploy everything from scratch. To display buffers and programs and close them one by one, follow the commands below. Closing programs also helps recover their rent deposit.

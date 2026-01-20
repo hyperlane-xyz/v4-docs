@@ -48,13 +48,11 @@ This command provides a walkthrough, prompting you for configuration choices dir
 Your config consists of a map of chain names to deployment configs. Each config sets details about the token for which you are creating a HWR.
 
 - **type**:
-
   - Set this to `collateral` to create a basic HWR for an ERC20/ERC721 token
   - Set this to `collateralVault` to create a yield-bearing HWR for an ERC20 token that deposits into an existing ERC4626 vault
   - Set this to `native` to create a HWR for a native token (e.g. ether)
 
 - **address:**
-
   - If using `collateral`, the address of the ERC20/ERC721 contract for which to create a route
   - If using `collateralVault`, the address of the existing ERC4626 vault to deposit collateral into
 
