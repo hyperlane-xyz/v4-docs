@@ -36,10 +36,18 @@ Validators provide the security for messages sent _from_ your chain to remote ch
 
 ### Setup directories
 
-First, set the `CONFIG_FILES` environment variable to the path of the agent config generated in the [deploy contracts](#2-deploy-contracts) step. For example:
+First, generate an agent config file using the Hyperlane CLI. If you have a local registry with custom chain configurations, pass the registry path to the command:
 
 ```bash
-export CONFIG_FILES=/full/path/to/configs/agent-config-{timestamp}.json
+hyperlane registry agent-config --chains <chains separated by space> --registry /path/to/your/registry
+```
+
+This will create an agent config at `./configs/agent-config.json`.
+
+Then, set the `CONFIG_FILES` environment variable to the path of the generated agent config:
+
+```bash
+export CONFIG_FILES=/full/path/to/configs/agent-config.json
 ```
 
 Next, create a local directory for your validator to write its signatures to. Remember the path, as you will need this when configuring your validator.
