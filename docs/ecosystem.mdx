@@ -1,0 +1,80 @@
+---
+title: "Ecosystem"
+description: "Projects building on Hyperlane across DeFi, stablecoins, privacy, and custom VMs"
+---
+
+<img
+  className="rounded-3xl"
+  src="/images/ecosystem-img.png"
+  alt="Hyperlane Ecosystem"
+/>
+
+Hyperlane provides the base layer for interoperability. This page shows what's possible with Hyperlane's primitives and how teams are using them in production.
+
+---
+
+## DeFi & Cross-Chain Swaps
+
+<CardGroup cols={2}>
+  <Card
+    title="Superswaps (Aerodrome)"
+    icon="arrows-rotate"
+    href="/docs/applications/use-cases/cross-chain-swaps"
+  >
+    Cross-chain swapping mechanism enabling one-click token swaps across the
+    Superchain ecosystem.
+  </Card>
+  <Card
+    title="TaoFi"
+    icon="shield-check"
+    href="/docs/applications/use-cases/cross-chain-swaps-with-recovery"
+  >
+    Cross-chain USDC swaps with built-in failure recovery using Hyperlane Warp
+    Routes and salted ICAs.
+  </Card>
+</CardGroup>
+
+<CardGroup cols={3}>
+  <Card title="Paradex" icon="chart-line" href="https://paradex.trade">
+    High-performance perpetuals DEX on Starknet using Hyperlane Warp Routes for
+    cross-chain transfers.
+  </Card>
+  <Card title="Renzo" icon="coins" href="https://renzoprotocol.com">
+    Liquid restaking protocol using Hyperlane Warp Routes to extend ezETH across
+    multiple chains.
+  </Card>
+  <Card
+    title="HoudiniSwap"
+    icon="wand-magic-sparkles"
+    href="https://docs.houdiniswap.com/houdini-swap/api-documentation"
+  >
+    Private transaction infrastructure for cross-chain transfers via API.
+  </Card>
+</CardGroup>
+
+---
+
+## Custom VM Implementations
+
+Hyperlane supports chains with non-EVM execution environments through bespoke VM implementations. These integrations include the full Hyperlane stack: [Mailbox](/docs/protocol/core/mailbox), [Hyperlane Warp Routes](/docs/protocol/warp-routes/warp-routes-overview), [ISMs](/docs/protocol/ISM/modular-security), and [agent infrastructure](/docs/protocol/agents/overview).
+
+<CardGroup cols={2}>
+  <Card title="Radix" icon="atom" href="https://radixdlt.com" />
+  <Card
+    title="Cosmos SDK"
+    icon="globe"
+    href="/docs/alt-vm-implementations/cosmos-sdk"
+  />
+</CardGroup>
+
+---
+
+## Build with Us
+
+<Card
+  title="Get in Touch"
+  icon="rocket"
+  href="https://www.hyperlane.xyz/contact"
+>
+  Connect with the ecosystem team to start building on Hyperlane.
+</Card>
