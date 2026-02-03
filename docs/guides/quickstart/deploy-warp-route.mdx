@@ -133,7 +133,7 @@ These files will be located under `$HOME/.hyperlane/deployments/warp_routes/`.
 You can initiate a test transfer of a single wei with the following command:
 
 ```
-hyperlane warp send --relay --symbol TOKEN
+hyperlane warp send --relay --warp-route-id TOKEN/chain1-chain2
 ```
 
 The `--relay` flag is optional and will relay the message to the destination chain.
@@ -141,7 +141,7 @@ The `--relay` flag is optional and will relay the message to the destination cha
 You can also run a relayer that delivers only for your HWR in the background with:
 
 ```
-hyperlane relayer --symbol TOKEN
+hyperlane relayer --warp-route-id TOKEN/chain1-chain2
 ```
 
 You can test in either direction between where you have the HWR set. However, if you deployed `native` or `collateral` HWR, you must select the origin where the route corresponding to where that `native` or `collateral` type is deployed. By default, the amount sent is `1` of the smallest unit of the token.
