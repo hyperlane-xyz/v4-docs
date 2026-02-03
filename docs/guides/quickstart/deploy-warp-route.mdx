@@ -121,12 +121,13 @@ During deployment, the CLI requires access to your private key to sign transacti
 
 2. **Manual Entry**: Alternatively, you can enter the private key directly when prompted during deployment.
 
-The `hyperlane warp deploy` command will create two new artifact files:
+The `hyperlane warp deploy` command will create deployment artifacts in your local registry at `$HOME/.hyperlane/deployments/warp_routes/<warpRouteId>/`.
 
-1. `otherchain-yourchain-addresses.yaml`: Contains addresses for the newly deployed HWR contracts.
-2. `otherchain-yourchain-config.yaml`: A config file for interacting with the HWR via the CLI and Warp UI.
+The warp route ID follows the format `SYMBOL/chain1-chain2` (e.g., `ETH/ethereum-yourchain`). This ID is used with CLI commands like `warp read`, `warp send`, and `warp apply`.
 
-These files will be located under `$HOME/.hyperlane/deployments/warp_routes/`.
+<Info>
+All warp route configs are now stored in the registry. To modify a warp route config, edit the files in `$HOME/.hyperlane/deployments/warp_routes/<warpRouteId>/` and then run `hyperlane warp apply`.
+</Info>
 
 3. Testing
 

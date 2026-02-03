@@ -61,11 +61,15 @@ yourchain:
   ...
 ```
 
-By default, `warp read` will save the output to `CURRENT_DIR/configs/warp-route-deployment.yaml`. Follow these steps using the CLI to transfer the existing ownership to another address.
+<Info>
+Warp route configs are stored in your local registry at `$HOME/.hyperlane/deployments/warp_routes/<warpRouteId>/`. The `warp read` command outputs the current on-chain config for reference.
+</Info>
+
+Follow these steps using the CLI to transfer the existing ownership to another address.
 
 ## Step 1: Configuration
 
-Update `owner` address in the `warp-route-deployment.yaml`
+Update the `owner` address in the warp route deployment config in your local registry.
 
 ```diff title="warp-route-deployment.yaml"
 yourchain:
