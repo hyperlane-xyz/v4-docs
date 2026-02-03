@@ -51,11 +51,15 @@ This particular config has a `trustedRelayerIsm` as part of the `staticAggregati
 
 This means that the `relayer` address will be allowed to call the HWR's `handle()` function. In other words, the `relayer` can execute arbitrary messages on the HWR. This may be undesirable in cases outside of the self-relaying feature.
 
-By default, `warp read` will save the output to `CURRENT_DIR/configs/warp-route-deployment.yaml`. Follow these steps using the CLI to transfer the existing ownership to another address.
+<Info>
+Warp route configs are stored in your local registry at `$HOME/.hyperlane/deployments/warp_routes/<warpRouteId>/`. The `warp read` command outputs the current on-chain config for reference.
+</Info>
+
+Follow these steps using the CLI to remove the trusted relayer.
 
 ## Step 1: Configuration
 
-Update the `warp-route-deployment.yaml` by **removing** the `trustedRelayerIsm` block from `modules`. Alternatively, you can configure the entire `modules` block as desired.
+Update the warp route deployment config in your local registry by **removing** the `trustedRelayerIsm` block from `modules`. Alternatively, you can configure the entire `modules` block as desired.
 
 ```diff title="warp-route-deployment.yaml"
 yourchain:
