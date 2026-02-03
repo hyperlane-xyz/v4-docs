@@ -61,10 +61,10 @@ By default, these limits are found in the Registry, located at `~/.hyperlane` lo
 Test transferring tokens across chains using:
 
 ```bash
-hyperlane warp send --symbol <token_symbol> --amount <amount>
+hyperlane warp send --warp-route-id <warpRouteId> --amount <amount>
 ```
 
-- Replace `<token_symbol>` with your token.
+- Replace `<warpRouteId>` with your warp route ID (e.g., `USDC/ethereum-yourchain`).
 - Replace `<amount>` with the number of tokens to transfer.
 
 ###
