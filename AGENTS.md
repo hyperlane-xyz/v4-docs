@@ -1,8 +1,8 @@
-# CLAUDE.md
+# AGENTS.md
 
 **Be extremely concise. Sacrifice grammar for concision. Terse responses preferred. No fluff.**
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI coding assistants when working with code in this repository.
 
 ## Overview
 
@@ -46,7 +46,7 @@ Documentation should be clear and direct. Don't add sections unless they help us
 - What do they need to know to succeed?
 - What mistakes do they commonly make?
 
-## Tips for Claude Code Sessions
+## Tips for AI Coding Sessions
 
 1. **Check existing terminology** - Use consistent Hyperlane terms (ISM, Warp Route, Mailbox)
 2. **Verify code examples** - Test snippets against actual SDK/CLI
@@ -66,7 +66,7 @@ Documentation should be clear and direct. Don't add sections unless they help us
 - Check `git log` or blame before assuming why code exists
 - Verify the Mintlify component syntax is correct
 
-## When Claude Gets It Wrong
+## When the AI Gets It Wrong
 
 If output seems wrong, check:
 
