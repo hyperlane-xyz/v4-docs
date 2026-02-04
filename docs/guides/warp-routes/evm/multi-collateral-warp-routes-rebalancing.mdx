@@ -127,7 +127,7 @@ Currently, Hyperlane Warp Routes 2.0 don’t have an explicit liquidity provider
 - To inspect a HWRs topology, use the `warp read` command:
 
 ```
-hyperlane warp read --warp-route-id ETH/ethereum-base-bsc
+hyperlane warp read -w ETH/ethereum-base-bsc
 
 ethereum:
     type: native
@@ -144,9 +144,9 @@ bsc:
 
 ```
 hyperlane warp send \
-	--warp-route-id ETH/ethereum-base-bsc \
+	-w ETH/ethereum-base-bsc \
 	--origin base \
-    --destination bsc \
+	--destination bsc \
 	--amount <AMOUNT> \
 	--recipient <ADDRESS>
 ```

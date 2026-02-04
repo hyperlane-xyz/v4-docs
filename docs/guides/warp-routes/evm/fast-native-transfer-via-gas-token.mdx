@@ -109,7 +109,7 @@ This collateralizes the native HWR, enabling users to bridge their native assets
 You can initiate a test transfer of a single wei with the following command:
 
 ```bash
-hyperlane warp send --relay --warp-route-id ETH/ethereum-yourchain
+hyperlane warp send --relay -w ETH/ethereum-yourchain
 ```
 
 The `--relay` flag is optional and will relay the message to the destination chain.
@@ -117,7 +117,7 @@ The `--relay` flag is optional and will relay the message to the destination cha
 You can also run a relayer that delivers only for your HWR in the background with:
 
 ```bash
-hyperlane relayer --warp-route-id ETH/ethereum-yourchain
+hyperlane relayer -w ETH/ethereum-yourchain
 ```
 
 You can test in either direction between where you have the HWR set.
