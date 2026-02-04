@@ -48,3 +48,38 @@ A few common command options include:
 ## Registries[​](#registries "Direct link to Registries")
 
 By default, the CLI will pull chain metadata and contract addresses from the [canonical Hyperlane Registry](https://github.com/hyperlane-xyz/hyperlane-registry) but will write new configs and deployments to your local filesystem. For more information see the [Registries page](/docs/reference/registries).
+
+## Warp Route ID
+
+Many CLI commands accept a `--warp-route-id` flag to specify which warp route to use.
+
+**Aliases:** `-w`, `--id`
+
+**Accepts:**
+- `SYMBOL/label` - exact route ID (e.g., `ETH/ethereum-arbitrum`)
+- `SYMBOL` - auto-resolves if unique, prompts if multiple (errors in CI)
+
+**Resolution logic:**
+1. If input contains `/` → exact match
+2. If SYMBOL only → find all routes with that symbol
+   - Single match → use it
+   - Multiple matches + interactive → prompt selection
+   - Multiple matches + CI → error with list of options
+3. Commands with `--origin`/`--destination` (e.g., `warp send`) use those to filter matches
+4. Deprecated route IDs auto-resolve with warning
+
+**Examples:**
+```bash
+# Full route ID
+hyperlane warp check -w ETH/viction
+
+# Symbol only - auto-selects if unique
+hyperlane warp apply --id USDC
+
+# Symbol + chain filter (warp send)
+hyperlane warp send -w ETH --origin ethereum --destination arbitrum
+
+# Deprecated ID - works but warns
+hyperlane warp check -w ETH/viction-ethereum
+# ⚠️  "ETH/viction-ethereum" is deprecated, resolving to "ETH/viction"
+```
