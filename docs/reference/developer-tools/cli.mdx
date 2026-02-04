@@ -65,8 +65,6 @@ Many CLI commands accept a `--warp-route-id` flag to specify which warp route to
    - Single match → use it
    - Multiple matches + interactive → prompt selection
    - Multiple matches + CI → error with list of options
-3. Commands with `--origin`/`--destination` (e.g., `warp send`) use those to filter matches
-4. Deprecated route IDs auto-resolve with warning
 
 **Examples:**
 ```bash
@@ -76,10 +74,9 @@ hyperlane warp check -w ETH/viction
 # Symbol only - auto-selects if unique
 hyperlane warp apply --id USDC
 
-# Symbol + chain filter (warp send)
-hyperlane warp send -w ETH --origin ethereum --destination arbitrum
-
-# Deprecated ID - works but warns
-hyperlane warp check -w ETH/viction-ethereum
-# ⚠️  "ETH/viction-ethereum" is deprecated, resolving to "ETH/viction"
+# Symbol only - prompts if multiple routes exist
+hyperlane warp send -w ETH
+# ? Multiple routes found for "ETH". Select one:
+#   ETH/ethereum-arbitrum
+#   ETH/ethereum-optimism
 ```
