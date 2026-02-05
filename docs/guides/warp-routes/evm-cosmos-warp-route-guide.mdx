@@ -58,7 +58,7 @@ hyperlane warp deploy --config warp-route-config.yaml
 The CLI will prompt you for the private keys for each chain.
 
 <Note>
-**Private Key Format:** Both EVM and Cosmos keys should be provided in **hex format** (64 characters, no `0x` prefix). The CLI handles the derivation of the bech32 address for Cosmos automatically.
+**Private Key Format:** Both EVM and Cosmos keys should be provided in **hex format** (64 characters, with or without `0x` prefix). The CLI handles the derivation of the bech32 address for Cosmos automatically.
 </Note>
 
 ### Step 3: Verify the Deployment
@@ -73,13 +73,15 @@ This will output the current configuration and contract addresses for the route.
 
 ### Step 4: Test a Transfer
 
-To ensure everything is working correctly, send a test transfer between the chains:
+<Note>
+  `hyperlane warp send` does not currently support Cosmos SDK chains. To test your cross-chain warp route, run a [relayer](/docs/guides/deploy-agents/run-relayer) between your chains and initiate a transfer from the EVM side using the deployed HypERC20 contract, or from the Cosmos side using native transaction tooling.
+</Note>
+
+Verify the warp route is correctly registered on both sides:
 
 ```bash
-hyperlane warp send --origin ethereum --destination yourcosmoschain --warpRouteId USDC/ethereum --relay
+hyperlane warp read --warpRouteId USDC/ethereum
 ```
-
-The `--relay` flag ensures the message is delivered to the destination chain immediately by the CLI.
 
 ## Important Considerations
 

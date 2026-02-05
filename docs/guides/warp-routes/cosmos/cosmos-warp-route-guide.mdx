@@ -34,20 +34,21 @@ The most common pattern is **Collateral to Synthetic**. You lock an existing tok
 Create a YAML file (e.g., `warp-route-deployment.yaml`) to define your Warp Route. This config maps chain names to their respective token settings.
 
 ```yaml
-# Replace chain names, addresses, and token details with your own values
+# Replace chain names, addresses, and token details with your own values.
+# Each chain uses its own bech32 prefix for addresses.
 hyp1:
   type: collateral
   token: uhyp
   owner: "hyp1jq304cthpx0lwhpqzrdjrcza559ukyy3sc4dw5"
-  mailbox: "hyp1mailboxaddress..."
+  mailbox: "hyp1..."  # Your chain's Mailbox address
   name: Hyperlane Token
   symbol: HYP
   decimals: 6
 
 hyp2:
   type: synthetic
-  owner: "hyp2jq304cthpx0lwhpqzrdjrcza559ukyy3sc4dw5"
-  mailbox: "hyp2mailboxaddress..."
+  owner: "hyp2..."    # Owner address on the destination chain
+  mailbox: "hyp2..."  # Destination chain's Mailbox address
   name: Hyperlane Token
   symbol: HYP
   decimals: 6
@@ -91,13 +92,13 @@ Replace `HYP/hyp1` with your actual Warp Route ID (usually `SYMBOL/label`).
 
 ### Step 4: Test a Transfer
 
-To ensure everything is working correctly, send a test transfer between your chains.
+<Note>
+  `hyperlane warp send` does not currently support Cosmos SDK chains. To test your warp route, run a [relayer](/docs/guides/deploy-agents/run-relayer) between your chains and initiate a transfer using the chain's native transaction tooling (e.g., a Cosmos SDK `MsgTransfer` to the warp route contract).
+</Note>
+
+You can verify the warp route is correctly registered on both chains by reading each side:
 
 ```bash
-hyperlane warp send --origin hyp1 --destination hyp2 --warpRouteId HYP/hyp1 --relay
+hyperlane warp read --warpRouteId HYP/hyp1
+hyperlane warp read --warpRouteId HYP/hyp2
 ```
-
-- `--origin`: The source chain name.
-- `--destination`: The destination chain name.
-- `--warpRouteId`: The Warp Route ID.
-- `--relay`: Automatically relays the message to the destination chain (useful for testing).

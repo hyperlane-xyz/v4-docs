@@ -22,7 +22,7 @@ Anyone can begin this quickstart guide once they have the following artifacts & 
   - A bech32 prefix, e.g. `hyp`
   - RPC, REST, and gRPC URLs
   - Native token denomination and gas price
-- A deployer wallet hex private key (64 hex chars, no `0x` prefix)
+- A deployer wallet hex private key (64 hex characters, with or without `0x` prefix)
   - This wallet should be funded on your custom chain and any chain you will be passing messages to & from
 - [Hyperlane CLI](/docs/reference/developer-tools/cli)
 
@@ -145,11 +145,10 @@ Use the arrows and enter to select your custom chain from the bottom of the list
 
 ```yaml
 # Example — your actual bech32 addresses will differ
-mailbox: "hyp1mailboxaddress..."
-interchainAccountRouter: "hyp1icarouteraddress..."
-interchainAccountIsm: "hyp1icaismaddress..."
-validatorAnnounce: "hyp1validatorannounceaddress..."
-testRecipient: "hyp1testrecipientaddress..."
+mailbox: "hyp1..."
+validatorAnnounce: "hyp1..."
+staticMerkleRootMultisigIsmFactory: "hyp1..."  # Populated based on your ISM type
+# Other factory fields may appear as empty strings
 ```
 
 </details>
@@ -158,24 +157,20 @@ testRecipient: "hyp1testrecipientaddress..."
   [Aggregation ISMs](/docs/protocol/ISM/standard-ISMs/aggregation-ISM) are currently not supported on Cosmos SDK chains due to AltVM limitations. Use `messageIdMultisigIsm` or `merkleRootMultisigIsm` instead.
 </Note>
 
-### Send test message
+### Verify deployment
 
-To send a test message, run:
-
-```bash
-hyperlane send message --relay
-```
-
-The `--relay` flag is optional and will deliver the message to the destination chain. The `send message` command is protocol-agnostic and works seamlessly with Cosmos SDK chains.
-
-You can also run a relayer in the background with
+After deployment, verify your core contracts are configured correctly:
 
 ```bash
-hyperlane relayer --chains yourchain,sepolia
+hyperlane core read --chain yourchain
 ```
+
+<Note>
+  `hyperlane send message` does not currently support Cosmos SDK chains. To test message delivery, deploy a [Warp Route](/docs/guides/warp-routes/cosmos/cosmos-warp-route-guide) and use the relayer to process transfers, or run a [self-relayer](/docs/guides/developer-tips/unit-testing#relaying).
+</Note>
 
 <Check>
-  **🎉 Congrats! You have successfully sent a message to your custom Cosmos chain**
+  **🎉 Congrats! You have successfully deployed Hyperlane core to your custom Cosmos chain**
 </Check>
 
 ## 3. Hyperlane Warp Route
