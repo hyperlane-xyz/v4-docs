@@ -138,7 +138,7 @@
                   },
                   "docs/guides/warp-routes/evm-svm-warp-route-guide",
                   "docs/guides/warp-routes/evm-cosmos-warp-route-guide",
-                  "docs/guides/warp-routes/svm-cosmos-warp-route-guide",
+                  "docs/guides/warp-routes/cosmos-svm-warp-route-guide",
                   "docs/guides/warp-routes/bridge-ui-guide"
                 ]
               },

@@ -1,8 +1,8 @@
 ---
-title: "Deploy an SVM ↔ Cosmos HWR"
+title: "Deploy a Cosmos ↔ SVM HWR"
 ---
 
-This guide walks you through deploying a Hyperlane Warp Route (HWR) between an SVM chain (Solana, Eclipse) and a Cosmos SDK chain. It combines the Sealevel Rust CLI for the SVM side with the Hyperlane TypeScript CLI for the Cosmos side, linked via the `foreignDeployment` field.
+This guide walks you through deploying a Hyperlane Warp Route (HWR) between a Cosmos SDK chain and an SVM chain (Solana, Eclipse). It combines the Hyperlane TypeScript CLI for the Cosmos side with the Sealevel Rust CLI for the SVM side, linked via the `foreignDeployment` field.
 
 ## Prerequisites
 
@@ -142,12 +142,6 @@ Cosmos tokens typically use 6 decimals, which is compatible with SVM's standard 
 - **Cosmos**: Bech32 addresses (e.g., `cosmos1...`)
 
 The `foreignDeployment` field in the SVM `token-config.json` accepts the Cosmos bech32 address directly.
-
-### Gas and Fees
-
-When sending messages from SVM to Cosmos, the IGP on the SVM side handles gas payments. Ensure the IGP is properly configured with oracle prices for the Cosmos destination chain.
-
-When sending from Cosmos to SVM, ensure the Cosmos-side IGP has oracle prices configured for the SVM destination domain.
 
 ### Key Management
 
