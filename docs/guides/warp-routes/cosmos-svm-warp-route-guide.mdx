@@ -20,6 +20,7 @@ Since the SVM and Cosmos chains use different deployment tooling, the workflow i
 
 1. **Deploy the Cosmos side** using the Hyperlane TypeScript CLI (`hyperlane warp deploy`)
 2. **Deploy the SVM side** using the Sealevel Rust CLI, referencing the Cosmos deployment via `foreignDeployment`
+3. **Update the Cosmos side** using `hyperlane warp apply` so the Cosmos router enrolls the SVM router
 
 ## Walkthrough
 
@@ -43,14 +44,15 @@ Set your Cosmos private key and deploy:
 
 ```bash
 export HYP_KEY_COSMOSNATIVE='<your_cosmos_hex_private_key>'
-hyperlane warp deploy --config cosmos-warp-config.yaml
+export WARP_ROUTE_ID='ATOM/cosmos-svm'
+hyperlane warp deploy --warpRouteId "$WARP_ROUTE_ID" --config cosmos-warp-config.yaml
 ```
 
 The CLI will output deployment artifacts to `~/.hyperlane/deployments/warp_routes/`. Note the deployed Warp Route address — you'll need it for the SVM side.
 
 ```bash
 # Verify the deployment
-hyperlane warp read --warpRouteId ATOM/yourcosmoschain
+hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
 ```
 
 ### Step 2: Deploy on the SVM Side
@@ -86,13 +88,44 @@ cargo run -- -k ./warp-route-deployer-key.json warp-route deploy \
   --warp-route-name atom \
   --environment mainnet3 \
   --environments-dir ../environments \
-  --built-so-dir ../../target/deploy \
+  --built-so-dir ../target/deploy \
   --token-config-file ../environments/mainnet3/warp-routes/atom/token-config.json \
   --registry ~/path/to/your/local/hyperlane-registry \
   --ata-payer-funding-amount 50000000
 ```
 
-### Step 3: Verify Both Sides
+The SVM deployment writes program IDs under `rust/sealevel/environments/mainnet3/warp-routes/atom/program-ids.json`. You will need the SVM warp route program ID for the next step.
+
+### Step 3: Update Cosmos-Side Router Enrollment
+
+Create an apply config that includes the SVM chain as a `foreignDeployment`:
+
+```yaml
+# cosmos-warp-apply.yaml
+yourcosmoschain:
+  type: collateral
+  token: uatom
+  owner: "cosmos1..."
+  mailbox: "cosmos1..."
+  name: "Cosmos Hub"
+  symbol: "ATOM"
+  decimals: 6
+
+solanamainnet:
+  type: synthetic
+  owner: "<svm_owner_base58_address>"
+  foreignDeployment: "<svm_warp_route_program_id_base58>"
+```
+
+Then apply — the CLI resolves the existing warp core config from the registry using the route ID:
+
+```bash
+hyperlane warp apply \
+  --warpRouteId "$WARP_ROUTE_ID" \
+  --config ./cosmos-warp-apply.yaml
+```
+
+### Step 4: Verify Both Sides
 
 **SVM side:**
 
@@ -106,10 +139,10 @@ cargo run -- -k ./warp-route-deployer-key.json \
 **Cosmos side:**
 
 ```bash
-hyperlane warp read --warpRouteId ATOM/yourcosmoschain
+hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
 ```
 
-### Step 4: Test a Transfer
+### Step 5: Test a Transfer
 
 <Note>
   `hyperlane warp send` does not currently support Cosmos SDK or SVM chains. To test your cross-chain warp route, run a [relayer](/docs/operate/relayer/run-relayer) between your chains and initiate a transfer from the SVM side using the Sealevel CLI, or from the Cosmos side using native transaction tooling.
@@ -142,6 +175,13 @@ Cosmos tokens typically use 6 decimals, which is compatible with SVM's standard 
 - **Cosmos**: Bech32 addresses (e.g., `cosmos1...`)
 
 The `foreignDeployment` field in the SVM `token-config.json` accepts the Cosmos bech32 address directly.
+
+### Router Enrollment
+
+This route is fully bidirectional only after both sides enroll each other:
+
+- The SVM deploy step enrolls the Cosmos router on the SVM side.
+- The `warp apply` step enrolls the SVM router on the Cosmos side.
 
 ### Key Management
 
