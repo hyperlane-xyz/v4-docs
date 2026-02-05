@@ -44,15 +44,14 @@ Set your Cosmos private key and deploy:
 
 ```bash
 export HYP_KEY_COSMOSNATIVE='<your_cosmos_hex_private_key>'
-export WARP_ROUTE_ID='ATOM/cosmos-svm'
-hyperlane warp deploy --warpRouteId "$WARP_ROUTE_ID" --config cosmos-warp-config.yaml
+hyperlane warp deploy --config cosmos-warp-config.yaml
 ```
 
-The CLI will output deployment artifacts to `~/.hyperlane/deployments/warp_routes/`. Note the deployed Warp Route address — you'll need it for the SVM side.
+The CLI will output deployment artifacts to `~/.hyperlane/deployments/warp_routes/`. Note the Warp Route ID (usually `SYMBOL/label`, e.g. `ATOM/yourcosmoschain`) and the deployed Warp Route address — you'll need both for later steps.
 
 ```bash
-# Verify the deployment
-hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
+# Verify the deployment (replace with your actual Warp Route ID)
+hyperlane warp read --warpRouteId ATOM/yourcosmoschain
 ```
 
 ### Step 2: Deploy on the SVM Side
@@ -121,7 +120,7 @@ Then apply — the CLI resolves the existing warp core config from the registry 
 
 ```bash
 hyperlane warp apply \
-  --warpRouteId "$WARP_ROUTE_ID" \
+  --warpRouteId ATOM/yourcosmoschain \
   --config ./cosmos-warp-apply.yaml
 ```
 
@@ -139,7 +138,7 @@ cargo run -- -k ./warp-route-deployer-key.json \
 **Cosmos side:**
 
 ```bash
-hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
+hyperlane warp read --warpRouteId ATOM/yourcosmoschain
 ```
 
 ### Step 5: Test a Transfer
