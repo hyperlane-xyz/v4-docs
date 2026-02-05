@@ -79,7 +79,7 @@ Create a `token-config.json` for the SVM side, referencing the Cosmos deployment
 }
 ```
 
-The `interchainGasPaymaster` value is the overhead IGP address from your SVM chain's core deployment artifacts at `rust/sealevel/environments/mainnet3/<chain>/core/program-ids.json`.
+The `interchainGasPaymaster` value is the overhead IGP address from your SVM chain's [core deployment artifacts](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/rust/sealevel/environments/mainnet3) at `<chain>/core/program-ids.json`.
 
 Deploy from the Sealevel client directory:
 
@@ -161,7 +161,7 @@ cargo run -- -u <SOLANA_RPC_URL> \
 ```
 
 <Note>
-  The recipient address must be in hex format (not bech32). The relayer handles the conversion to the Cosmos bech32 address format on the destination chain.
+  The recipient address must be in hex format (not bech32). You can convert a bech32 address to hex using any bech32 decoder — the hex part is the data portion after removing the human-readable prefix. The relayer handles the conversion back to bech32 on the destination chain.
 </Note>
 
 ## Important Considerations
