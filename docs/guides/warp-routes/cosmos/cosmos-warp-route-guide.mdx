@@ -1,0 +1,102 @@
+---
+title: "Deploy a Cosmos HWR"
+---
+
+## Outcomes
+
+You will be deploying a Hyperlane Warp Route (HWR) for an asset of your choice between Cosmos SDK chains, or between a Cosmos chain and an EVM/SVM chain, provided there is an existing Hyperlane core deployment.
+
+<Info>
+  **Looking for EVM ↔ Cosmos?**
+  This guide focuses on Cosmos-native deployments. For cross-chain setups involving EVM, check out the [EVM ↔ Cosmos Warp Route Guide](/docs/guides/warp-routes/evm-cosmos-warp-route-guide).
+</Info>
+
+## HWR Types
+
+The type of token used determines the HWR type. In Cosmos, tokens are identified by their **denominations (denoms)** rather than contract addresses.
+
+- [Collateral](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-types#collateral-backed-erc20-warp-routes): Handles the transfer of existing tokens by locking them on the source chain. This can be a native denom (e.g., `uatom`, `uhyp`) or an IBC denom (e.g., `ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2`).
+- [Synthetic](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-types#synthetic-erc20-warp-routes): Handles synthetic tokens that are minted and burned as transfers occur. The Hyperlane CLI deploys a new token representation on the destination chain.
+
+### Common Setup: Collateral to Synthetic
+The most common pattern is **Collateral to Synthetic**. You lock an existing token (Collateral) on its origin chain to mint a new representation (Synthetic) on the destination chain. When transferring back, the Synthetic token is burned and the Collateral is unlocked.
+
+## Before You Start
+
+- **Hyperlane Core**: Ensure Hyperlane core contracts are deployed on your target chains. If not, follow the [Deploy Hyperlane to Cosmos](/docs/guides/chains/deploy-hyperlane-cosmos) guide.
+- **Deployer Wallet**: You need a private key for a wallet funded with native tokens on all participating chains to pay for deployment and transaction fees.
+- **Hyperlane CLI**: Install the [Hyperlane CLI](/docs/reference/developer-tools/cli).
+
+## Walkthrough: Deploy a Cosmos HWR
+
+### Step 1: Create Warp Deployment Config
+
+Create a YAML file (e.g., `warp-route-deployment.yaml`) to define your Warp Route. This config maps chain names to their respective token settings.
+
+```yaml
+hyp1:
+  type: collateral
+  token: uhyp
+  owner: "hyp1jq304cthpx0lwhpqzrdjrcza559ukyy3sc4dw5"
+  mailbox: "hyp1mailboxaddress..."
+  name: Hyperlane Token
+  symbol: HYP
+  decimals: 6
+
+hyp2:
+  type: synthetic
+  owner: "hyp2jq304cthpx0lwhpqzrdjrcza559ukyy3sc4dw5"
+  mailbox: "hyp2mailboxaddress..."
+  name: Hyperlane Token
+  symbol: HYP
+  decimals: 6
+```
+
+#### Config Schema
+| Field | Description |
+| :--- | :--- |
+| `type` | `collateral` (lock existing) or `synthetic` (mint new). |
+| `token` | The token denomination (e.g., `uhyp`, `uatom`, or an `ibc/` path). Required for `collateral`. |
+| `owner` | The Bech32 address that will own the Warp Route contracts. |
+| `mailbox` | The address of the Mailbox contract. |
+| `name` | The display name of the token. |
+| `symbol` | The token symbol. |
+| `decimals` | The number of decimal places (usually `6` for Cosmos SDK tokens). |
+
+### Step 2: Deploy the Warp Route
+
+Run the deployment command using the Hyperlane CLI. The CLI will prompt you for the private key for each chain if it's not provided via environment variables.
+
+```bash
+hyperlane warp deploy --config ./warp-route-deployment.yaml
+```
+
+<Note>
+  You can also set your private key as an environment variable to skip prompts:
+  `export HYP_KEY=<your_hex_private_key>`
+</Note>
+
+Upon success, the CLI will output the deployment artifacts to `~/.hyperlane/deployments/warp_routes/`.
+
+### Step 3: Verify the Deployment
+
+You can verify the state of your deployed Warp Route by reading its configuration from the chains.
+
+```bash
+hyperlane warp read --warp HYP/hyp1
+```
+
+Replace `HYP/hyp1` with your actual Warp Route ID (usually `SYMBOL/label`).
+
+### Step 4: Test a Transfer
+
+To ensure everything is working correctly, send a test transfer between your chains.
+
+```bash
+hyperlane warp send --origin hyp1 --destination hyp2 --warp HYP/hyp1 --relay
+```
+
+- `--origin`: The source chain name.
+- `--destination`: The destination chain name.
+- `--warp`: The Warp Route ID.
+- `--relay`: Automatically relays the message to the destination chain (useful for testing).
