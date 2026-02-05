@@ -6,7 +6,7 @@ description: "Step-by-step guide on how to connect your Cosmos SDK chain with Hy
 <Note>
 
 - This guide is for **Cosmos SDK** chains with the Hyperlane module integrated. For CosmWasm-based chains, see the [CosmWasm implementation](https://github.com/many-things/cw-hyperlane).
-- It will walk you through deploying Hyperlane to your new chain as quickly as possible for testing, not production. This includes the core Mailbox and ISM contracts as well as Hyperlane Warp Route contracts for asset bridging.
+- It will walk you through deploying Hyperlane to your new chain as quickly as possible for testing, not production. This includes the core Mailbox and ISM components as well as Hyperlane Warp Route components for asset bridging.
 - To see which chains are already supported, visit the [Registry](https://github.com/hyperlane-xyz/hyperlane-registry/tree/main/chains).
 - If you need any help, reach out on [GitHub Discussions](https://github.com/hyperlane-xyz/hyperlane-monorepo/discussions) or [get in touch](https://forms.gle/KyRTaWvo4XNmNvrq6).
 
@@ -28,20 +28,15 @@ Anyone can begin this quickstart guide once they have the following artifacts & 
 
 ## 1. Registry
 
-Let’s create a custom chain config, run:
+The `hyperlane registry init` command is currently designed for EVM chains and does not support Cosmos SDK chains. Instead, create your chain metadata file manually.
+
+Create the directory and file:
 
 ```bash
-hyperlane registry init
+mkdir -p $HOME/.hyperlane/chains/yourchain
 ```
 
-Follow the prompts to set up your chain metadata. Ensure you select `cosmosnative` as the protocol.
-
-Now, under `$HOME/.hyperlane/chains` you will find a new folder named with your custom chain’s name, and a file named `metadata.yaml` within that folder.
-
-<details> 
-  <summary>
-    Example content of this config at `$HOME/.hyperlane/chains/yourchain/metadata.yaml`
-  </summary>
+Then create `$HOME/.hyperlane/chains/yourchain/metadata.yaml` with the following content, replacing values with your chain's details:
 
 ```yaml
 # yaml-language-server: $schema=../schema.json
@@ -73,11 +68,19 @@ blockExplorers:
     url: https://mychain.com/explorer
 ```
 
-</details>
+<Note>
+Key Cosmos-specific fields:
+- **`protocol: cosmosnative`** — Must be exactly `cosmosnative` (not `cosmos` or `ethereum`)
+- **`bech32Prefix`** — Your chain's address prefix (e.g. `cosmos`, `osmo`, `hyp`)
+- **`slip44`** — SLIP-44 coin type (use `118` for standard Cosmos chains)
+- **`grpcUrls`** — Required for Cosmos SDK chains
+- **`gasPrice`** — Must include both `amount` and `denom`
+- **`nativeToken.denom`** — The on-chain denomination (e.g. `uatom`, `uosmo`)
+</Note>
 
 ## 2. Core
 
-Next, let’s configure, deploy and test your custom chain’s core contracts.
+Next, let’s configure, deploy and test your custom chain’s core components.
 
 ### Initialize configuration
 
@@ -94,7 +97,7 @@ hyperlane core init
   </summary>
 
 ```yaml
-# The address that owns and manages the deployed contracts. This account has admin privileges.
+# The address that owns and manages the deployed components. This account has admin privileges.
 owner: "hyp1jq304cthpx0lwhpqzrdjrcza559ukyy3sc4dw5"
 
 # The default Interchain Security Module (ISM) configuration.
@@ -111,7 +114,8 @@ defaultHook:
   type: interchainGasPaymaster
   owner: "hyp1jq304cthpx0lwhpqzrdjrcza559ukyy3sc4dw5"
   beneficiary: "hyp1jq304cthpx0lwhpqzrdjrcza559ukyy3sc4dw5"
-  oracleKey: "hyp1jq304cthpx0lwhpqzrdjrcza559ukyy3sc4dw5"
+  # Address authorized to set gas oracle prices. On Cosmos, typically the same as owner.
+  oracleKey: "hyp1..."
   overhead:
     hyp: 200000
   oracleConfig:
@@ -127,15 +131,15 @@ requiredHook:
 
 </details>
 
-### Deploy contracts
+### Deploy
 
-To deploy contracts, run:
+To deploy, run:
 
 ```bash
 hyperlane core deploy
 ```
 
-Use the arrows and enter to select your custom chain from the bottom of the list. It will take a few minutes for all contracts to deploy.
+Use the arrows and enter to select your custom chain from the bottom of the list. It will take a few minutes for all components to deploy.
 
 <details>
   <summary>
@@ -159,7 +163,7 @@ staticMerkleRootMultisigIsmFactory: "hyp1..."  # Populated based on your ISM typ
 
 ### Verify deployment
 
-After deployment, verify your core contracts are configured correctly:
+After deployment, verify your core components are configured correctly:
 
 ```bash
 hyperlane core read --chain yourchain
@@ -175,7 +179,7 @@ hyperlane core read --chain yourchain
 
 ## 3. Hyperlane Warp Route
 
-Now that you have a Hyperlane Mailbox and core contracts on your chain, it’s time to set up token bridging between your chain and any other Hyperlane chain.
+Now that you have a Hyperlane Mailbox and core components on your chain, it’s time to set up token bridging between your chain and any other Hyperlane chain.
 
 Continue on to the [Deploy a Cosmos Warp Route](/docs/guides/warp-routes/cosmos/cosmos-warp-route-guide) docs for more details.
 

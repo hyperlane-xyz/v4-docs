@@ -23,7 +23,7 @@ The most common pattern is **Collateral to Synthetic**. You lock an existing tok
 
 ## Before You Start
 
-- **Hyperlane Core**: Ensure Hyperlane core contracts are deployed on your target chains. If not, follow the [Deploy Hyperlane to Cosmos](/docs/guides/chains/deploy-hyperlane-cosmos) guide.
+- **Hyperlane Core**: Ensure Hyperlane core components are deployed on your target chains. If not, follow the [Deploy Hyperlane to Cosmos](/docs/guides/chains/deploy-hyperlane-cosmos) guide.
 - **Deployer Wallet**: You need a private key for a wallet funded with native tokens on all participating chains to pay for deployment and transaction fees.
 - **Hyperlane CLI**: Install the [Hyperlane CLI](/docs/reference/developer-tools/cli).
 
@@ -59,7 +59,7 @@ hyp2:
 | :--- | :--- |
 | `type` | `collateral` (lock existing) or `synthetic` (mint new). |
 | `token` | The token denomination (e.g., `uhyp`, `uatom`, or an `ibc/` path). Required for `collateral`. |
-| `owner` | The Bech32 address that will own the Warp Route contracts. |
+| `owner` | The Bech32 address that will own the Warp Route components. |
 | `mailbox` | The address of the Mailbox contract. |
 | `name` | The display name of the token. |
 | `symbol` | The token symbol. |
@@ -93,7 +93,7 @@ Replace `HYP/hyp1` with your actual Warp Route ID (usually `SYMBOL/label`).
 ### Step 4: Test a Transfer
 
 <Note>
-  `hyperlane warp send` does not currently support Cosmos SDK chains. To test your warp route, run a [relayer](/docs/operate/relayer/run-relayer) between your chains and initiate a transfer using the chain's native transaction tooling (e.g., a Cosmos SDK `MsgTransfer` to the warp route contract).
+  `hyperlane warp send` does not currently support Cosmos SDK chains. To test your warp route, run a [relayer](/docs/operate/relayer/run-relayer) between your chains and initiate a transfer using the chain's native transaction tooling to interact with the warp route module.
 </Note>
 
 You can verify the warp route is correctly registered on both chains by reading each side:
