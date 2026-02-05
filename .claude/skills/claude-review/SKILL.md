@@ -16,3 +16,25 @@ Use this skill to review documentation changes against Hyperlane docs standards.
 ## Instructions
 
 Read and apply the guidelines from `.github/prompts/writing-review.md` to review the documentation changes.
+
+### For PR Reviews
+
+When reviewing a PR, deliver feedback using `/inline-pr-comments` to post inline comments on specific lines.
+
+**Delivery format:**
+
+1. **Inline comments** - For all issues on lines IN the diff
+2. **Summary body** - For:
+   - Overall assessment
+   - Structure/organization concerns
+   - Issues found OUTSIDE the diff (use "## Observations Outside This PR" section)
+
+GitHub API limitation: Can only post inline comments on changed lines. Issues in unchanged code go in the summary body.
+
+### For Self-Review
+
+When reviewing your own changes before committing:
+
+1. Run `git diff` to see changes
+2. Apply the review guidelines
+3. Fix issues directly rather than commenting
