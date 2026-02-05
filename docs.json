@@ -94,14 +94,14 @@
           {
             "group": "Guides",
             "pages": [
-               {
-                 "group": "Setup Hyperlane on your Chain",
-                 "pages": [
-                   "docs/guides/chains/deploy-hyperlane",
-                   "docs/guides/chains/deploy-hyperlane-cosmos",
-                   "docs/guides/chains/deploy-hyperlane-with-local-agents"
-                 ]
-               },
+              {
+                "group": "Setup Hyperlane on your Chain",
+                "pages": [
+                  "docs/guides/chains/deploy-hyperlane",
+                  "docs/guides/chains/deploy-hyperlane-cosmos",
+                  "docs/guides/chains/deploy-hyperlane-with-local-agents"
+                ]
+              },
               {
                 "group": "Hyperlane Warp Routes (HWR)",
                 "pages": [
@@ -117,28 +117,28 @@
                       "docs/guides/warp-routes/evm/transfer-and-call-pattern"
                     ]
                   },
-                   {
-                     "group": "SVM HWR",
-                     "pages": [
-                       "docs/guides/warp-routes/svm/svm-warp-route-guide",
-                       {
-                         "group": "Using Squads",
-                         "pages": [
-                           "docs/guides/production/using-squads/alt-svm-using-sqauds",
-                           "docs/guides/production/using-squads/using-squads-solana"
-                         ]
-                       }
-                     ]
-                   },
-                   {
-                     "group": "Cosmos HWR",
-                     "pages": [
-                       "docs/guides/warp-routes/cosmos/cosmos-warp-route-guide"
-                     ]
-                   },
-                   "docs/guides/warp-routes/evm-svm-warp-route-guide",
-                   "docs/guides/warp-routes/evm-cosmos-warp-route-guide",
-                   "docs/guides/warp-routes/bridge-ui-guide"
+                  {
+                    "group": "SVM HWR",
+                    "pages": [
+                      "docs/guides/warp-routes/svm/svm-warp-route-guide",
+                      {
+                        "group": "Using Squads",
+                        "pages": [
+                          "docs/guides/production/using-squads/alt-svm-using-sqauds",
+                          "docs/guides/production/using-squads/using-squads-solana"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "group": "Cosmos HWR",
+                    "pages": [
+                      "docs/guides/warp-routes/cosmos/cosmos-warp-route-guide"
+                    ]
+                  },
+                  "docs/guides/warp-routes/evm-svm-warp-route-guide",
+                  "docs/guides/warp-routes/evm-cosmos-warp-route-guide",
+                  "docs/guides/warp-routes/bridge-ui-guide"
                 ]
               },
               {
