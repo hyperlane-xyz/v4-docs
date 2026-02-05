@@ -40,11 +40,13 @@ jobs:
 
       - name: Get latest agent release tag
         id: get-tag
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           # Fetch releases from GitHub API and filter using same pattern as monorepo
           # Only stable releases matching agents-vX.Y.Z (no prerelease suffixes)
-          LATEST_TAG=$(curl -s https://api.github.com/repos/hyperlane-xyz/hyperlane-monorepo/releases \
-            | jq -r '.[] | select(.prerelease == false and .draft == false) | .tag_name' \
+          LATEST_TAG=$(gh api repos/hyperlane-xyz/hyperlane-monorepo/releases --paginate \
+            --jq '.[] | select(.prerelease == false and .draft == false) | .tag_name' \
             | grep -E "^agents-v[0-9]+\.[0-9]+\.[0-9]+$" \
             | head -1)
 
