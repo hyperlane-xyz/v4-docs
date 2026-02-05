@@ -129,11 +129,11 @@ type PostDispatchHook interface {	HookType() uint8	SupportsMetadata(metadata any
 
 1. Instances instead of Contracts
 2. IDs instead of Contract addresses
-3. Tokens: There are no native tokens, this has implications to the IGP where a `denom` for gas payments has to be specified. Similarly, there is no `NativeCollateralToken`.
+3. Tokens: Cosmos uses denoms (including native denoms and IBC denoms) instead of token contract addresses, so IGP config must specify a `denom`. There is no `NativeCollateralToken` contract abstraction.
 
 ### Tool Integration
 
-The Hyperlane CLI fully supports the Cosmos SDK module for deploying and managing core infrastructure and warp routes. The CLI handles Cosmos-specific details like bech32 address derivation, denom-based token references, and message-based deployment automatically.
+The Hyperlane CLI supports the Cosmos SDK module for deploying and managing core infrastructure and warp routes. The CLI handles Cosmos-specific details like bech32 address derivation, denom-based token references, and message-based deployment automatically.
 
 <CardGroup cols={2}>
   <Card title="Deploy Hyperlane to a Cosmos Chain" href="/docs/guides/chains/deploy-hyperlane-cosmos">

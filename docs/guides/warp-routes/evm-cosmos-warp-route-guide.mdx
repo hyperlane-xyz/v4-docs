@@ -61,6 +61,17 @@ The CLI will prompt you for the private keys for each chain.
 **Private Key Format:** Both EVM and Cosmos keys should be provided in **hex format** (64 characters, with or without `0x` prefix). The CLI handles the derivation of the bech32 address for Cosmos automatically.
 </Note>
 
+<Note>
+To avoid prompts, set both env vars before running deploy:
+
+```bash
+export HYP_KEY=<your_evm_hex_private_key>
+export HYP_KEY_COSMOSNATIVE=<your_cosmos_hex_private_key>
+```
+
+You can also pass protocol-specific flags directly (`--key` for EVM and `--key.cosmosnative` for Cosmos).
+</Note>
+
 ### Step 3: Verify the Deployment
 
 After the deployment completes, you can verify the state of your Warp Route on both sides:

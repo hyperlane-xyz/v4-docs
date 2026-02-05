@@ -75,7 +75,9 @@ hyperlane warp deploy --config ./warp-route-deployment.yaml
 
 <Note>
   You can also set your private key as an environment variable to skip prompts:
-  `export HYP_KEY=<your_hex_private_key>`
+  `export HYP_KEY_COSMOSNATIVE=<your_hex_private_key>`
+
+  For mixed EVM ↔ Cosmos routes, also set `HYP_KEY` for the EVM side.
 </Note>
 
 Upon success, the CLI will output the deployment artifacts to `~/.hyperlane/deployments/warp_routes/`.

@@ -82,18 +82,20 @@ Key Cosmos-specific fields:
 
 Next, let’s configure, deploy and test your custom chain’s core components.
 
-### Initialize configuration
+### Create configuration
 
-1. From your local environment, set the hex private key of your funded deployer address to `HYP_KEY`. For example: `export HYP_KEY='<YOUR_PRIVATE_KEY>'` (64 hex characters, with or without `0x` prefix)
-2. From the same terminal instance, run:
+1. Set the hex private key of your funded deployer address for Cosmos-native operations:
+   - `export HYP_KEY_COSMOSNATIVE='<YOUR_PRIVATE_KEY>'` (64 hex characters, with or without `0x` prefix)
+   - Or pass `--key.cosmosnative` directly to deploy commands
+2. Create `./configs/core-config.yaml` using the template below.
 
-```bash
-hyperlane core init
-```
+<Note>
+  `HYP_KEY` is treated as the legacy Ethereum shared key in the current CLI. For Cosmos SDK chains, use `HYP_KEY_COSMOSNATIVE` (or `--key.cosmosnative`) to avoid key prompts.
+</Note>
 
 <details>
   <summary>
-    The deployment config will be written to `./configs/core-config.yaml`
+    Use this template for `./configs/core-config.yaml`
   </summary>
 
 ```yaml
