@@ -15,8 +15,8 @@ You will be deploying a Hyperlane Warp Route (HWR) for an asset of your choice b
 
 The type of token used determines the HWR type. In Cosmos, tokens are identified by their **denominations (denoms)** rather than contract addresses.
 
-- [Collateral](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-types#collateral-backed-erc20-warp-routes): Handles the transfer of existing tokens by locking them on the source chain. This can be a native denom (e.g., `uatom`, `uhyp`) or an IBC denom (e.g., `ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2`).
-- [Synthetic](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-types#synthetic-erc20-warp-routes): Handles synthetic tokens that are minted and burned as transfers occur. The Hyperlane CLI deploys a new token representation on the destination chain.
+- [Collateral](/docs/protocol/warp-routes/warp-routes-types#collateral-backed-erc20-warp-routes): Handles the transfer of existing tokens by locking them on the source chain. This can be a native denom (e.g., `uatom`, `uhyp`) or an IBC denom (e.g., `ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2`).
+- [Synthetic](/docs/protocol/warp-routes/warp-routes-types#synthetic-erc20-warp-routes): Handles synthetic tokens that are minted and burned as transfers occur. The Hyperlane CLI deploys a new token representation on the destination chain.
 
 ### Common Setup: Collateral to Synthetic
 The most common pattern is **Collateral to Synthetic**. You lock an existing token (Collateral) on its origin chain to mint a new representation (Synthetic) on the destination chain. When transferring back, the Synthetic token is burned and the Collateral is unlocked.
@@ -83,7 +83,7 @@ Upon success, the CLI will output the deployment artifacts to `~/.hyperlane/depl
 You can verify the state of your deployed Warp Route by reading its configuration from the chains.
 
 ```bash
-hyperlane warp read --warp HYP/hyp1
+hyperlane warp read --warpRouteId HYP/hyp1
 ```
 
 Replace `HYP/hyp1` with your actual Warp Route ID (usually `SYMBOL/label`).
@@ -93,10 +93,10 @@ Replace `HYP/hyp1` with your actual Warp Route ID (usually `SYMBOL/label`).
 To ensure everything is working correctly, send a test transfer between your chains.
 
 ```bash
-hyperlane warp send --origin hyp1 --destination hyp2 --warp HYP/hyp1 --relay
+hyperlane warp send --origin hyp1 --destination hyp2 --warpRouteId HYP/hyp1 --relay
 ```
 
 - `--origin`: The source chain name.
 - `--destination`: The destination chain name.
-- `--warp`: The Warp Route ID.
+- `--warpRouteId`: The Warp Route ID.
 - `--relay`: Automatically relays the message to the destination chain (useful for testing).

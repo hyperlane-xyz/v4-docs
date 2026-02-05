@@ -26,8 +26,8 @@ ethereum:
   token: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"  # USDC on Ethereum
   mailbox: "0xc005dc82818d67AF737725bD4bf75435d065D239"
   owner: "0xa7ECcdb9Be08178f896c26b7BbD8C3D4E844d9Ba"
-  interchainSecurityModule: "0x0000000000000000000000000000000000000000"
-  gas: 300000 # Compute units for message delivery on Cosmos
+  interchainSecurityModule: "0x0000000000000000000000000000000000000000" # Use destination Mailbox default ISM
+  gas: 300000 # Set a ceiling for expected Cosmos-side compute units
 
 yourcosmoschain:
   type: synthetic
@@ -44,7 +44,8 @@ yourcosmoschain:
 - **`type`**: Use `collateral` for the chain where the original token exists, and `synthetic` for the chain where the new token will be minted.
 - **`token`**: On EVM, this is the ERC20 contract address. On Cosmos, if using `collateral`, this would be the native denom (e.g., `uatom`).
 - **`foreignDeployment`**: This field is used to link to an existing Warp Route contract on the remote chain. If you have already deployed the Cosmos side, provide its address here to enroll it in the EVM deployment.
-- **`gas`**: In the EVM config, the `gas` field specifies the compute units required for message delivery on the destination Cosmos chain.
+- **`interchainSecurityModule`**: Set to `0x0000000000000000000000000000000000000000` to use the default ISM configured in the destination Mailbox.
+- **`gas`**: In the EVM config, `gas` sets the Cosmos-side compute unit ceiling for message delivery. Start conservative and increase if messages run out of gas.
 
 ### Step 2: Deploy the Warp Route
 
@@ -54,7 +55,7 @@ Run the deployment command using the Hyperlane CLI:
 hyperlane warp deploy --config warp-route-config.yaml
 ```
 
-The CLI will prompt you for the private keys for each chain. 
+The CLI will prompt you for the private keys for each chain.
 
 <Note>
 **Private Key Format:** Both EVM and Cosmos keys should be provided in **hex format** (64 characters, no `0x` prefix). The CLI handles the derivation of the bech32 address for Cosmos automatically.
@@ -65,7 +66,7 @@ The CLI will prompt you for the private keys for each chain.
 After the deployment completes, you can verify the state of your Warp Route on both sides:
 
 ```bash
-hyperlane warp read --warp USDC/ethereum
+hyperlane warp read --warpRouteId USDC/ethereum
 ```
 
 This will output the current configuration and contract addresses for the route.
@@ -75,7 +76,7 @@ This will output the current configuration and contract addresses for the route.
 To ensure everything is working correctly, send a test transfer between the chains:
 
 ```bash
-hyperlane warp send --origin ethereum --destination yourcosmoschain --relay
+hyperlane warp send --origin ethereum --destination yourcosmoschain --warpRouteId USDC/ethereum --relay
 ```
 
 The `--relay` flag ensures the message is delivered to the destination chain immediately by the CLI.
@@ -86,7 +87,7 @@ The `--relay` flag ensures the message is delivered to the destination chain imm
 EVM chains use hex addresses (starting with `0x`), while Cosmos chains use bech32 addresses (e.g., `cosmos1...`). The Hyperlane CLI handles the conversion between these formats automatically when interacting with the different protocols.
 
 ### Gas and Fees
-When sending a message from EVM to Cosmos, you must specify a sufficient `gas` limit in your config. This represents the compute units on the Cosmos side. Ensure your EVM wallet has enough native tokens to pay for the interchain gas fees.
+When sending a message from EVM to Cosmos, you must specify a sufficient `gas` limit in your config. This represents the compute units on the Cosmos side. Set this as a ceiling based on expected execution and raise it if delivery fails due to out-of-gas. Ensure your EVM wallet has enough native tokens to pay for the interchain gas fees.
 
 ## Related Guides
 
