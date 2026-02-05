@@ -43,7 +43,7 @@ yourcosmoschain:
 
 - **`type`**: Use `collateral` for the chain where the original token exists, and `synthetic` for the chain where the new token will be minted.
 - **`token`**: On EVM, this is the ERC20 contract address. On Cosmos, if using `collateral`, this would be the native denom (e.g., `uatom`).
-- **`foreignDeployment`**: This field is used to link to an existing Warp Route contract on the remote chain. If you have already deployed the Cosmos side, provide its address here to enroll it in the EVM deployment.
+- **`foreignDeployment`**: This field is used to link to an existing Warp Route deployment on the remote chain. If you have already deployed the Cosmos side, provide its address here to enroll it in the EVM deployment.
 - **`interchainSecurityModule`**: Set to `0x0000000000000000000000000000000000000000` to use the default ISM configured in the destination Mailbox.
 - **`gas`**: In the EVM config, `gas` sets the Cosmos-side compute unit ceiling for message delivery. Start conservative and increase if messages run out of gas.
 
@@ -69,7 +69,7 @@ After the deployment completes, you can verify the state of your Warp Route on b
 hyperlane warp read --warpRouteId USDC/ethereum
 ```
 
-This will output the current configuration and contract addresses for the route.
+This will output the current configuration and addresses for the route.
 
 ### Step 4: Test a Transfer
 
