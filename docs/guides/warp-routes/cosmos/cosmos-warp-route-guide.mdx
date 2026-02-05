@@ -89,10 +89,11 @@ Upon success, the CLI will output the deployment artifacts to `~/.hyperlane/depl
 You can verify the state of your deployed Warp Route by reading its configuration from the chains.
 
 ```bash
-hyperlane warp read --warpRouteId HYP/hyp1
+export WARP_ROUTE_ID='<your_warp_route_id>'
+hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
 ```
 
-Replace `HYP/hyp1` with your actual Warp Route ID (usually `SYMBOL/label`).
+Use the Warp Route ID shown in deploy output. For a config with exactly one synthetic chain, the default ID is usually `SYMBOL/<synthetic_chain_name>` (for the example above, `HYP/hyp2`).
 
 ### Step 4: Test a Transfer
 
@@ -100,9 +101,8 @@ Replace `HYP/hyp1` with your actual Warp Route ID (usually `SYMBOL/label`).
   `hyperlane warp send` does not currently support Cosmos SDK chains. To test your warp route, run a [relayer](/docs/operate/relayer/run-relayer) between your chains and initiate a transfer using the chain's native transaction tooling to interact with the warp route module.
 </Note>
 
-You can verify the warp route is correctly registered on both chains by reading each side:
+You can verify the warp route is correctly registered on both chains:
 
 ```bash
-hyperlane warp read --warpRouteId HYP/hyp1
-hyperlane warp read --warpRouteId HYP/hyp2
+hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
 ```

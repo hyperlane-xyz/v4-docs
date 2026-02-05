@@ -77,8 +77,11 @@ You can also pass protocol-specific flags directly (`--key` for EVM and `--key.c
 After the deployment completes, you can verify the state of your Warp Route on both sides:
 
 ```bash
-hyperlane warp read --warpRouteId USDC/ethereum
+export WARP_ROUTE_ID='<your_warp_route_id>'
+hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
 ```
+
+Use the Warp Route ID shown in deploy output. For a config with exactly one synthetic chain, the default ID is usually `SYMBOL/<synthetic_chain_name>` (for this example, typically `USDC/yourcosmoschain`).
 
 This will output the current configuration and addresses for the route.
 
@@ -91,7 +94,7 @@ This will output the current configuration and addresses for the route.
 Verify the warp route is correctly registered on both sides:
 
 ```bash
-hyperlane warp read --warpRouteId USDC/ethereum
+hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
 ```
 
 ## Important Considerations

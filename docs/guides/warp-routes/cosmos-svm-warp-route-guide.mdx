@@ -44,14 +44,15 @@ Set your Cosmos private key and deploy:
 
 ```bash
 export HYP_KEY_COSMOSNATIVE='<your_cosmos_hex_private_key>'
-hyperlane warp deploy --config cosmos-warp-config.yaml
+export WARP_ROUTE_ID='ATOM/yourcosmoschain'
+hyperlane warp deploy --warpRouteId "$WARP_ROUTE_ID" --config cosmos-warp-config.yaml
 ```
 
 The CLI will output deployment artifacts to `~/.hyperlane/deployments/warp_routes/`. Note the Warp Route ID (usually `SYMBOL/label`, e.g. `ATOM/yourcosmoschain`) and the deployed Warp Route address — you'll need both for later steps.
 
 ```bash
-# Verify the deployment (replace with your actual Warp Route ID)
-hyperlane warp read --warpRouteId ATOM/yourcosmoschain
+# Verify the deployment
+hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
 ```
 
 ### Step 2: Deploy on the SVM Side
@@ -118,12 +119,15 @@ solanamainnet:
   foreignDeployment: "<svm_warp_route_program_id_base58>"
 ```
 
-Then apply — the CLI resolves the existing warp core config from the registry using the route ID:
+Because `--config` is a local deploy-config file, also pass the matching warp core config via `--warp`:
 
 ```bash
+cp ~/.hyperlane/deployments/warp_routes/"$WARP_ROUTE_ID"-config.yaml ./cosmos-warp-core.yaml
+
 hyperlane warp apply \
-  --warpRouteId ATOM/yourcosmoschain \
-  --config ./cosmos-warp-apply.yaml
+  --warpRouteId "$WARP_ROUTE_ID" \
+  --config ./cosmos-warp-apply.yaml \
+  --warp ./cosmos-warp-core.yaml
 ```
 
 ### Step 4: Verify Both Sides
@@ -140,7 +144,7 @@ cargo run -- -k ./warp-route-deployer-key.json \
 **Cosmos side:**
 
 ```bash
-hyperlane warp read --warpRouteId ATOM/yourcosmoschain
+hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
 ```
 
 ### Step 5: Test a Transfer
@@ -161,7 +165,7 @@ cargo run -- -u <SOLANA_RPC_URL> \
 ```
 
 <Note>
-  The recipient address must be in hex format (not bech32). You can convert a bech32 address to hex using any bech32 decoder — the hex part is the data portion after removing the human-readable prefix. The relayer handles the conversion back to bech32 on the destination chain.
+  The recipient address must be a `0x`-prefixed 32-byte hex value (64 hex chars), not bech32. When converting from bech32, use a converter that outputs the Hyperlane recipient format (left-padded bytes32). The relayer handles conversion back to a bech32 account on the destination chain.
 </Note>
 
 ## Important Considerations
