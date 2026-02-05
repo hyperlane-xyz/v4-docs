@@ -68,7 +68,7 @@ Create a `token-config.json` for the SVM side, referencing the Cosmos deployment
     "name": "Cosmos Hub",
     "symbol": "ATOM",
     "uri": "<permalink to token metadata JSON>",
-    "interchainGasPaymaster": "<from SVM core artifacts, use the overhead IGP>"
+    "interchainGasPaymaster": "<overhead IGP from core program-ids.json>"
   },
   "yourcosmoschain": {
     "type": "collateral",
@@ -78,6 +78,8 @@ Create a `token-config.json` for the SVM side, referencing the Cosmos deployment
   }
 }
 ```
+
+The `interchainGasPaymaster` value is the overhead IGP address from your SVM chain's core deployment artifacts at `rust/sealevel/environments/mainnet3/<chain>/core/program-ids.json`.
 
 Deploy from the Sealevel client directory:
 
