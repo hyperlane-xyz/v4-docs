@@ -70,7 +70,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd scripts
-          pnpm install
+          pnpm install --no-frozen-lockfile
 
       - name: Run generate-all script
         run: |
