@@ -131,10 +131,17 @@ type PostDispatchHook interface {	HookType() uint8	SupportsMetadata(metadata any
 2. IDs instead of Contract addresses
 3. Tokens: There are no native tokens, this has implications to the IGP where a `denom` for gas payments has to be specified. Similarly, there there is no `NativeCollateralToken`.
 
-### Tool integration
+### Tool Integration
 
-<Note>
-  Support for the native Cosmos SDK module is under development for Hyperlane
-  agents and CLI. Deploying a HWR requires manually setting up all necessary
-  components (Mailbox, ISM, IGP, Token, etc.) with the correct transactions.
-</Note>
+The Hyperlane CLI fully supports the Cosmos SDK module for deploying and managing core infrastructure and warp routes. The CLI handles Cosmos-specific details like bech32 address derivation, denom-based token references, and message-based deployment automatically.
+
+<CardGroup cols={2}>
+  <Card title="Deploy Hyperlane to a Cosmos Chain" href="/docs/guides/chains/deploy-hyperlane-cosmos">
+    Step-by-step core deployment guide
+  </Card>
+  <Card title="Deploy a Cosmos Warp Route" href="/docs/guides/warp-routes/cosmos/cosmos-warp-route-guide">
+    Bridge tokens between Cosmos chains
+  </Card>
+</CardGroup>
+
+For cross-chain routes between EVM and Cosmos, see the [EVM ↔ Cosmos HWR Guide](/docs/guides/warp-routes/evm-cosmos-warp-route-guide).
