@@ -26,12 +26,14 @@ mintlify broken-links
 ## Architecture
 
 ### Directory Structure
+
 - `docs/` - Main documentation pages (MDX files)
 - `api-reference/` - API documentation
 - `images/` - Static images
 - `mint.json` or `docs.json` - Mintlify configuration
 
 ### Mintlify Syntax
+
 - Uses MDX (Markdown + JSX components)
 - Supports Mintlify-specific components (Cards, Tabs, CodeGroups, etc.)
 - Internal links use relative paths without `.mdx` extension
@@ -39,12 +41,43 @@ mintlify broken-links
 ## Writing Philosophy
 
 ### Keep It Simple
+
 Documentation should be clear and direct. Don't add sections unless they help users accomplish tasks.
 
 ### Focus on the User
+
 - What is the user trying to do?
 - What do they need to know to succeed?
 - What mistakes do they commonly make?
+
+## Code Review
+
+For review guidelines, see `.github/prompts/writing-review.md`.
+
+### PR Review Comment Format
+
+**Use inline comments** for specific feedback on changes. Use the GitHub API to post reviews:
+
+```bash
+gh api repos/{owner}/{repo}/pulls/{pr}/reviews --input - << 'EOF'
+{
+  "event": "COMMENT",
+  "body": "Overall summary (optional)",
+  "comments": [
+    {"path": "docs/guide.mdx", "line": 42, "body": "Specific issue here"},
+    {"path": "docs/guide.mdx", "start_line": 10, "line": 15, "body": "Multi-line comment"}
+  ]
+}
+EOF
+```
+
+| Feedback Type     | Where                                   |
+| ----------------- | --------------------------------------- |
+| Specific issue    | Inline comment on that line             |
+| Repeated pattern  | Inline on first, mention others in body |
+| Structure concern | Summary body                            |
+
+**Limitation**: Can only comment on lines in the diff (changed lines). Comments on unchanged code fail.
 
 ## Tips for AI Coding Sessions
 
