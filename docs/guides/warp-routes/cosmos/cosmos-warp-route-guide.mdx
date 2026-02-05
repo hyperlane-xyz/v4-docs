@@ -66,6 +66,8 @@ hyp2:
 | `name` | The display name of the token. |
 | `symbol` | The token symbol. |
 | `decimals` | The number of decimal places (usually `6` for Cosmos SDK tokens). |
+| `interchainSecurityModule` | (Optional) Address of a custom ISM. Omit to use the default ISM configured in the destination Mailbox. |
+| `gas` | (Optional) Compute unit ceiling for message delivery on the destination chain. Start conservative (e.g., `300000`) and increase if messages run out of gas. |
 
 ### Step 2: Deploy the Warp Route
 

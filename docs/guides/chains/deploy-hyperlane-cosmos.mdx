@@ -72,7 +72,7 @@ blockExplorers:
 Key Cosmos-specific fields:
 - **`protocol: cosmosnative`** — Must be exactly `cosmosnative` (not `cosmos` or `ethereum`)
 - **`bech32Prefix`** — Your chain's address prefix (e.g. `cosmos`, `osmo`, `hyp`)
-- **`slip44`** — SLIP-44 coin type (use `118` for standard Cosmos chains)
+- **`slip44`** — [SLIP-44](https://github.com/satoshilabs/slips/blob/master/slip-0044.md) coin type (use `118` for standard Cosmos chains)
 - **`grpcUrls`** — Required for Cosmos SDK chains
 - **`gasPrice`** — Must include both `amount` and `denom`
 - **`nativeToken.denom`** — The on-chain denomination (e.g. `uatom`, `uosmo`)
