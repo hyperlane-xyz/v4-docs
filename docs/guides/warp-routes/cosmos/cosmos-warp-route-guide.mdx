@@ -97,14 +97,48 @@ hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
 
 Use the Warp Route ID shown in deploy output. For a config with exactly one synthetic chain, the default ID is usually `SYMBOL/<synthetic_chain_name>` (for the example above, `HYP/hyp2`).
 
-### Step 4: Test a Transfer
+### Step 4: Transfer ownership for production (recommended)
+
+Many teams deploy first with a hot deployer key, then transfer ownership to a multisig after verification.
+
+1. Update `owner` fields in your `warp-route-deployment.yaml` to your production owner addresses.
+2. Use the generated core config and re-apply:
+
+```bash
+cp ~/.hyperlane/deployments/warp_routes/"$WARP_ROUTE_ID"-config.yaml ./warp-route-core.yaml
+
+hyperlane warp apply \
+  --warpRouteId "$WARP_ROUTE_ID" \
+  --config ./warp-route-deployment.yaml \
+  --warp ./warp-route-core.yaml
+```
 
 <Note>
-  `hyperlane warp send` does not currently support Cosmos SDK chains. To test your warp route, run a [relayer](/docs/operate/relayer/run-relayer) between your chains and initiate a transfer using the chain's native transaction tooling to interact with the warp route module.
+  When `--config` points to a local deploy config file, you must also pass the matching core config with `--warp`.
 </Note>
+
+### Step 5: Test a Transfer
+
+<Note>
+  `hyperlane warp send` does not currently support Cosmos SDK chains.
+</Note>
+
+To test your route:
+
+- Run a [relayer](/docs/operate/relayer/run-relayer) between your chains.
+- Use chain-native transaction tooling to call the warp route module.
+- Or run a local bridge UI using the [Hyperlane Warp UI template](https://github.com/hyperlane-xyz/hyperlane-warp-ui-template) (see [Bridge UI Guide](/docs/guides/warp-routes/bridge-ui-guide)).
 
 You can verify the warp route is correctly registered on both chains:
 
 ```bash
 hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
 ```
+
+## Production handoff
+
+If you want your route to be discoverable by others:
+
+- Open a PR to [hyperlane-registry](https://github.com/hyperlane-xyz/hyperlane-registry) with your deploy/config artifacts.
+- Add `logoURI` on all route tokens and `coinGeckoId` on collateral/native entries when applicable.
+- If you want listing in Hyperlane-hosted bridge surfaces (such as Nexus), contact the Hyperlane team after your registry PR is merged.

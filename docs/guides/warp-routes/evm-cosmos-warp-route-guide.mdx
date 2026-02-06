@@ -85,17 +85,51 @@ Use the Warp Route ID shown in deploy output. For a config with exactly one synt
 
 This will output the current configuration and addresses for the route.
 
-### Step 4: Test a Transfer
+### Step 4: Transfer ownership for production (recommended)
+
+If you deployed with hot deployer keys, update the route owners and re-apply before production:
+
+1. Update `owner` fields in `warp-route-config.yaml` to your production owner addresses.
+2. Re-apply with the generated core config:
+
+```bash
+cp ~/.hyperlane/deployments/warp_routes/"$WARP_ROUTE_ID"-config.yaml ./warp-route-core.yaml
+
+hyperlane warp apply \
+  --warpRouteId "$WARP_ROUTE_ID" \
+  --config ./warp-route-config.yaml \
+  --warp ./warp-route-core.yaml
+```
 
 <Note>
-  `hyperlane warp send` does not currently support Cosmos SDK chains. To test your cross-chain warp route, run a [relayer](/docs/operate/relayer/run-relayer) between your chains and initiate a transfer from the EVM side using the deployed HypERC20 contract, or from the Cosmos side using native transaction tooling.
+  When `--config` points to a local deploy config file, you must also pass the matching core config with `--warp`.
 </Note>
+
+### Step 5: Test a Transfer
+
+<Note>
+  `hyperlane warp send` does not currently support Cosmos SDK chains.
+</Note>
+
+To test your route:
+
+- Run a [relayer](/docs/operate/relayer/run-relayer) between both chains.
+- Initiate transfers from EVM using the deployed HypERC20 contract, or from Cosmos using native transaction tooling.
+- Optionally use the [Hyperlane Warp UI template](https://github.com/hyperlane-xyz/hyperlane-warp-ui-template) for manual end-to-end testing (see [Bridge UI Guide](/docs/guides/warp-routes/bridge-ui-guide)).
 
 Verify the warp route is correctly registered on both sides:
 
 ```bash
 hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
 ```
+
+## Production handoff
+
+For ecosystem discoverability:
+
+- Open a PR to [hyperlane-registry](https://github.com/hyperlane-xyz/hyperlane-registry) with your route artifacts.
+- Add `logoURI` on route tokens and `coinGeckoId` where applicable.
+- If you want listing in Hyperlane-hosted bridge surfaces (such as Nexus), contact the Hyperlane team after your registry PR is merged.
 
 ## Important Considerations
 

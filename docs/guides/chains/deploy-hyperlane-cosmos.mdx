@@ -175,6 +175,20 @@ hyperlane core read --chain yourchain
   `hyperlane send message` does not currently support Cosmos SDK chains. To test message delivery, deploy a [Warp Route](/docs/guides/warp-routes/cosmos/cosmos-warp-route-guide) and use a [relayer](/docs/operate/relayer/run-relayer) to process transfers.
 </Note>
 
+### Update core configuration (day-2)
+
+Use `core read` output as your editable config for updates such as validator rotation, default ISM changes, or gas oracle updates:
+
+```bash
+hyperlane core read --chain yourchain --config ./yourchain-core.yaml
+# Edit ./yourchain-core.yaml
+hyperlane core apply --chain yourchain --config ./yourchain-core.yaml
+```
+
+For production hardening, see:
+- [Update Mailbox Default ISM](/docs/guides/production/core-deployment/update-mailbox-default-ism)
+- [Transfer Mailbox Ownership](/docs/guides/production/core-deployment/transfer-mailbox-ownership)
+
 <Check>
   **🎉 Congrats! You have successfully deployed Hyperlane core to your custom Cosmos chain**
 </Check>
