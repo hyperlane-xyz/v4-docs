@@ -82,7 +82,7 @@ Key Cosmos-specific fields:
 
 Next, let’s configure, deploy and test your custom chain’s core components.
 
-### Create configuration
+### Create Configuration
 
 1. Set the hex private key of your funded deployer address for Cosmos-native operations:
    - `export HYP_KEY_COSMOSNATIVE='<YOUR_PRIVATE_KEY>'` (64 hex characters, with or without `0x` prefix)
@@ -175,7 +175,7 @@ hyperlane core read --chain yourchain
   `hyperlane send message` does not currently support Cosmos SDK chains. To test message delivery, deploy a [Warp Route](/docs/guides/warp-routes/cosmos/cosmos-warp-route-guide) and use a [relayer](/docs/operate/relayer/run-relayer) to process transfers.
 </Note>
 
-### Update core configuration (day-2)
+### Update Core Configuration (Day 2)
 
 Use `core read` output as your editable config for updates such as validator rotation, default ISM changes, or gas oracle updates:
 
@@ -210,7 +210,7 @@ Make sure your metadata is complete:
 - add a `logo.svg` file inside the folder
 - include `Deployer` information identifying the team deploying
 - indicate `isTestnet` `true` if the chain is testnet
-- lint the yaml files and order alphabetically
+- lint the YAML files and order alphabetically
 
 ### Commit to GitHub
 
@@ -231,7 +231,4 @@ Finally, push local registry to GitHub fork and submit a PR. Please include a [c
 
 <Check>
 **Congrats! You have successfully deployed Hyperlane to your Cosmos chain and added your work to the Hyperlane registry**
-
-Thank you for contributing to the future of permissionless interop 🫡
-
 </Check>

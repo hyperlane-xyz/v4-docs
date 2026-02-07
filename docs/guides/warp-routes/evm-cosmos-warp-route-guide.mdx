@@ -58,7 +58,7 @@ hyperlane warp deploy --config warp-route-config.yaml
 The CLI will prompt you for the private keys for each chain.
 
 <Note>
-**Private Key Format:** Both EVM and Cosmos keys should be provided in **hex format** (64 characters, with or without `0x` prefix). The CLI handles the derivation of the bech32 address for Cosmos automatically.
+  **Private key format:** Both EVM and Cosmos keys should be provided in **hex format** (64 characters, with or without `0x` prefix). The CLI handles bech32 derivation for Cosmos automatically.
 </Note>
 
 <Note>
@@ -85,7 +85,7 @@ Use the Warp Route ID shown in deploy output. For a config with exactly one synt
 
 This will output the current configuration and addresses for the route.
 
-### Step 4: Transfer ownership for production (recommended)
+### Step 4: Transfer Ownership for Production (Recommended)
 
 If you deployed with hot deployer keys, update the route owners and re-apply before production:
 
@@ -123,7 +123,7 @@ Verify the warp route is correctly registered on both sides:
 hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
 ```
 
-## Production handoff
+## Production Handoff
 
 For ecosystem discoverability:
 

@@ -9,7 +9,7 @@ Use this skill to post code review feedback as inline comments on specific lines
 
 ## When to Use
 
-- After completing a code review (use with /claude-review, /claude-security-review, /claude-tob-review)
+- After completing a code review (use with /claude-review)
 - When you have specific line-by-line feedback to deliver
 - To make review feedback more actionable
 
@@ -24,12 +24,12 @@ gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews --input - << 'EOF'
   "body": "Optional summary of overall findings",
   "comments": [
     {
-      "path": "path/to/file.ts",
+      "path": "path/to/file.mdx",
       "line": 42,
       "body": "Issue description and suggested fix"
     },
     {
-      "path": "another/file.ts",
+      "path": "another/file.mdx",
       "start_line": 10,
       "line": 15,
       "body": "Multi-line comment spanning lines 10-15"
@@ -65,7 +65,7 @@ Example structure:
 ```json
 {
   "event": "COMMENT",
-  "body": "## Review Summary\n[inline feedback summary]\n\n## Observations Outside This PR\nWhile reviewing, I noticed:\n- `src/utils/foo.ts:142`: Pre-existing null check missing\n- `src/core/bar.ts:78-82`: Similar pattern to line 45 issue - consider deduping",
+  "body": "## Review Summary\n[inline feedback summary]\n\n## Observations Outside This PR\nWhile reviewing, I noticed:\n- `docs/guides/foo.mdx:142`: Outdated link\n- `docs/reference/bar.mdx:78-82`: Similar issue - consider updating",
   "comments": [
     // Only lines IN the diff
   ]
