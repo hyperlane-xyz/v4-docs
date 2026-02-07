@@ -1,5 +1,6 @@
 ---
 title: "Deploy an EVM ↔ Cosmos HWR"
+description: "Deploy a Hyperlane Warp Route between an EVM chain and a Cosmos SDK chain"
 ---
 
 This guide walks you through deploying a Hyperlane Warp Route (HWR) between an EVM-based chain and a Cosmos SDK chain using the Hyperlane CLI.
@@ -10,6 +11,7 @@ Before you begin, ensure you have:
 
 - [Hyperlane CLI](/docs/reference/developer-tools/cli) installed.
 - Funded wallets on both the EVM and Cosmos chains.
+  - Cosmos signer keys must be raw hex private keys (64 hex chars, optional `0x`). If you use mnemonics, derive/export the hex key first.
 - Hyperlane core components (Mailbox, etc.) already deployed on both chains.
   - For Cosmos, see [Deploy to a Cosmos Chain](/docs/guides/chains/deploy-hyperlane-cosmos).
   - For EVM, see [Deploy Hyperlane](/docs/guides/chains/deploy-hyperlane).
@@ -52,16 +54,14 @@ yourcosmoschain:
 Run the deployment command using the Hyperlane CLI:
 
 ```bash
-hyperlane warp deploy --config warp-route-config.yaml
+hyperlane warp deploy --config ./warp-route-config.yaml
 ```
 
 The CLI will prompt you for the private keys for each chain.
 
 <Note>
   **Private key format:** Both EVM and Cosmos keys should be provided in **hex format** (64 characters, with or without `0x` prefix). The CLI handles bech32 derivation for Cosmos automatically.
-</Note>
 
-<Note>
 To avoid prompts, set both env vars before running deploy:
 
 ```bash
@@ -114,7 +114,9 @@ hyperlane warp apply \
 To test your route:
 
 - Run a [relayer](/docs/operate/relayer/run-relayer) between both chains.
-- Initiate transfers from EVM using the deployed HypERC20 contract, or from Cosmos using native transaction tooling.
+- Initiate transfers from EVM using the deployed HypERC20 contract.
+- From Cosmos, submit `/hyperlane.warp.v1.MsgRemoteTransfer` with your chain's native `tx` tooling.
+- Before Cosmos-side transfer submission, quote required gas payment via `QueryQuoteRemoteTransfer` (`hyperlane.warp.v1.Query/QuoteRemoteTransfer`).
 - Optionally use the [Hyperlane Warp UI template](https://github.com/hyperlane-xyz/hyperlane-warp-ui-template) for manual end-to-end testing (see [Bridge UI Guide](/docs/guides/warp-routes/bridge-ui-guide)).
 
 Verify the warp route is correctly registered on both sides:
@@ -141,6 +143,8 @@ When sending a message from EVM to Cosmos, you must specify a sufficient `gas` l
 
 ## Related Guides
 
+- [Deploy to a New Chain (EVM)](/docs/guides/chains/deploy-hyperlane)
 - [Deploy to a Cosmos Chain](/docs/guides/chains/deploy-hyperlane-cosmos)
 - [Deploy a Cosmos HWR](/docs/guides/warp-routes/cosmos/cosmos-warp-route-guide)
+- [Deploy a Cosmos ↔ SVM HWR](/docs/guides/warp-routes/cosmos-svm-warp-route-guide)
 - [Bridge a Token (EVM)](/docs/guides/quickstart/deploy-warp-route)

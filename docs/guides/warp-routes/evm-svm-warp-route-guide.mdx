@@ -1,5 +1,5 @@
 ---
-title: "Deploy an EVM <-> SVM HWR"
+title: "Deploy an EVM ↔ SVM HWR"
 ---
 
 ## Prerequisites
@@ -51,7 +51,7 @@ Ensure you have the following installed and configured:
    --environments-dir ../environments  \
    --built-so-dir ../target/deploy  \
    --token-config-file ../environments/mainnet3/warp-routes/pzeth/token-config.json  \
-   --chain-config-file ../environments/mainnet3/chain-config.json  \
+   --registry ~/path/to/your/local/hyperlane-registry \
    --ata-payer-funding-amount 50000000
    ```
 
@@ -133,6 +133,6 @@ cargo run -- -k ~/solana-mainnet-deployer-keypair.json warp-route deploy  \
 --environments-dir ../environments \
 --built-so-dir ../target/deploy \
 --token-config-file ../environments/mainnet3/warp-routes/pzeth/token-config.json  \
---chain-config-file ../environments/mainnet3/chain-config.json  \
+--registry ~/path/to/your/local/hyperlane-registry \
 --ata-payer-funding-amount 50000000
 ```

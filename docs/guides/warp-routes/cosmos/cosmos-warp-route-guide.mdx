@@ -1,5 +1,6 @@
 ---
 title: "Deploy a Cosmos HWR"
+description: "Deploy a Hyperlane Warp Route between Cosmos SDK chains with the Hyperlane CLI"
 ---
 
 ## Outcomes
@@ -27,6 +28,7 @@ The most common pattern is **Collateral to Synthetic**. You lock an existing tok
 
 - **Hyperlane Core**: Ensure Hyperlane core components are deployed on your target chains. If not, follow the [Deploy Hyperlane to Cosmos](/docs/guides/chains/deploy-hyperlane-cosmos) guide.
 - **Deployer Wallet**: You need a private key for a wallet funded with native tokens on all participating chains to pay for deployment and transaction fees.
+  - If your wallet is mnemonic-based, derive/export the raw hex private key first (64 hex chars, optional `0x` prefix).
 - **Hyperlane CLI**: Install the [Hyperlane CLI](/docs/reference/developer-tools/cli).
 
 ## Walkthrough: Deploy a Cosmos HWR
@@ -126,7 +128,8 @@ hyperlane warp apply \
 To test your route:
 
 - Run a [relayer](/docs/operate/relayer/run-relayer) between your chains.
-- Use chain-native transaction tooling to call the warp route module.
+- From Cosmos, submit a warp module transfer transaction using `/hyperlane.warp.v1.MsgRemoteTransfer` (via your chain's native `tx` tooling).
+- Before sending, quote the required gas payment using `QueryQuoteRemoteTransfer` (`hyperlane.warp.v1.Query/QuoteRemoteTransfer`).
 - Or run a local bridge UI using the [Hyperlane Warp UI template](https://github.com/hyperlane-xyz/hyperlane-warp-ui-template) (see [Bridge UI Guide](/docs/guides/warp-routes/bridge-ui-guide)).
 
 You can verify the warp route is correctly registered on both chains:

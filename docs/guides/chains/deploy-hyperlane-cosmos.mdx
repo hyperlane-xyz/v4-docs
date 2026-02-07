@@ -16,6 +16,7 @@ description: "Step-by-step guide on how to connect your Cosmos SDK chain with Hy
 
 Anyone can begin this quickstart guide once they have the following artifacts & assets available:
 
+- A Cosmos SDK chain with the Hyperlane module integrated (including the `x/core` and `x/warp` modules)
 - A new, custom, or pre-existing Cosmos SDK network of your choice, including the following metadata:
   - A chain name, e.g. `hyp1`
   - A chain ID, e.g. `hyperlane-local-1`
@@ -24,6 +25,7 @@ Anyone can begin this quickstart guide once they have the following artifacts & 
   - Native token denomination and gas price
 - A deployer wallet hex private key (64 hex characters, with or without `0x` prefix)
   - This wallet should be funded on your custom chain and any chain you will be passing messages to & from
+  - If you use a mnemonic wallet, export/derive the raw hex private key before running CLI commands
 - [Hyperlane CLI](/docs/reference/developer-tools/cli)
 
 ## 1. Registry
@@ -45,7 +47,7 @@ Then create `$HOME/.hyperlane/chains/yourchain/metadata.yaml` with the following
 bech32Prefix: hyp
 chainId: hyperlane-local-1
 displayName: My Cosmos Chain
-domainId: 758986691
+domainId: 758986691 # Must be globally unique across Hyperlane-connected chains
 name: yourchain
 protocol: cosmosnative
 slip44: 118
@@ -76,6 +78,7 @@ Key Cosmos-specific fields:
 - **`grpcUrls`** — Required for Cosmos SDK chains
 - **`gasPrice`** — Must include both `amount` and `denom`
 - **`nativeToken.denom`** — The on-chain denomination (e.g. `uatom`, `uosmo`)
+- **`domainId`** — Must be unique across the Hyperlane network (do not reuse another chain's domain)
 </Note>
 
 ## 2. Core
@@ -117,7 +120,7 @@ defaultHook:
   owner: "hyp1jq304cthpx0lwhpqzrdjrcza559ukyy3sc4dw5"
   beneficiary: "hyp1jq304cthpx0lwhpqzrdjrcza559ukyy3sc4dw5"
   # Address authorized to set gas oracle prices. On Cosmos, typically the same as owner.
-  oracleKey: "hyp1..."
+  oracleKey: "hyp1jq304cthpx0lwhpqzrdjrcza559ukyy3sc4dw5"
   overhead:
     hyp: 200000
   oracleConfig:
@@ -163,7 +166,7 @@ staticMerkleRootMultisigIsmFactory: "hyp1..."  # Populated based on your ISM typ
   [Aggregation ISMs](/docs/protocol/ISM/standard-ISMs/aggregation-ISM) are currently not supported on Cosmos SDK chains due to AltVM limitations. Use `messageIdMultisigIsm` or `merkleRootMultisigIsm` instead.
 </Note>
 
-### Verify deployment
+### Verify Deployment
 
 After deployment, verify your core components are configured correctly:
 
@@ -197,7 +200,11 @@ For production hardening, see:
 
 Now that you have a Hyperlane Mailbox and core components on your chain, it’s time to set up token bridging between your chain and any other Hyperlane chain.
 
-Continue on to the [Deploy a Cosmos Warp Route](/docs/guides/warp-routes/cosmos/cosmos-warp-route-guide) docs for more details.
+Continue with one of the following guides:
+
+- [Deploy a Cosmos Warp Route](/docs/guides/warp-routes/cosmos/cosmos-warp-route-guide)
+- [Deploy an EVM ↔ Cosmos HWR](/docs/guides/warp-routes/evm-cosmos-warp-route-guide)
+- [Deploy a Cosmos ↔ SVM HWR](/docs/guides/warp-routes/cosmos-svm-warp-route-guide)
 
 ## 4. Submit to Registry
 
@@ -230,5 +237,5 @@ git pull canonical main --rebase
 Finally, push local registry to GitHub fork and submit a PR. Please include a [changeset](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md) in your PR.
 
 <Check>
-**Congrats! You have successfully deployed Hyperlane to your Cosmos chain and added your work to the Hyperlane registry**
+**🎉 Congrats! You have successfully deployed Hyperlane to your Cosmos chain and added your work to the Hyperlane registry**
 </Check>
