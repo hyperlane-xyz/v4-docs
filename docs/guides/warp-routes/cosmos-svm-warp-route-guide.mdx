@@ -1,0 +1,208 @@
+---
+title: "Deploy a Cosmos ↔ SVM HWR"
+description: "Deploy a Hyperlane Warp Route between a Cosmos SDK chain and an SVM chain"
+---
+
+This guide walks you through deploying a Hyperlane Warp Route (HWR) between a Cosmos SDK chain and an SVM chain (Solana, Eclipse). It combines the Hyperlane TypeScript CLI for the Cosmos side with the Sealevel Rust CLI for the SVM side, linked via the `foreignDeployment` field.
+
+## Prerequisites
+
+- [Hyperlane CLI](/docs/reference/developer-tools/cli) (TypeScript CLI for Cosmos deployment)
+- Rust (latest stable version) and [Solana CLI tools](https://docs.solanalabs.com/cli/install) (`1.18.18` for deployment)
+- A funded wallet on the SVM chain (Solana keypair)
+- A funded wallet on the Cosmos chain (hex private key)
+  - If your Cosmos wallet uses a mnemonic, derive/export the raw hex private key first (64 hex chars, optional `0x` prefix).
+- Hyperlane core deployed on both chains:
+  - For SVM, see the prerequisites in [Deploy an SVM HWR](/docs/guides/warp-routes/svm/svm-warp-route-guide)
+  - For Cosmos, see [Deploy to a Cosmos Chain](/docs/guides/chains/deploy-hyperlane-cosmos)
+
+## Overview
+
+Since the SVM and Cosmos chains use different deployment tooling, the workflow is:
+
+1. **Deploy the Cosmos side** using the Hyperlane TypeScript CLI (`hyperlane warp deploy`)
+2. **Deploy the SVM side** using the Sealevel Rust CLI, referencing the Cosmos deployment via `foreignDeployment`
+3. **Update the Cosmos side** using `hyperlane warp apply` so the Cosmos router enrolls the SVM router
+
+## Walkthrough
+
+### Step 1: Deploy on the Cosmos Side
+
+Create a Warp Route config for the Cosmos chain. Since we are deploying the Cosmos side first, only the Cosmos chain entry is required.
+
+```yaml
+# cosmos-warp-config.yaml
+yourcosmoschain:
+  type: collateral
+  token: uatom  # Native denom on the Cosmos chain
+  owner: "cosmos1..."  # Bech32 owner address
+  mailbox: "cosmos1..."  # Bech32 Mailbox address from core deployment
+  name: "Cosmos Hub"
+  symbol: "ATOM"
+  decimals: 6
+```
+
+Set your Cosmos private key and (optionally) preselect a Warp Route ID for deterministic artifact filenames:
+
+```bash
+export HYP_KEY_COSMOSNATIVE='<your_cosmos_hex_private_key>'
+export WARP_ROUTE_ID='ATOM/yourcosmoschain'
+hyperlane warp deploy --warpRouteId "$WARP_ROUTE_ID" --config ./cosmos-warp-config.yaml
+```
+
+The CLI will output deployment artifacts to `~/.hyperlane/deployments/warp_routes/`. If you omit `--warpRouteId`, use the ID shown in deploy output (usually `SYMBOL/label`, e.g. `ATOM/yourcosmoschain`) for later steps.
+
+```bash
+# Verify the deployment
+hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
+```
+
+### Step 2: Deploy on the SVM Side
+
+Follow the [SVM HWR guide](/docs/guides/warp-routes/svm/svm-warp-route-guide) for building programs and preparing your environment.
+
+Create a `token-config.json` for the SVM side, referencing the Cosmos deployment via `foreignDeployment`:
+
+```json
+{
+  "solanamainnet": {
+    "type": "synthetic",
+    "decimals": 6,
+    "name": "Cosmos Hub",
+    "symbol": "ATOM",
+    "uri": "<permalink to token metadata JSON>",
+    "interchainGasPaymaster": "<overhead IGP from core program-ids.json>"
+  },
+  "yourcosmoschain": {
+    "type": "collateral",
+    "decimals": 6,
+    "token": "uatom",
+    "foreignDeployment": "<cosmos_warp_route_bech32_address>"
+  }
+}
+```
+
+The `interchainGasPaymaster` value is the overhead IGP address from your SVM chain's [core deployment artifacts](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/rust/sealevel/environments/mainnet3) at `<chain>/core/program-ids.json`.
+
+Deploy from the Sealevel client directory:
+
+```bash
+# From rust/sealevel/client
+cargo run -- -k ./warp-route-deployer-key.json warp-route deploy \
+  --warp-route-name atom \
+  --environment mainnet3 \
+  --environments-dir ../environments \
+  --built-so-dir ../target/deploy \
+  --token-config-file ../environments/mainnet3/warp-routes/atom/token-config.json \
+  --registry ~/path/to/your/local/hyperlane-registry \
+  --ata-payer-funding-amount 50000000
+```
+
+The SVM deployment writes program IDs under `rust/sealevel/environments/mainnet3/warp-routes/atom/program-ids.json`. You will need the SVM warp route program ID for the next step.
+
+### Step 3: Update Cosmos-Side Router Enrollment
+
+Create an apply config that includes the SVM chain as a `foreignDeployment`:
+
+```yaml
+# cosmos-warp-apply.yaml
+yourcosmoschain:
+  type: collateral
+  token: uatom
+  owner: "cosmos1..."
+  mailbox: "cosmos1..."
+  name: "Cosmos Hub"
+  symbol: "ATOM"
+  decimals: 6
+
+solanamainnet:
+  type: synthetic
+  owner: "<svm_owner_base58_address>"
+  foreignDeployment: "<svm_warp_route_program_id_base58>"
+```
+
+Because `--config` is a local deploy-config file, also pass the matching warp core config via `--warp`:
+
+```bash
+cp ~/.hyperlane/deployments/warp_routes/"$WARP_ROUTE_ID"-config.yaml ./cosmos-warp-core.yaml
+
+hyperlane warp apply \
+  --warpRouteId "$WARP_ROUTE_ID" \
+  --config ./cosmos-warp-apply.yaml \
+  --warp ./cosmos-warp-core.yaml
+```
+
+### Step 4: Verify Both Sides
+
+**SVM side:**
+
+```bash
+# From rust/sealevel/client
+cargo run -- -k ./warp-route-deployer-key.json \
+  -u <SOLANA_RPC_URL> token query \
+  --program-id <PROGRAM_ID> synthetic
+```
+
+**Cosmos side:**
+
+```bash
+hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
+```
+
+### Step 5: Test a Transfer
+
+<Note>
+  `hyperlane warp send` does not currently support Cosmos SDK or SVM chains. To test your cross-chain warp route, run a [relayer](/docs/operate/relayer/run-relayer) between your chains and initiate a transfer from the SVM side using the Sealevel CLI, or from the Cosmos side using native transaction tooling.
+</Note>
+
+For Cosmos-initiated transfers, submit `/hyperlane.warp.v1.MsgRemoteTransfer` using your chain's native `tx` tooling, and quote fees beforehand with `QueryQuoteRemoteTransfer` (`hyperlane.warp.v1.Query/QuoteRemoteTransfer`).
+
+To transfer from SVM to Cosmos:
+
+```bash
+# From rust/sealevel/client
+cargo run -- -u <SOLANA_RPC_URL> \
+  -k ./warp-route-deployer-key.json \
+  token transfer-remote ./warp-route-deployer-key.json \
+  <AMOUNT> <COSMOS_DOMAIN_ID> <RECIPIENT_HEX_ADDRESS> \
+  synthetic --program-id <PROGRAM_ID>
+```
+
+<Note>
+  The recipient address must be a `0x`-prefixed 32-byte hex value (64 hex chars), not bech32. When converting from bech32, use a converter that outputs the Hyperlane recipient format (left-padded `bytes32`). The relayer handles conversion back to a bech32 account on the destination chain.
+</Note>
+
+## Important Considerations
+
+### Decimals
+
+Cosmos tokens typically use 6 decimals, which is compatible with SVM's standard precision. If bridging a token with different decimals on each side, use the `remoteDecimals` field in the SVM config (see the [EVM ↔ SVM guide](/docs/guides/warp-routes/evm-svm-warp-route-guide) for an example).
+
+### Address Formats
+
+- **SVM**: Base58-encoded public keys (e.g., `D6k6T3G74ij6atCtBiWBs5TbFa1hFVcrFUSGZHuV7q3Z`)
+- **Cosmos**: Bech32 addresses (e.g., `cosmos1...`)
+
+The `foreignDeployment` field in the SVM `token-config.json` accepts the Cosmos bech32 address directly.
+
+### Router Enrollment
+
+This route is fully bidirectional only after both sides enroll each other:
+
+- The SVM deploy step enrolls the Cosmos router on the SVM side.
+- The `warp apply` step enrolls the SVM router on the Cosmos side.
+
+### Key Management
+
+- **SVM side**: Uses a Solana keypair file (JSON format)
+- **Cosmos side**: Uses a hex private key via `HYP_KEY_COSMOSNATIVE` or `--key.cosmosnative`
+
+For production deployments, transfer ownership to a multisig setup — [Squads](https://squads.so/) for SVM or a Cosmos-native multisig for the Cosmos side.
+
+## Related Guides
+
+- [Deploy an SVM HWR](/docs/guides/warp-routes/svm/svm-warp-route-guide)
+- [Deploy a Cosmos HWR](/docs/guides/warp-routes/cosmos/cosmos-warp-route-guide)
+- [Deploy to a Cosmos Chain](/docs/guides/chains/deploy-hyperlane-cosmos)
+- [Deploy an EVM ↔ SVM HWR](/docs/guides/warp-routes/evm-svm-warp-route-guide)
+- [Deploy an EVM ↔ Cosmos HWR](/docs/guides/warp-routes/evm-cosmos-warp-route-guide)
