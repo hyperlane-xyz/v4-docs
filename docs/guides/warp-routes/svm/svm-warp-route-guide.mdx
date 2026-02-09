@@ -18,11 +18,11 @@ You will be deploying a Hyperlane Warp Route (HWR) for an asset of your choice, 
 
 The type of token used determines the HWR type, so it's important to understand the different HWR contracts available:
 
-- [Native](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-types#native-token-warp-routes): Handles the transfer of native gas tokens (e.g. SOL on Solana, ETH on Eclipse).
-- [Collateral](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-types#collateral-backed-erc20-warp-routes): Handles the transfer of existing [Token-2022](https://spl.solana.com/token-2022) or [Token](https://spl.solana.com/token) tokens (the ERC20 equivalent on SVM).
-- [Synthetic](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-types#synthetic-erc20-warp-routes): Handles synthetic tokens that are minted and burned as transfers occur through the HWR, to represent tokens from their origin chain. The tooling in this guide deploys a new Token-2022 token in this case, whose authority is set to the deployer key.
+- [Native](/docs/protocol/warp-routes/warp-routes-types#native-token-hwrs): Handles the transfer of native gas tokens (e.g. SOL on Solana, ETH on Eclipse).
+- [Collateral](/docs/protocol/warp-routes/warp-routes-types#collateral-backed-erc20-hwr): Handles the transfer of existing [Token-2022](https://spl.solana.com/token-2022) or [Token](https://spl.solana.com/token) tokens (the ERC20 equivalent on SVM).
+- [Synthetic](/docs/protocol/warp-routes/warp-routes-types#synthetic-erc20-hwr): Handles synthetic tokens that are minted and burned as transfers occur through the HWR, to represent tokens from their origin chain. The tooling in this guide deploys a new Token-2022 token in this case, whose authority is set to the deployer key.
 
-Here are the common HWR setups (you can find more details [here](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-example-usage)):
+Here are the common HWR setups (you can find more details [here](/docs/protocol/warp-routes/warp-routes-example-usage)):
 
 - **Native to Synthetic**: Lock Native tokens on the origin chain to mint Synthetic ones on the destination. When transferring back, the Synthetic is burned. An example of this is a SOL HWR between Solana and Eclipse.
 - **Collateral to Synthetic**: Lock Collateral tokens on the origin chain to mint Synthetic ones on the destination. When transferring back, the Synthetic is burned. An example of this is a USDC HWR between Solana and Eclipse.
