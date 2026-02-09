@@ -1,0 +1,150 @@
+---
+title: "Deploy an EVM ↔ Cosmos HWR"
+description: "Deploy a Hyperlane Warp Route between an EVM chain and a Cosmos SDK chain"
+---
+
+This guide walks you through deploying a Hyperlane Warp Route (HWR) between an EVM-based chain and a Cosmos SDK chain using the Hyperlane CLI.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- [Hyperlane CLI](/docs/reference/developer-tools/cli) installed.
+- Funded wallets on both the EVM and Cosmos chains.
+  - Cosmos signer keys must be raw hex private keys (64 hex chars, optional `0x`). If you use mnemonics, derive/export the hex key first.
+- Hyperlane core components (Mailbox, etc.) already deployed on both chains.
+  - For Cosmos, see [Deploy to a Cosmos Chain](/docs/guides/chains/deploy-hyperlane-cosmos).
+  - For EVM, see [Deploy Hyperlane](/docs/guides/chains/deploy-hyperlane).
+
+## Walkthrough
+
+### Step 1: Create the Warp Route Config
+
+Create a YAML file (e.g., `warp-route-config.yaml`) that defines the token and connection details for both chains.
+
+```yaml
+ethereum:
+  type: collateral
+  token: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"  # USDC on Ethereum
+  mailbox: "0xc005dc82818d67AF737725bD4bf75435d065D239"
+  owner: "0xa7ECcdb9Be08178f896c26b7BbD8C3D4E844d9Ba"
+  interchainSecurityModule: "0x0000000000000000000000000000000000000000" # Zero address = use the default ISM configured in the destination Mailbox
+  gas: 300000 # Set a ceiling for expected Cosmos-side compute units
+
+yourcosmoschain:
+  type: synthetic
+  mailbox: "hyp1mailboxaddress..." # Bech32 address
+  owner: "hyp1owneraddress..."     # Bech32 address
+  name: "USD Coin"
+  symbol: "USDC"
+  decimals: 6
+  # foreignDeployment: "hyp1..."   # Use if the Cosmos HWR is already deployed
+```
+
+#### Key Fields
+
+- **`type`**: Use `collateral` for the chain where the original token exists, and `synthetic` for the chain where the new token will be minted.
+- **`token`**: On EVM, this is the ERC20 contract address. On Cosmos, if using `collateral`, this would be the native denom (e.g., `uatom`).
+- **`foreignDeployment`**: This field is used to link to an existing Warp Route deployment on the remote chain. If you have already deployed the Cosmos side, provide its address here to enroll it in the EVM deployment.
+- **`interchainSecurityModule`**: Set to `0x0000000000000000000000000000000000000000` to use the default ISM configured in the destination Mailbox.
+- **`gas`**: In the EVM config, `gas` sets the Cosmos-side compute unit ceiling for message delivery. Start conservative and increase if messages run out of gas.
+
+### Step 2: Deploy the Warp Route
+
+Run the deployment command using the Hyperlane CLI:
+
+```bash
+hyperlane warp deploy --config ./warp-route-config.yaml
+```
+
+The CLI will prompt you for the private keys for each chain.
+
+<Note>
+  **Private key format:** Both EVM and Cosmos keys should be provided in **hex format** (64 characters, with or without `0x` prefix). The CLI handles bech32 derivation for Cosmos automatically.
+
+To avoid prompts, set both env vars before running deploy:
+
+```bash
+export HYP_KEY=<your_evm_hex_private_key>
+export HYP_KEY_COSMOSNATIVE=<your_cosmos_hex_private_key>
+```
+
+You can also pass protocol-specific flags directly (`--key` for EVM and `--key.cosmosnative` for Cosmos).
+</Note>
+
+### Step 3: Verify the Deployment
+
+After the deployment completes, you can verify the state of your Warp Route on both sides:
+
+```bash
+export WARP_ROUTE_ID='<your_warp_route_id>'
+hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
+```
+
+Use the Warp Route ID shown in deploy output. For a config with exactly one synthetic chain, the default ID is usually `SYMBOL/<synthetic_chain_name>` (for this example, typically `USDC/yourcosmoschain`).
+
+This will output the current configuration and addresses for the route.
+
+### Step 4: Transfer Ownership for Production (Recommended)
+
+If you deployed with hot deployer keys, update the route owners and re-apply before production:
+
+1. Update `owner` fields in `warp-route-config.yaml` to your production owner addresses.
+2. Re-apply with the generated core config:
+
+```bash
+cp ~/.hyperlane/deployments/warp_routes/"$WARP_ROUTE_ID"-config.yaml ./warp-route-core.yaml
+
+hyperlane warp apply \
+  --warpRouteId "$WARP_ROUTE_ID" \
+  --config ./warp-route-config.yaml \
+  --warp ./warp-route-core.yaml
+```
+
+<Note>
+  When `--config` points to a local deploy config file, you must also pass the matching core config with `--warp`.
+</Note>
+
+### Step 5: Test a Transfer
+
+<Note>
+  `hyperlane warp send` does not currently support Cosmos SDK chains.
+</Note>
+
+To test your route:
+
+- Run a [relayer](/docs/operate/relayer/run-relayer) between both chains.
+- Initiate transfers from EVM using the deployed HypERC20 contract.
+- From Cosmos, submit `/hyperlane.warp.v1.MsgRemoteTransfer` with your chain's native `tx` tooling.
+- Before Cosmos-side transfer submission, quote required gas payment via `QueryQuoteRemoteTransfer` (`hyperlane.warp.v1.Query/QuoteRemoteTransfer`).
+- Optionally use the [Hyperlane Warp UI template](https://github.com/hyperlane-xyz/hyperlane-warp-ui-template) for manual end-to-end testing (see [Bridge UI Guide](/docs/guides/warp-routes/bridge-ui-guide)).
+
+Verify the warp route is correctly registered on both sides:
+
+```bash
+hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
+```
+
+## Production Handoff
+
+For ecosystem discoverability:
+
+- Open a PR to [hyperlane-registry](https://github.com/hyperlane-xyz/hyperlane-registry) with your route artifacts.
+- Add `logoURI` on route tokens and `coinGeckoId` where applicable.
+- If you want listing in Hyperlane-hosted bridge surfaces (such as Nexus), contact the Hyperlane team after your registry PR is merged.
+
+## Important Considerations
+
+### Address Formats
+EVM chains use hex addresses (starting with `0x`), while Cosmos chains use bech32 addresses (e.g., `cosmos1...`). The Hyperlane CLI handles the conversion between these formats automatically when interacting with the different protocols.
+
+### Gas and Fees
+When sending a message from EVM to Cosmos, you must specify a sufficient `gas` limit in your config. This represents the compute units on the Cosmos side. Set this as a ceiling based on expected execution and raise it if delivery fails due to out-of-gas. Ensure your EVM wallet has enough native tokens to pay for the interchain gas fees.
+
+## Related Guides
+
+- [Deploy to a New Chain (EVM)](/docs/guides/chains/deploy-hyperlane)
+- [Deploy to a Cosmos Chain](/docs/guides/chains/deploy-hyperlane-cosmos)
+- [Deploy a Cosmos HWR](/docs/guides/warp-routes/cosmos/cosmos-warp-route-guide)
+- [Deploy a Cosmos ↔ SVM HWR](/docs/guides/warp-routes/cosmos-svm-warp-route-guide)
+- [Bridge a Token (EVM)](/docs/guides/quickstart/deploy-warp-route)
