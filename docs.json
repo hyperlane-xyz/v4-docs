@@ -98,6 +98,7 @@
                 "group": "Setup Hyperlane on your Chain",
                 "pages": [
                   "docs/guides/chains/deploy-hyperlane",
+                  "docs/guides/chains/deploy-hyperlane-cosmos",
                   "docs/guides/chains/deploy-hyperlane-with-local-agents"
                 ]
               },
