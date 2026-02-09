@@ -157,7 +157,7 @@ Deploying a HWR requires there to be a core Hyperlane deployment that is connect
    --built-so-dir ../target/deploy \
    --token-config-file ../environments/mainnet3/warp-routes/<YOUR-WARP-ROUTE-NAME>/token-config.json \
    --registry ~/path/to/your/local/hyperlane-registry \
-   --ata-payer-funding-amount <REASNOABLE-FUNDING-AMOUNT>
+   --ata-payer-funding-amount <REASONABLE-FUNDING-AMOUNT>
    ```
 
 <Warning>
@@ -171,7 +171,7 @@ Deploying a HWR requires there to be a core Hyperlane deployment that is connect
   - `--warp-route-name`: should match the directory name picked for the HWR earlier
   - `--environment`: keep as `mainnet3`
   - `--environments-dir ../environments`: keep as `../environments`
-  - `--built-so-dir`: keep as `../../target/deploy`, as it points to the compilation output directory of HWR programs
+  - `--built-so-dir`: keep as `../target/deploy`, as it points to the compilation output directory of HWR programs
   - `--token-config-file`: point this to the `token-config.json` file created earlier
   - `--registry`: path to your local clone of the hyperlane-registry
   - `--ata-payer-funding-amount`: this flag specifies by how much to fund the HWR [ATA](https://www.alchemy.com/overviews/associated-token-account) payer accounts on both chains the deployment happens on. It's expressed in the lowest currency denomination, which means that it's interpreted as Lamports on Solana and Gwei on Eclipse (since it uses ETH as its native currency). In the command below, the value `1000000` works out to `0.001` ETH and `0.001` SOL, which is enough for an initial deployment, but not for production usage. ATA payers can always be topped up later. For reference, every HWR transfer costs the ATA payer `0.000000001 SOL` (on Solana) and `0.000021 ETH` (on Eclipse) on the destination chain.
@@ -210,7 +210,7 @@ Deploying a HWR requires there to be a core Hyperlane deployment that is connect
    --warp-route-name eclipsesol \
    --environment mainnet3 \
    --environments-dir ../environments \
-   --built-so-dir ../../target/deploy \
+   --built-so-dir ../target/deploy \
    --token-config-file ../environments/mainnet3/warp-routes/eclipsesol/token-config.json  \
    --registry ~/path/to/your/local/hyperlane-registry \
    --ata-payer-funding-amount 10000000
