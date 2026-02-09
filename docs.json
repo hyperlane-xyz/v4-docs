@@ -130,6 +130,7 @@
                       }
                     ]
                   },
+                  "docs/guides/warp-routes/cosmos/cosmos-warp-route-guide",
                   "docs/guides/warp-routes/evm-svm-warp-route-guide",
                   "docs/guides/warp-routes/bridge-ui-guide"
                 ]
