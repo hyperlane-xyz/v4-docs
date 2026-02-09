@@ -26,7 +26,7 @@ This section provides a step-by-step walkthrough for creating an interchain toke
 To deploy the route, you will need a HWR deployment config file. A valid config will specify:
 
 - Which token, on which chain, is this HWR being created for?
-- _Optional:_ Hyperlane connection details, such as contract addresses for the [Mailbox](/docs/reference/addresses/deployments/mainnet/mailbox), [Interchain Gas](/docs/reference/hooks/interchain-gas), and [Interchain Security Modules](/docs/protocol/ISM/modular-security#core-concepts).
+- _Optional:_ Hyperlane connection details, such as contract addresses for the [Mailbox](/docs/reference/addresses/deployments/mailbox), [Interchain Gas](/docs/reference/hooks/interchain-gas), and [Interchain Security Modules](/docs/protocol/ISM/modular-security#core-concepts).
 - _Optional:_ Token standard, including ERC20 (fungible tokens), ERC721 (NFTs), and ERC4626 (yield-bearing tokens). Note ERC721 support is experimental and some Hyperlane tooling won't work for NFTs yet.
 
 The easiest way to create a HWR deployment config file is with the CLI's config command:
@@ -68,7 +68,7 @@ You may specify the following optional values in your config entries. If no valu
 - **symbol:** The token symbol
 - **name:** The token name
 - **decimals:** The number of decimal places for the token
-- **mailbox:** The address of the [mailbox](/docs/reference/addresses/deployments/mainnet/mailbox) contract to use to send and receive messages
+- **mailbox:** The address of the [mailbox](/docs/reference/addresses/deployments/mailbox) contract to use to send and receive messages
 - **interchainSecurityModule:** The address of an [interchain security modules](/docs/protocol/ISM/modular-security#core-concepts) to verify interchain messages
 
 #### Example[​](#example "Direct link to Example")
@@ -152,7 +152,7 @@ You can test in either direction between where you have the HWR set. However, if
 <Info>
   **Next Steps**
 
-- If you were following the [Deploy Hyperlane to a new chain](/docs/guides/chains/deploy-hyperlane#3-warp-route) guide and want to connect other chains or move to production with Abacus Works, continue with the [Submit to Registry](/docs/guides/chains/deploy-hyperlane#4-submit-to-registry) guide.
+- If you were following the [Deploy Hyperlane to a new chain](/docs/guides/chains/deploy-hyperlane#3-hyperlane-warp-route) guide and want to connect other chains or move to production with Abacus Works, continue with the [Submit to Registry](/docs/guides/chains/deploy-hyperlane#4-submit-to-registry) guide.
 
 - For interacting with HWRs via a UI, continue to the [Warp UI docs](/docs/guides/warp-routes/bridge-ui-guide).
 
