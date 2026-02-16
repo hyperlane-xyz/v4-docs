@@ -183,7 +183,7 @@ Cosmos tokens typically use 6 decimals, which is compatible with SVM's standard 
 - **SVM**: Base58-encoded public keys (e.g., `D6k6T3G74ij6atCtBiWBs5TbFa1hFVcrFUSGZHuV7q3Z`)
 - **Cosmos**: Bech32 addresses (e.g., `cosmos1...`)
 
-The `foreignDeployment` field in the SVM `token-config.json` accepts the Cosmos bech32 address directly.
+The `foreignDeployment` field in the SVM `token-config.json` should use the Cosmos warp route address in Hex32 format (`0x`-prefixed 32-byte value), not bech32.
 
 ### Router Enrollment
 
