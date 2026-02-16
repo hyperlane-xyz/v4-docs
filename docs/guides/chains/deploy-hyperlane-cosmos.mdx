@@ -18,9 +18,9 @@ Anyone can begin this quickstart guide once they have the following artifacts & 
 
 - A Cosmos SDK chain with the Hyperlane module integrated (including the `x/core` and `x/warp` modules)
 - A new, custom, or pre-existing Cosmos SDK network of your choice, including the following metadata:
-  - A chain name, e.g. `hyp1`
-  - A chain ID, e.g. `hyperlane-local-1`
-  - A bech32 prefix, e.g. `hyp`
+  - The chain name, e.g. `hyp1`
+  - The chain ID, e.g. `hyperlane-local-1`
+  - The bech32 prefix, e.g. `hyp`
   - RPC, REST, and gRPC URLs
   - Native token denomination and gas price
 - A deployer wallet hex private key (64 hex characters, with or without `0x` prefix)
@@ -47,7 +47,7 @@ Then create `$HOME/.hyperlane/chains/yourchain/metadata.yaml` with the following
 bech32Prefix: hyp
 chainId: hyperlane-local-1
 displayName: My Cosmos Chain
-domainId: 758986691 # Must be globally unique across Hyperlane-connected chains
+domainId: 758986691 # Must be globally unique; generate with: python3 -c 'print(int("NAME".encode().hex(), 16) % 4_294_967_295)'
 name: yourchain
 protocol: cosmosnative
 slip44: 118
@@ -187,6 +187,10 @@ hyperlane core read --chain yourchain --config ./yourchain-core.yaml
 # Edit ./yourchain-core.yaml
 hyperlane core apply --chain yourchain --config ./yourchain-core.yaml
 ```
+
+<Note>
+  Once ownership has been transferred away from the deployer, `core apply` will no longer work with the deployer key alone. Use the `--strategy` flag with a file submitter to submit transactions through the new owner (e.g. a multisig).
+</Note>
 
 For production hardening, see:
 - [Update Mailbox Default ISM](/docs/guides/production/core-deployment/update-mailbox-default-ism)

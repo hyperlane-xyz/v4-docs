@@ -36,7 +36,7 @@ yourcosmoschain:
   type: collateral
   token: uatom  # Native denom on the Cosmos chain
   owner: "cosmos1..."  # Bech32 owner address
-  mailbox: "cosmos1..."  # Bech32 Mailbox address from core deployment
+  mailbox: "0x..."       # Hex32 Mailbox address from core deployment
   name: "Cosmos Hub"
   symbol: "ATOM"
   decimals: 6
@@ -77,7 +77,7 @@ Create a `token-config.json` for the SVM side, referencing the Cosmos deployment
     "type": "collateral",
     "decimals": 6,
     "token": "uatom",
-    "foreignDeployment": "<cosmos_warp_route_bech32_address>"
+    "foreignDeployment": "<cosmos_warp_route_hex32_address>"
   }
 }
 ```
@@ -110,7 +110,7 @@ yourcosmoschain:
   type: collateral
   token: uatom
   owner: "cosmos1..."
-  mailbox: "cosmos1..."
+  mailbox: "0x..."       # Hex32 Mailbox address
   name: "Cosmos Hub"
   symbol: "ATOM"
   decimals: 6
