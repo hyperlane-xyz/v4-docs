@@ -7,20 +7,22 @@ title: "Deploy an SVM HWR"
 You will be deploying a Hyperlane Warp Route (HWR) for an asset of your choice, between two SVM chains with an existing Hyperlane core deployment. At the time of writing this document, supported SVM chains are Solana and Eclipse, but you can find an up-to-date list [here](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/rust/sealevel/environments/mainnet3) (all chain directory names with a `core` subdirectory).
 
 <Info>
-  **If you want your SVM rollup supported as a core Hyperlane deployment, or are
-  looking to set up an EVM to SVM HWR, [get in
-  touch](https://forms.gle/KyRTaWvo4XNmNvrq6)!**
+  **Looking for cross-VM guides?** See:
+  - [EVM ↔ SVM Warp Route Guide](/docs/guides/warp-routes/evm-svm-warp-route-guide)
+  - [Cosmos ↔ SVM Warp Route Guide](/docs/guides/warp-routes/cosmos-svm-warp-route-guide)
+
+  If you want your SVM rollup supported as a core Hyperlane deployment, [get in touch](https://forms.gle/KyRTaWvo4XNmNvrq6)!
 </Info>
 
 ## HWR Types
 
 The type of token used determines the HWR type, so it's important to understand the different HWR contracts available:
 
-- [Native](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-types#native-token-warp-routes): Handles the transfer of native gas tokens (e.g. SOL on Solana, ETH on Eclipse).
-- [Collateral](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-types#collateral-backed-erc20-warp-routes): Handles the transfer of existing [Token-2022](https://spl.solana.com/token-2022) or [Token](https://spl.solana.com/token) tokens (the ERC20 equivalent on SVM).
-- [Synthetic](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-types#synthetic-erc20-warp-routes): Handles synthetic tokens that are minted and burned as transfers occur through the HWR, to represent tokens from their origin chain. The tooling in this guide deploys a new Token-2022 token in this case, whose authority is set to the deployer key.
+- [Native](/docs/protocol/warp-routes/warp-routes-types#native-token-hwrs): Handles the transfer of native gas tokens (e.g. SOL on Solana, ETH on Eclipse).
+- [Collateral](/docs/protocol/warp-routes/warp-routes-types#collateral-backed-erc20-hwr): Handles the transfer of existing [Token-2022](https://spl.solana.com/token-2022) or [Token](https://spl.solana.com/token) tokens (the ERC20 equivalent on SVM).
+- [Synthetic](/docs/protocol/warp-routes/warp-routes-types#synthetic-erc20-hwr): Handles synthetic tokens that are minted and burned as transfers occur through the HWR, to represent tokens from their origin chain. The tooling in this guide deploys a new Token-2022 token in this case, whose authority is set to the deployer key.
 
-Here are the common HWR setups (you can find more details [here](https://docs.hyperlane.xyz/docs/protocol/warp-routes/warp-routes-example-usage)):
+Here are the common HWR setups (you can find more details [here](/docs/protocol/warp-routes/warp-routes-example-usage)):
 
 - **Native to Synthetic**: Lock Native tokens on the origin chain to mint Synthetic ones on the destination. When transferring back, the Synthetic is burned. An example of this is a SOL HWR between Solana and Eclipse.
 - **Collateral to Synthetic**: Lock Collateral tokens on the origin chain to mint Synthetic ones on the destination. When transferring back, the Synthetic is burned. An example of this is a USDC HWR between Solana and Eclipse.
@@ -157,7 +159,7 @@ Deploying a HWR requires there to be a core Hyperlane deployment that is connect
    --built-so-dir ../target/deploy \
    --token-config-file ../environments/mainnet3/warp-routes/<YOUR-WARP-ROUTE-NAME>/token-config.json \
    --registry ~/path/to/your/local/hyperlane-registry \
-   --ata-payer-funding-amount <REASNOABLE-FUNDING-AMOUNT>
+   --ata-payer-funding-amount <REASONABLE-FUNDING-AMOUNT>
    ```
 
 <Warning>
@@ -171,7 +173,7 @@ Deploying a HWR requires there to be a core Hyperlane deployment that is connect
   - `--warp-route-name`: should match the directory name picked for the HWR earlier
   - `--environment`: keep as `mainnet3`
   - `--environments-dir ../environments`: keep as `../environments`
-  - `--built-so-dir`: keep as `../../target/deploy`, as it points to the compilation output directory of HWR programs
+  - `--built-so-dir`: keep as `../target/deploy`, as it points to the compilation output directory of HWR programs
   - `--token-config-file`: point this to the `token-config.json` file created earlier
   - `--registry`: path to your local clone of the hyperlane-registry
   - `--ata-payer-funding-amount`: this flag specifies by how much to fund the HWR [ATA](https://www.alchemy.com/overviews/associated-token-account) payer accounts on both chains the deployment happens on. It's expressed in the lowest currency denomination, which means that it's interpreted as Lamports on Solana and Gwei on Eclipse (since it uses ETH as its native currency). In the command below, the value `1000000` works out to `0.001` ETH and `0.001` SOL, which is enough for an initial deployment, but not for production usage. ATA payers can always be topped up later. For reference, every HWR transfer costs the ATA payer `0.000000001 SOL` (on Solana) and `0.000021 ETH` (on Eclipse) on the destination chain.
@@ -210,7 +212,7 @@ Deploying a HWR requires there to be a core Hyperlane deployment that is connect
    --warp-route-name eclipsesol \
    --environment mainnet3 \
    --environments-dir ../environments \
-   --built-so-dir ../../target/deploy \
+   --built-so-dir ../target/deploy \
    --token-config-file ../environments/mainnet3/warp-routes/eclipsesol/token-config.json  \
    --registry ~/path/to/your/local/hyperlane-registry \
    --ata-payer-funding-amount 10000000

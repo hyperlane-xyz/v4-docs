@@ -1,0 +1,147 @@
+---
+title: "Deploy a Cosmos HWR"
+description: "Deploy a Hyperlane Warp Route between Cosmos SDK chains with the Hyperlane CLI"
+---
+
+## Outcomes
+
+You will be deploying a Hyperlane Warp Route (HWR) for an asset of your choice between Cosmos SDK chains, provided there is an existing Hyperlane core deployment.
+
+<Info>
+  **Looking for cross-VM guides?**
+  This guide focuses on Cosmos-native deployments. For cross-chain setups, see:
+  - [EVM ↔ Cosmos Warp Route Guide](/docs/guides/warp-routes/evm-cosmos-warp-route-guide)
+  - [Cosmos ↔ SVM Warp Route Guide](/docs/guides/warp-routes/cosmos-svm-warp-route-guide)
+</Info>
+
+## HWR Types
+
+The type of token used determines the HWR type. In Cosmos, tokens are identified by their **denominations (denoms)** rather than contract addresses.
+
+- [Collateral](/docs/protocol/warp-routes/warp-routes-types#collateral-backed-erc20-hwr): Handles the transfer of existing tokens by locking them on the source chain. This can be a native denom (e.g., `uatom`, `uhyp`) or an IBC denom (e.g., `ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2`).
+- [Synthetic](/docs/protocol/warp-routes/warp-routes-types#synthetic-erc20-hwr): Handles synthetic tokens that are minted and burned as transfers occur. The Hyperlane CLI deploys a new token representation on the destination chain.
+
+### Common Setup: Collateral to Synthetic
+The most common pattern is **Collateral to Synthetic**. You lock an existing token (Collateral) on its origin chain to mint a new representation (Synthetic) on the destination chain. When transferring back, the Synthetic token is burned and the Collateral is unlocked.
+
+## Before You Start
+
+- **Hyperlane Core**: Ensure Hyperlane core components are deployed on your target chains. If not, follow the [Deploy Hyperlane to Cosmos](/docs/guides/chains/deploy-hyperlane-cosmos) guide.
+- **Deployer Wallet**: You need a private key for a wallet funded with native tokens on all participating chains to pay for deployment and transaction fees.
+  - If your wallet is mnemonic-based, derive/export the raw hex private key first (64 hex chars, optional `0x` prefix).
+- **Hyperlane CLI**: Install the [Hyperlane CLI](/docs/reference/developer-tools/cli).
+
+## Walkthrough: Deploy a Cosmos HWR
+
+### Step 1: Create Warp Deployment Config
+
+Create a YAML file (e.g., `warp-route-deployment.yaml`) to define your Warp Route. This config maps chain names to their respective token settings.
+
+```yaml
+# Replace chain names, addresses, and token details with your own values.
+# Each chain uses its own bech32 prefix for addresses.
+hyp1:
+  type: collateral
+  token: uhyp
+  owner: "hyp1jq304cthpx0lwhpqzrdjrcza559ukyy3sc4dw5"
+  mailbox: "0x..."    # Your chain's Mailbox address (Hex32 format)
+  name: Hyperlane Token
+  symbol: HYP
+  decimals: 6
+
+hyp2:
+  type: synthetic
+  owner: "hyp2..."    # Owner address on the destination chain
+  mailbox: "0x..."    # Destination chain's Mailbox address (Hex32 format)
+  name: Hyperlane Token
+  symbol: HYP
+  decimals: 6
+```
+
+#### Config Schema
+| Field | Description |
+| :--- | :--- |
+| `type` | `collateral` (lock existing) or `synthetic` (mint new). |
+| `token` | The token denomination (e.g., `uhyp`, `uatom`, or an `ibc/` path). Required for `collateral`. |
+| `owner` | The Bech32 address that will own the Warp Route components. |
+| `mailbox` | The address of the Mailbox. |
+| `name` | The display name of the token. |
+| `symbol` | The token symbol. |
+| `decimals` | The number of decimal places (usually `6` for Cosmos SDK tokens). |
+| `interchainSecurityModule` | (Optional) Address of a custom ISM. Omit to use the default ISM configured in the destination Mailbox. |
+| `gas` | (Optional) Compute unit ceiling for message delivery on the destination chain. Start conservative (e.g., `300000`) and increase if messages run out of gas. |
+
+### Step 2: Deploy the Warp Route
+
+Run the deployment command using the Hyperlane CLI. The CLI will prompt you for the private key for each chain if it's not provided via environment variables.
+
+```bash
+hyperlane warp deploy --config ./warp-route-deployment.yaml
+```
+
+<Note>
+  You can also set your private key as an environment variable to skip prompts:
+  `export HYP_KEY_COSMOSNATIVE=<your_hex_private_key>`
+
+  For mixed EVM ↔ Cosmos routes, also set `HYP_KEY` for the EVM side.
+</Note>
+
+Upon success, the CLI will output the deployment artifacts to `~/.hyperlane/deployments/warp_routes/`.
+
+### Step 3: Verify the Deployment
+
+You can verify the state of your deployed Warp Route by reading its configuration from the chains.
+
+```bash
+export WARP_ROUTE_ID='<your_warp_route_id>'
+hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
+```
+
+Use the Warp Route ID shown in deploy output. For a config with exactly one synthetic chain, the default ID is usually `SYMBOL/<synthetic_chain_name>` (for the example above, `HYP/hyp2`).
+
+### Step 4: Transfer Ownership for Production (Recommended)
+
+Many teams deploy first with a hot deployer key, then transfer ownership to a multisig after verification.
+
+1. Update `owner` fields in your `warp-route-deployment.yaml` to your production owner addresses.
+2. Use the generated core config and re-apply:
+
+```bash
+cp ~/.hyperlane/deployments/warp_routes/"$WARP_ROUTE_ID"-config.yaml ./warp-route-core.yaml
+
+hyperlane warp apply \
+  --warpRouteId "$WARP_ROUTE_ID" \
+  --config ./warp-route-deployment.yaml \
+  --warp ./warp-route-core.yaml
+```
+
+<Note>
+  When `--config` points to a local deploy config file, you must also pass the matching core config with `--warp`.
+</Note>
+
+### Step 5: Test a Transfer
+
+<Note>
+  `hyperlane warp send` does not currently support Cosmos SDK chains.
+</Note>
+
+To test your route:
+
+- Run a [relayer](/docs/operate/relayer/run-relayer) between your chains.
+- From Cosmos, submit a warp module transfer transaction using `/hyperlane.warp.v1.MsgRemoteTransfer` (via your chain's native `tx` tooling).
+- Before sending, quote the required gas payment using `QueryQuoteRemoteTransfer` (`hyperlane.warp.v1.Query/QuoteRemoteTransfer`).
+- Or run a local bridge UI using the [Hyperlane Warp UI template](https://github.com/hyperlane-xyz/hyperlane-warp-ui-template) (see [Bridge UI Guide](/docs/guides/warp-routes/bridge-ui-guide)).
+
+You can verify the warp route is correctly registered on both chains:
+
+```bash
+hyperlane warp read --warpRouteId "$WARP_ROUTE_ID"
+```
+
+## Production Handoff
+
+If you want your route to be discoverable by others:
+
+- Open a PR to [hyperlane-registry](https://github.com/hyperlane-xyz/hyperlane-registry) with your deploy/config artifacts.
+- Add `logoURI` on all route tokens and `coinGeckoId` on collateral/native entries when applicable.
+- If you want listing in Hyperlane-hosted bridge surfaces (such as Nexus), contact the Hyperlane team after your registry PR is merged.
