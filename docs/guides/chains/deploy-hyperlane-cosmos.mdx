@@ -68,6 +68,7 @@ grpcUrls:
 blockExplorers:
   - name: My Chain Explorer
     url: https://mychain.com/explorer
+    apiUrl: https://mychain.com/explorer/api
 ```
 
 <Note>
@@ -153,10 +154,10 @@ Use the arrows and enter to select your custom chain from the bottom of the list
   </summary>
 
 ```yaml
-# Example — your actual bech32 addresses will differ
-mailbox: "hyp1..."
-validatorAnnounce: "hyp1..."
-staticMerkleRootMultisigIsmFactory: "hyp1..."  # Populated based on your ISM type
+# Example — your actual Hex32 IDs will differ
+mailbox: "0x68797065726c616e650000000000000000000000000000000000000000000000"
+validatorAnnounce: "0x68797065726c616e650000000000000000000000000000000000000000000000"
+staticMerkleRootMultisigIsmFactory: "0x68797065726c616e650000000000000000000000000000000000000000000000"  # Populated based on your ISM type
 # Other factory fields may appear as empty strings
 ```
 
