@@ -7,9 +7,9 @@
   },
   "name": "Hyperlane Docs",
   "colors": {
-    "primary": "#3578e5",
-    "light": "#6e9eff",
-    "dark": "#0e4baa"
+    "primary": "#7B2FBE",
+    "light": "#A855F7",
+    "dark": "#5B21B6"
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -426,7 +426,7 @@
   },
   "seo": {
     "metatags": {
-      "og:image": "/images/hero-light.png"
+      "og:image": "/images/hero.png"
     }
   },
   "redirects": [
