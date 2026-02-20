@@ -53,11 +53,13 @@ sepolia:
 
 This particular config has 2 chains: basesepolia and sepolia. This means messages can be relayed between both chains.
 
-By default, `warp read` will save the output to `CURRENT_DIR/configs/warp-route-deployment.yaml`. Follow these steps to add a chain to the existing HWR.
+<Info>
+Warp route configs are stored in your local registry at `$HOME/.hyperlane/deployments/warp_routes/<warpRouteId>/`. The `warp read` command outputs the current on-chain config, which you can use as a reference when making updates.
+</Info>
 
 ## Step 1: Configuration
 
-Update the `warp-route-deployment.yaml` by adding a config for the new chain.
+Edit the warp route deployment config in your local registry (e.g., `$HOME/.hyperlane/deployments/warp_routes/ETH/sepolia-basesepolia/warp-route-deployment.yaml`) to add a new chain.
 
 ```diff title="warp-route-deployment.yaml"
 sepolia:
