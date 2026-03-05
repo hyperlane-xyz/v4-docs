@@ -61,7 +61,7 @@ jobs:
       - name: Update agent tags in documentation
         run: |
           # Find the current agent tag version in the docs
-          CURRENT_TAG=$(grep -ohP 'gcr\.io/abacus-labs-dev/hyperlane-agent:\K(agents-v[0-9]+\.[0-9]+\.[0-9]+)' docs/ -r | head -1)
+          CURRENT_TAG=$(grep -ohP 'ghcr\.io/hyperlane-xyz/hyperlane-agent:\K(agents-v[0-9]+\.[0-9]+\.[0-9]+)' docs/ -r | head -1)
           NEW_TAG="${{ steps.get-tag.outputs.tag }}"
 
           echo "Current tag: $CURRENT_TAG"
@@ -85,7 +85,7 @@ jobs:
           fi
 
           # Update all occurrences in markdown files
-          find docs -name "*.mdx" -type f -print0 | xargs -0 sed -i "s|gcr\.io/abacus-labs-dev/hyperlane-agent:$CURRENT_TAG|gcr.io/abacus-labs-dev/hyperlane-agent:$NEW_TAG|g"
+          find docs -name "*.mdx" -type f -print0 | xargs -0 sed -i "s|ghcr\.io/hyperlane-xyz/hyperlane-agent:$CURRENT_TAG|ghcr.io/hyperlane-xyz/hyperlane-agent:$NEW_TAG|g"
 
           echo "Updated agent tags from $CURRENT_TAG to $NEW_TAG"
 
