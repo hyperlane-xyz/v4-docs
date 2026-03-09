@@ -52,7 +52,7 @@ Documentation should be clear and direct. Don't add sections unless they help us
 
 ## Code Review
 
-For review guidelines, see `.github/prompts/writing-review.md`.
+For review guidelines, see `REVIEW.md`.
 
 ### PR Review Comment Format
 
