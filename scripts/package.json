@@ -4,6 +4,6 @@
   "type": "module",
   "dependencies": {
     "@hyperlane-xyz/registry": "24.0.0",
-    "@hyperlane-xyz/sdk": "25.3.2"
+    "@hyperlane-xyz/sdk": "26.0.0"
   }
 }
