@@ -1,5 +1,5 @@
 ---
-title: "HWR 2.0: Native Rebalancing"
+title: "HWR 2.0: Rebalancing"
 ---
 
 Chains want to allow users to deposit and withdraw tokens from multiple networks, as users increasingly hold assets across different chains and expect a seamless cross-chain experience. However, manually managing token liquidity across all these chains can be complex and operationally intensive.
@@ -22,7 +22,7 @@ HWR 2.0 solves the liquidity imbalance problem with a new **Rebalancer Agent** a
 
 ### Rebalancer
 
-HWR 2.0 includes a built-in **Rebalancer.** The Rebalancer is a whitelisted agent that continuously monitors and manages collateral across all chains in the warp route. This agent uses external/native bridges like CCTP or protocols like Everclear to automatically move funds between chains, maintaining optimal liquidity distribution.
+HWR 2.0 includes a built-in **Rebalancer.** The Rebalancer is a whitelisted agent that continuously monitors and manages collateral across all chains in the warp route. This agent uses native bridges like CCTP to automatically move funds between chains, maintaining optimal liquidity distribution.
 
 For example, if users deposit USDC on Arbitrum and withdraw on Base, the Rebalancer can use CCTP to transfer USDC from Arbitrum to Base to maintain sufficient liquidity on Base.
 
@@ -91,22 +91,39 @@ flowchart
 
 ### Managing Collateral Imbalances
 
-To maintain a smooth user experience, collateral must be balanced across chains. HWR 2.0 introduces native rebalancing capabilities that automate this process where supported - collateral is automatically moved between chains to resolve imbalances. For deployments without native rebalancing, this requires manually moving collateral between chains.
+To maintain a smooth user experience, collateral must be balanced across chains. HWR 2.0 introduces native rebalancing capabilities that automate this process where supported — collateral is automatically moved between chains to resolve imbalances. For deployments without native rebalancing, this requires manually moving collateral between chains.
 
-### Requirements for Native Rebalancing
+### USDC Rebalancing
 
-For native rebalancing, the following requirements must be met:
+For USDC, native rebalancing is handled directly via [Circle CCTP](https://developers.circle.com/cctp). The Rebalancer uses CCTP to move USDC between chains without any additional infrastructure.
+
+**Requirements:**
 
 - A Rebalancer Agent (the whitelisted agent that monitors and manages collateral)
 - Warp Route contracts with rebalancer role support
-- Native/external bridges or protocols, typically available on major chains. For example, CCTP with USDC.
-
-These components work together to create a complete native rebalancing system.
+- CCTP support on each participating chain
 
 <Warning>
-  Chains without native bridge support or external protocol integration cannot
-  support this feature.
+  Chains without CCTP support cannot use native rebalancing for USDC.
 </Warning>
+
+### Inventory Rebalancing
+
+For tokens without native bridge support (USDT, ETH), Inventory Rebalancing fills the same role — automatically redistributing collateral across chains based on configurable thresholds via a cross-chain liquidity aggregator.
+
+**How It Works:**
+
+1. **Detect**: The Rebalancer monitors collateral levels across all chains in the route and identifies imbalances against configured thresholds
+2. **Move**: Inventory is moved to the target chain via a cross-chain liquidity aggregator
+3. **Deposit**: Collateral is deposited and withdrawn via the warp route contracts to restore balance
+
+**Requirements:**
+
+- The route must have on-chain inventory (collateral) on the chains to be rebalanced
+- The HWR must support the Rebalancer role (HWR 2.0)
+- Fee contracts must be deployed on each collateral leg of the HWR. These ensure rebalancing costs are covered and that the route remains economically sustainable.
+
+Inventory Rebalancing supports USDT and ETH across EVM-compatible chains. Additional chains and assets are planned.
 
 ## Manual Rebalancing
 
@@ -117,7 +134,7 @@ These components work together to create a complete native rebalancing system.
 
 ### Liquidity Provider
 
-Currently, Hyperlane Warp Routes 2.0 don’t have an explicit liquidity provider interface that enables local deposits/withdrawals. However, LPs can manually manage liquidity using the [Hyperlane CLI](https://www.npmjs.com/package/@hyperlane-xyz/cli) or the UI to interact with the HWRs in the [Hyperlane registry](https://github.com/hyperlane-xyz/hyperlane-registry).
+Currently, Hyperlane Warp Routes 2.0 don't have an explicit liquidity provider interface that enables local deposits/withdrawals. However, LPs can manually manage liquidity using the [Hyperlane CLI](https://www.npmjs.com/package/@hyperlane-xyz/cli) or the UI to interact with the HWRs in the [Hyperlane registry](https://github.com/hyperlane-xyz/hyperlane-registry).
 
 <Warning>
   The stopgap procedure defined below requires at least one synthetic chain to
