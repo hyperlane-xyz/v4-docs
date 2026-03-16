@@ -1,22 +1,22 @@
 ---
-title: "HWR 2.0: Rebalancing"
+title: "HWR 2.0: Native Rebalancing"
 ---
 
-Chains want to allow users to deposit and withdraw tokens from multiple networks, as users increasingly hold assets across different chains and expect a seamless cross-chain experience. However, manually managing token liquidity across all these chains can be complex and operationally intensive.
+## Overview
 
-**Hyperlane Warp Route (HWR) 2.0** eliminates the complexity of managing multi-chain token liquidity while enabling users to deposit tokens from any supported chain to the destination chain. Instead of manually rebalancing collateral across chains, HWR 2.0 automatically maintains liquidity where chains need it, when they need it.
+Chains want to allow users to deposit and withdraw tokens from multiple networks. However, manually managing token liquidity across all these chains can be complex and operationally intensive.
 
-## Liquidity Imbalances Challenges
+When deploying assets (like USDC, USDT, ETH) across multiple chains, liquidity gets unbalanced when:
 
-When deploying assets (like USDC, USDT, ETH) across multiple chains as wrapped tokens, liquidity management becomes necessary.
-
-Liquidity gets unbalanced when:
-
-- Users deposit tokens on Chain A but withdraws from Chain B
+- Users deposit tokens on Chain A but withdraw from Chain B
 - Chain B runs out of tokens
 - New users cannot withdraw from Chain B until someone manually moves tokens from Chain A to Chain B
 
+Native Rebalancing automates this process. For cases where it doesn't apply, [Manual Rebalancing](#manual-rebalancing) is also covered below.
+
 ## The Solution: Native Rebalancing
+
+**Hyperlane Warp Route (HWR) 2.0** eliminates the complexity of managing multi-chain token liquidity while enabling users to deposit tokens from any supported chain to the destination chain.
 
 HWR 2.0 solves the liquidity imbalance problem with a new **Rebalancer Agent** and smart contract support. The Warp Route contracts have been upgraded to enable the new functionality, with a rebalancer role which the contract owner controls.
 
