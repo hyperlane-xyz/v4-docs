@@ -83,7 +83,7 @@ When the destination chain is non-EVM, the following rules apply:
 - **`--recipient` is required** — there is no signer-based fallback for non-EVM destinations. Omitting it will error before any transaction is sent.
 - **`--relay` is skipped** — self-relay only works when both origin and destination are EVM. For non-EVM destinations, run an external [relayer](/docs/operate/relayer/run-relayer) or wait for the Hyperlane relayer network to deliver.
 - **`--round-trip` requires all-EVM chains** — since non-EVM chains cannot be intermediate hop origins, round-trip mode is restricted to EVM-only routes.
-- **Delivery confirmation** — for non-EVM destinations, the CLI polls the [Hyperlane Explorer](/docs/reference/explorer/overview) for delivery status instead of checking on-chain. Track delivery at `https://explorer.hyperlane.xyz/message/<messageId>`.
+- **Delivery confirmation** — for non-EVM destinations, the CLI polls the [Hyperlane Explorer](/docs/reference/explorer/overview) for delivery status instead of checking on-chain. The CLI prints the message ID after a successful send — track delivery at `https://explorer.hyperlane.xyz/message/<messageId>`.
 
 ### Non-EVM origin requirements
 
@@ -108,7 +108,7 @@ export HYP_KEY_RADIX=<hex_private_key>
 
 ### Multi-hop transfers
 
-In multi-hop paths (e.g., `--chains ethereum,polygon,solana`), non-EVM chains can only appear as the **final destination**, not as intermediate hops. When no `--origin`/`--destination` is specified, the CLI automatically orders EVM chains first so non-EVM chains become the final destination.
+In multi-hop transfers, non-EVM chains can only appear as the **final destination**, not as intermediate hops. When no `--origin`/`--destination` is specified, the CLI automatically orders EVM chains first so non-EVM chains become the final destination.
 
 ## Warp Route ID
 
