@@ -140,7 +140,9 @@ You can initiate a test transfer of a single wei with the following command:
 hyperlane warp send --relay -w TOKEN/chain1-chain2
 ```
 
-The `--relay` flag is optional and will relay the message to the destination chain.
+The `--relay` flag is optional and will relay the message to the destination chain. `--relay` only works when both origin and destination are EVM chains.
+
+For non-EVM routes, see the [CLI Warp Send reference](/docs/reference/developer-tools/cli#warp-send).
 
 You can also run a relayer that delivers only for your HWR in the background with:
 

@@ -49,6 +49,61 @@ A few common command options include:
 
 By default, the CLI will pull chain metadata and contract addresses from the [canonical Hyperlane Registry](https://github.com/hyperlane-xyz/hyperlane-registry) but will write new configs and deployments to your local filesystem. For more information see the [Registries page](/docs/reference/registries).
 
+## Warp Send[​](#warp-send "Direct link to Warp Send")
+
+`hyperlane warp send` supports transfers between any combination of supported VMs:
+
+| Protocol | Examples |
+| --- | --- |
+| Ethereum (EVM) | Ethereum, Arbitrum, Base, Optimism |
+| Tron | Tron mainnet |
+| Sealevel (SVM) | Solana, Eclipse |
+| Cosmos / CosmosNative | Neutron, Injective, Stride |
+| Starknet | Starknet mainnet |
+| Radix | Radix mainnet |
+
+### Basic usage
+
+```bash
+# EVM to EVM
+hyperlane warp send -w ETH/ethereum-arbitrum
+
+# EVM to Cosmos (recipient required for non-EVM destinations)
+hyperlane warp send -w USDC/ethereum-neutron --recipient neutron1abc...
+
+# Cosmos to EVM
+export HYP_KEY_COSMOSNATIVE=<cosmos_hex_private_key>
+hyperlane warp send -w ATOM/neutron-ethereum --amount 1000000
+```
+
+### Non-EVM destination requirements
+
+When the destination chain is non-EVM, the following rules apply:
+
+- **`--recipient` is required** — there is no signer-based fallback for non-EVM destinations. Omitting it will error before any transaction is sent.
+- **`--relay` is skipped** — self-relay only works when both origin and destination are EVM. For non-EVM destinations, run an external [relayer](/docs/operate/relayer/run-relayer) or wait for the Hyperlane relayer network to deliver.
+- **`--round-trip` requires all-EVM chains** — since non-EVM chains cannot be intermediate hop origins, round-trip mode is restricted to EVM-only routes.
+- **Delivery confirmation** — for non-EVM destinations, the CLI polls the [Hyperlane Explorer](/docs/reference/explorer/overview) for delivery status instead of checking on-chain. Track delivery at `https://explorer.hyperlane.xyz/message/<messageId>`.
+
+### Non-EVM origin requirements
+
+When sending from a non-EVM origin chain, set the protocol-specific private key:
+
+```bash
+# Cosmos / CosmosNative
+export HYP_KEY_COSMOSNATIVE=<hex_private_key>
+
+# Sealevel (SVM) — path to Solana keypair file
+export HYP_KEY_SEALEVEL=<path_to_keypair.json>
+
+# Starknet
+export HYP_KEY_STARKNET=<hex_private_key>
+```
+
+### Multi-hop transfers
+
+In multi-hop paths (e.g., `--chains ethereum,polygon,solana`), non-EVM chains can only appear as the **final destination**, not as intermediate hops. When no `--origin`/`--destination` is specified, the CLI automatically orders EVM chains first so non-EVM chains become the final destination.
+
 ## Warp Route ID
 
 Many CLI commands accept a `--warp-route-id` flag to specify which warp route to use.
