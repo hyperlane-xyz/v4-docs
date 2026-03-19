@@ -74,7 +74,7 @@ Using the Hyperlane CLI, deploy an ethereum `ETH` EvmHypNative ↔ yourchain `ET
    3. For yourchain, select `native` and accept the mailbox.
 2. Before executing the deployment, ensure yourchain’s `metadata.yaml` has a `blockExplorers` field defined. This will be needed for contract verification in order to easily collateralize yourchain's HWR.
 3. Run `hyperlane warp deploy` and confirm the warp deploy config is as expected.
-4. After execution, your deployment config in `$HOME/.hyperlane/deployments/warp_routes/ETH/ethereum-yourchain/` will look similar to the following:
+4. After execution, your deployment config in `$HOME/.hyperlane/deployments/warp_routes/ETH/yourid/` will look similar to the following:
 
    ```solidity
    # yaml-language-server: $schema=../schema.json
@@ -109,7 +109,7 @@ This collateralizes the native HWR, enabling users to bridge their native assets
 You can initiate a test transfer of a single wei with the following command:
 
 ```bash
-hyperlane warp send --relay -w ETH/ethereum-yourchain
+hyperlane warp send --relay -w ETH/yourid
 ```
 
 The `--relay` flag is optional and will relay the message to the destination chain.
@@ -117,7 +117,7 @@ The `--relay` flag is optional and will relay the message to the destination cha
 You can also run a relayer that delivers only for your HWR in the background with:
 
 ```bash
-hyperlane relayer -w ETH/ethereum-yourchain
+hyperlane relayer -w ETH/yourid
 ```
 
 You can test in either direction between where you have the HWR set.
