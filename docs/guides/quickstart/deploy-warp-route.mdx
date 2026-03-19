@@ -129,10 +129,10 @@ The `hyperlane warp deploy` command will create deployment artifacts in your loc
 The warp route ID follows the format `SYMBOL/chain1-chain2` (e.g., `ETH/ethereum-yourchain`). This ID is used with CLI commands like `warp read`, `warp send`, and `warp apply`.
 
 <Info>
-All warp route configs are now stored in the registry. To modify a warp route config, edit the files in `$HOME/.hyperlane/deployments/warp_routes/<warpRouteId>/` and then run `hyperlane warp apply`.
+Warp route configs are stored in the registry. To modify a warp route config, edit the files in `$HOME/.hyperlane/deployments/warp_routes/<warpRouteId>/` and then run `hyperlane warp apply`.
 </Info>
 
-3. Testing
+### Testing
 
 You can initiate a test transfer of a single wei with the following command:
 

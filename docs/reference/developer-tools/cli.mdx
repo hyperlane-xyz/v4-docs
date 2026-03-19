@@ -56,7 +56,7 @@ Many CLI commands accept a `--warp-route-id` flag to specify which warp route to
 **Aliases:** `-w`, `--id`
 
 **Accepts:**
-- `SYMBOL/label` - exact route ID (e.g., `ETH/ethereum-arbitrum`)
+- `SYMBOL/chain1-chain2` - full route ID (e.g., `ETH/ethereum-arbitrum`)
 - `SYMBOL` - auto-resolves if unique, prompts if multiple (errors in CI)
 
 **Resolution logic:**
@@ -65,7 +65,7 @@ Many CLI commands accept a `--warp-route-id` flag to specify which warp route to
    - Single match → use it
    - Multiple matches + interactive → prompt selection
    - Multiple matches + CI → error with list of options
-3. Commands with `--origin`/`--destination` (e.g., `warp send`) use those to both filter route resolution and control transfer direction
+3. Commands with `--origin`/`--destination` (e.g., `warp send`) use those to filter route resolution (matching routes that contain both chains) and control transfer direction
 
 **Examples:**
 ```bash

@@ -74,7 +74,7 @@ Using the Hyperlane CLI, deploy an ethereum `ETH` EvmHypNative ↔ yourchain `ET
    3. For yourchain, select `native` and accept the mailbox.
 2. Before executing the deployment, ensure yourchain’s `metadata.yaml` has a `blockExplorers` field defined. This will be needed for contract verification in order to easily collateralize yourchain's HWR.
 3. Run `hyperlane warp deploy` and confirm the warp deploy config is as expected.
-4. After execution, your `yourchain-ethereum-config.yaml` deployment file will look similar to the following:
+4. After execution, your deployment config in `$HOME/.hyperlane/deployments/warp_routes/ETH/ethereum-yourchain/` will look similar to the following:
 
    ```solidity
    # yaml-language-server: $schema=../schema.json
