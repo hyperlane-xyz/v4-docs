@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@hyperlane-xyz/registry':
-        specifier: 24.1.0
-        version: 24.1.0
+        specifier: 24.2.0
+        version: 24.2.0
       '@hyperlane-xyz/sdk':
         specifier: 29.1.0
         version: 29.1.0(@ethersproject/abi@5.8.0)(@ethersproject/providers@5.8.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/sinon-chai@4.0.0)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(utf-8-validate@5.0.10)
@@ -390,8 +390,8 @@ packages:
     resolution: {integrity: sha512-KK3N2wC35xZhF8KFHD3awQ/GEPwT4G6Fquwcb3bjXaPPh/JwMRzHfeoyLQeTx2lA4cfSeODkDPRgmkrXDo2JqQ==}
     engines: {node: '>=24'}
 
-  '@hyperlane-xyz/registry@24.1.0':
-    resolution: {integrity: sha512-tFwFrIKRBNVxTPcLbmV7lPGhih0ItLbS/MfU2IJDI4sYybV6cgIYbqc2gOidLnUVwDJ5m/8BprZGePYwzuHmlA==}
+  '@hyperlane-xyz/registry@24.2.0':
+    resolution: {integrity: sha512-bOJjuWds5eadY3bZ2vGw0kgav/Xt4OivWPRP/DjiGm9xy341mCafdkP/x6X2RorD8v8RM4ffqoaAj1YzYQFU/Q==}
     engines: {node: '>=24'}
 
   '@hyperlane-xyz/sdk@29.1.0':
@@ -3489,7 +3489,7 @@ snapshots:
       yaml: 2.4.5
       zod: 3.25.76
 
-  '@hyperlane-xyz/registry@24.1.0':
+  '@hyperlane-xyz/registry@24.2.0':
     dependencies:
       jszip: 3.10.1
       yaml: 2.4.5
