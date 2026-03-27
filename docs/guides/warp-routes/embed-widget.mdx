@@ -1,8 +1,9 @@
 ---
 title: "Embedding the Bridge Widget"
+description: "Embed Hyperlane's bridge widget in your app using the @hyperlane-xyz/warp-widget SDK or a plain iframe"
 ---
 
-You can add Hyperlane bridging directly into your site so users never have to leave your app. The `@hyperlane-xyz/warp-widget` SDK handles iframe creation, theming, and event listening.
+You can add Hyperlane bridging directly into your site so users never have to leave your app. The [`@hyperlane-xyz/warp-widget`](https://www.npmjs.com/package/@hyperlane-xyz/warp-widget) SDK handles iframe creation, theming, and event listening.
 
 ## Install
 
@@ -10,6 +11,8 @@ You can add Hyperlane bridging directly into your site so users never have to le
 pnpm add @hyperlane-xyz/warp-widget
 # or
 npm install @hyperlane-xyz/warp-widget
+# or
+yarn add @hyperlane-xyz/warp-widget
 ```
 
 ## React
@@ -49,8 +52,11 @@ Works with Vue, Angular, Svelte, or plain HTML — anything that can give you a 
 ```ts
 import { createWarpWidget } from '@hyperlane-xyz/warp-widget';
 
+const container = document.getElementById('widget-root');
+if (!container) throw new Error('Missing #widget-root element');
+
 const widget = createWarpWidget({
-  container: document.getElementById('widget-root'),
+  container,
   config: {
     theme: { accent: '3b82f6', mode: 'dark' },
     defaults: { origin: 'ethereum', destination: 'base' },
