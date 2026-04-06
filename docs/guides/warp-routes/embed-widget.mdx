@@ -78,7 +78,7 @@ widget.destroy();
 | `width`     | `string`           | `'100%'`    | Iframe width                |
 | `height`    | `string`           | `'600px'`   | Iframe height               |
 
-Returns `{ iframe, destroy, on }` — `destroy()` removes the iframe and cleans up listeners, `on(event, callback)` subscribes to events and returns an unsubscribe function.
+Returns `{ iframe, destroy, on }` — `iframe` is the raw `HTMLIFrameElement`, `destroy()` removes it and cleans up listeners, `on(event, callback)` subscribes to events and returns an unsubscribe function.
 
 ## Theme Colors
 
@@ -164,7 +164,7 @@ To restrict which sites can embed your instance, set the `NEXT_PUBLIC_EMBED_ALLO
 NEXT_PUBLIC_EMBED_ALLOWED_ORIGINS=https://app-a.com https://app-b.com
 ```
 
-If not set, any site can embed the widget (default: `*`).
+If not set, any site can embed the widget (default: `*`). Set this in production to prevent unauthorized sites from embedding your instance.
 
 ## Alternative: No-Code Embed
 
@@ -172,13 +172,13 @@ If you can't install npm packages (e.g. WordPress, Shopify, Webflow), you can em
 
 ```html
 <iframe
-  src="https://nexus.hyperlane.xyz/embed?accent=3b82f6&mode=dark&origin=ethereum&destination=arbitrum"
+  src="https://nexus.hyperlane.xyz/embed?accent=3b82f6&mode=dark&origin=ethereum&destination=arbitrum&routes=ETH/viction,USDC/eclipsemainnet"
   width="420"
   height="600"
   style="border: none; border-radius: 12px;"
   sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
   allow="clipboard-write"
-/>
+></iframe>
 ```
 
 All [theme properties](#theme-colors) work as URL params, plus `origin`, `destination`, `originToken`, `destinationToken`, and `routes` (comma-separated).
