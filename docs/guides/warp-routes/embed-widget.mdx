@@ -1,0 +1,211 @@
+---
+title: "Embedding the Bridge Widget"
+description: "Embed Hyperlane's bridge widget in your app using the @hyperlane-xyz/warp-widget SDK or a plain iframe"
+---
+
+You can add Hyperlane bridging directly into your site so users never have to leave your app. The [`@hyperlane-xyz/warp-widget`](https://www.npmjs.com/package/@hyperlane-xyz/warp-widget) SDK handles iframe creation, theming, and event listening.
+
+## Install
+
+```bash
+pnpm add @hyperlane-xyz/warp-widget
+# or
+npm install @hyperlane-xyz/warp-widget
+# or
+yarn add @hyperlane-xyz/warp-widget
+```
+
+## React
+
+```tsx
+import { HyperlaneWarpWidget } from '@hyperlane-xyz/warp-widget/react';
+
+function BridgePage() {
+  return (
+    <HyperlaneWarpWidget
+      config={{
+        theme: { accent: '3b82f6', mode: 'dark' },
+        defaults: { origin: 'ethereum', destination: 'arbitrum' },
+        routes: ['USDC/eclipsemainnet'],
+      }}
+      onEvent={(event) => console.log('Widget event:', event)}
+      width="420px"
+      height="600px"
+    />
+  );
+}
+```
+
+| Prop        | Type               | Default     | Description                 |
+| ----------- | ------------------ | ----------- | --------------------------- |
+| `config`    | `WarpWidgetConfig` | `undefined` | Theme, defaults, and routes |
+| `onEvent`   | `(event) => void`  | `undefined` | Event callback              |
+| `width`     | `string`           | `'100%'`    | Iframe width                |
+| `height`    | `string`           | `'600px'`   | Iframe height               |
+| `className` | `string`           | `undefined` | CSS class for the container |
+| `style`     | `CSSProperties`    | `undefined` | Inline styles               |
+
+## Vanilla JS
+
+Works with Vue, Angular, Svelte, or plain HTML — anything that can give you a DOM element.
+
+```ts
+import { createWarpWidget } from '@hyperlane-xyz/warp-widget';
+
+const container = document.getElementById('widget-root');
+if (!container) throw new Error('Missing #widget-root element');
+
+const widget = createWarpWidget({
+  container,
+  config: {
+    theme: { accent: '3b82f6', mode: 'dark' },
+    defaults: { origin: 'ethereum', destination: 'base' },
+  },
+});
+
+widget.on('ready', (payload) => {
+  console.log('Widget ready at', payload?.timestamp);
+});
+
+// When you're done:
+widget.destroy();
+```
+
+| Option      | Type               | Default     | Description                 |
+| ----------- | ------------------ | ----------- | --------------------------- |
+| `container` | `HTMLElement`      | required    | DOM element to mount into   |
+| `config`    | `WarpWidgetConfig` | `undefined` | Theme, defaults, and routes |
+| `width`     | `string`           | `'100%'`    | Iframe width                |
+| `height`    | `string`           | `'600px'`   | Iframe height               |
+
+Returns `{ iframe, destroy, on }` — `iframe` is the raw `HTMLIFrameElement`, `destroy()` removes it and cleans up listeners, `on(event, callback)` subscribes to events and returns an unsubscribe function.
+
+## Theme Colors
+
+Control the widget's look by passing a `theme` object. All color values are hex strings **without the `#` prefix**.
+
+```ts
+config: {
+  theme: {
+    accent: '3b82f6',
+    bg: '0f172a',
+    card: '1e293b',
+    text: 'e2e8f0',
+    buttonText: 'ffffff',
+    border: '334155',
+    error: 'ef4444',
+    mode: 'dark',
+  },
+}
+```
+
+| Property     | Description                                     | Default     |
+| ------------ | ----------------------------------------------- | ----------- |
+| `accent`     | Primary color for buttons, headers, and links   | `9a0dff`    |
+| `bg`         | Page background                                 | transparent |
+| `card`       | Card and surface backgrounds                    | `ffffff`    |
+| `text`       | Main text color                                 | `010101`    |
+| `buttonText` | Text color inside buttons                       | `ffffff`    |
+| `border`     | Border color                                    | `bfbfbf40`  |
+| `error`      | Error state color                               | `dc2626`    |
+| `mode`       | `'dark'` or `'light'` — sets preset defaults    | `light`     |
+
+Setting `mode: 'dark'` applies a full dark color scheme. You can still override individual colors on top — for example, `mode: 'dark'` with `accent: '22c55e'` gives a dark widget with green accents.
+
+## Transfer Defaults
+
+Pre-fill the transfer form so users land on a ready-to-go state instead of picking chains and tokens themselves.
+
+```ts
+config: {
+  defaults: {
+    origin: 'ethereum',
+    destination: 'arbitrum',
+    originToken: 'USDC',
+    destinationToken: 'USDC',
+  },
+}
+```
+
+| Property           | Description                                |
+| ------------------ | ------------------------------------------ |
+| `origin`           | Origin chain name (e.g. `'ethereum'`)      |
+| `destination`      | Destination chain name (e.g. `'arbitrum'`) |
+| `originToken`      | Origin token symbol (e.g. `'USDC'`)        |
+| `destinationToken` | Destination token symbol                   |
+
+## Route Filtering
+
+By default the widget shows all routes from the Hyperlane registry. To limit which routes your users see, pass their IDs:
+
+```ts
+config: {
+  routes: ['ETH/viction', 'USDC/eclipsemainnet'],
+}
+```
+
+Route IDs are derived from the [Hyperlane Registry deployments](https://github.com/hyperlane-xyz/hyperlane-registry/tree/main/deployments/warp_routes) — the folder name is the symbol and the config file name is the route identifier. For example, `deployments/warp_routes/USDC/eclipsemainnet-config.yaml` becomes `USDC/eclipsemainnet`. Only specified routes will appear in the token selector.
+
+## Events
+
+The widget sends events to your app. Use `onEvent` in React or `widget.on()` in vanilla JS.
+
+| Event   | Payload         | Description                      |
+| ------- | --------------- | -------------------------------- |
+| `ready` | `{ timestamp }` | Fires when the widget has loaded |
+
+## Self-Hosting
+
+The widget points to the Hyperlane-hosted Warp UI by default. If you [fork and deploy the Warp UI template](https://github.com/hyperlane-xyz/hyperlane-warp-ui-template) yourself, the `/embed` route is included automatically.
+
+To restrict which sites can embed your instance, set the `NEXT_PUBLIC_EMBED_ALLOWED_ORIGINS` environment variable:
+
+```text
+NEXT_PUBLIC_EMBED_ALLOWED_ORIGINS=https://app-a.com https://app-b.com
+```
+
+If not set, any site can embed the widget (default: `*`). Set this in production to prevent unauthorized sites from embedding your instance.
+
+## Alternative: No-Code Embed
+
+If you can't install npm packages (e.g. WordPress, Shopify, Webflow), you can embed the widget with a plain iframe:
+
+```html
+<iframe
+  src="https://nexus.hyperlane.xyz/embed?accent=3b82f6&mode=dark&origin=ethereum&destination=arbitrum&routes=ETH/viction,USDC/eclipsemainnet"
+  width="420"
+  height="600"
+  style="border: none; border-radius: 12px;"
+  sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
+  allow="clipboard-write"
+></iframe>
+```
+
+All [theme properties](#theme-colors) work as URL params, plus `origin`, `destination`, `originToken`, `destinationToken`, and `routes` (comma-separated).
+
+## Troubleshooting
+
+### Widget doesn't load
+
+Your site's Content Security Policy might be blocking the iframe. Add the Warp UI origin to your CSP `frame-src`:
+
+```text
+Content-Security-Policy: frame-src https://nexus.hyperlane.xyz;
+```
+
+### Wallet popups don't open
+
+The iframe needs `allow-popups` in its sandbox for wallet extensions like MetaMask. The SDK sets this automatically — if using a raw iframe, make sure your `sandbox` attribute includes it.
+
+## Examples
+
+Working examples in the [hyperlane-monorepo](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/typescript/warp-widget/examples):
+
+- **`vanilla/`** — Single HTML file, no build tools. Open in a browser.
+- **`react-app/`** — Vite + React app showing both the React component and imperative API.
+
+```bash
+cd typescript/warp-widget/examples/react-app
+pnpm install
+pnpm dev
+```
