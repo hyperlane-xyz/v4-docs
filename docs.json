@@ -46,7 +46,8 @@
                     ]
                   },
                   "docs/reference/domains",
-                  "docs/reference/registries"
+                  "docs/reference/registries",
+                  "docs/reference/deprecated-chains"
                 ]
               },
               "docs/ecosystem"
