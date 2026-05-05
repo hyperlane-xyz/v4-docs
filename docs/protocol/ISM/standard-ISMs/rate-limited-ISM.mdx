@@ -65,6 +65,17 @@ The `_postDispatch()` function:
 3. Confirms this is the most recently dispatched message (`_isLatestDispatched`).
 4. Extracts the token amount and calls `_validateAndConsumeFilledLevel`.
 
+```solidity
+function _postDispatch(
+    bytes calldata,
+    bytes calldata _message
+) internal override onlySender(_message) validateMessageOnce(_message) {
+    require(_isLatestDispatched(_message.id()), "InvalidDispatchedMessage");
+    uint256 newAmount = _message.body().amount();
+    _validateAndConsumeFilledLevel(newAmount);
+}
+```
+
 ## Properties
 
 ### Blast radius containment
@@ -90,7 +101,7 @@ ism.setRefillRate(newCapacity); // new refillRate = newCapacity / DURATION
 
 ### Aggregation ISM compatibility
 
-`RateLimitedIsm` can be nested inside an `AggregationIsm` to layer rate limiting on top of other security checks — for example, requiring both a `MultisigIsm` and a `RateLimitedIsm` to pass before a message is delivered. This requires the latest relayer version.
+`RateLimitedIsm` can be nested inside an `AggregationIsm` to layer rate limiting on top of other security checks — for example, requiring both a `MultisigIsm` and a `RateLimitedIsm` to pass before a message is delivered. This requires relayer version [`agents-v2.2.0`](https://github.com/hyperlane-xyz/hyperlane-monorepo/releases/tag/agents-v2.2.0) or later.
 
 ## SDK configuration
 
@@ -134,7 +145,7 @@ RateLimitedHook hook = new RateLimitedHook(
 
 [`NetFlowRateLimitedHookIsm`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/net-flow-rate-limit-ism/solidity/contracts/hooks/warp-route/NetFlowRateLimitedHookIsm.sol) is an alternative to the `RateLimitedIsm` and `RateLimitedHook` pair that takes a different approach on two fronts:
 
-- **Dynamic cap instead of fixed.** Rather than a fixed `maxCapacity` set by the owner, the cap is derived from the warp route's live TVL: `maxCapacity = localCollateral() × maxFlowBps / 10000`. As TVL grows or shrinks, the effective cap scales with it automatically. `maxFlowBps` is immutable — set once at deployment.
+- **Dynamic cap instead of fixed.** Rather than a fixed `maxCapacity` set by the owner, the cap is derived from the warp route's live TVL: `maxCapacity = localCollateral() × maxFlowBps / 10_000` (where `10_000` is `BPS_DENOMINATOR`). As TVL grows or shrinks, the effective cap scales with it automatically. `maxFlowBps` is immutable — set once at deployment.
 
 - **Net flow, not gross outflow.** The bucket tracks *net* outflow. Inbound transfers (tokens returning to the route) credit the bucket back, so the limit applies to net outflow over the window rather than total volume sent in one direction. This makes it more permissive for routes with high bidirectional traffic.
 
