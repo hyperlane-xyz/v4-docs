@@ -1,0 +1,147 @@
+---
+title: "Rate Limited ISM"
+description: "Add configurable transfer volume caps to Hyperlane Warp Routes"
+---
+
+The `RateLimitedIsm` is an ISM for warp routes that caps the token volume transferable to a destination chain within a configurable window. It pairs with a [`RateLimitedHook`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/hooks/warp-route/RateLimitedHook.sol) on the origin side, giving warp route deployers bidirectional control over transfer throughput.
+
+## How it works
+
+Both contracts inherit from [`RateLimited`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/libs/RateLimited.sol), which implements a token bucket algorithm:
+
+- The bucket starts full at deployment (`filledLevel = maxCapacity`).
+- It refills continuously at `refillRate = maxCapacity / DURATION` tokens per second.
+- Each transfer consumes capacity equal to the token amount in the message.
+- If a transfer would exceed the current available capacity, it reverts with `RateLimitExceeded`.
+- After a full `DURATION` of inactivity the bucket is fully restored.
+
+```solidity
+uint256 public constant DURATION = 1 days; // 86400 seconds
+```
+
+```
+maxCapacity = refillRate × DURATION
+currentLevel ≈ previousLevel + (elapsed × refillRate)
+```
+
+The refill window is `DURATION`, set to 1 day. The capacity — `maxCapacity`, expressed in the token's base unit (e.g. `1_000_000e6` for 1M USDC) — is set at deployment and can be updated by the warp route owner at any time.
+
+## Contracts
+
+| Contract | Chain side | Role |
+|---|---|---|
+| [`RateLimitedHook`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/hooks/warp-route/RateLimitedHook.sol) | Origin | Enforces the limit at dispatch time (outbound) |
+| [`RateLimitedIsm`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/warp-route/RateLimitedIsm.sol) | Destination | Enforces the limit at delivery time (inbound) |
+
+Either contract can be deployed independently or together. Deploying both provides defense in depth: transfers are blocked on the origin before they are relayed, and again on the destination before funds are released.
+
+### RateLimitedIsm
+
+The `verify()` function:
+
+1. Requires the message recipient matches the configured `recipient` address (`onlyRecipient`).
+2. Requires the message has not already been validated — tracked via `messageValidated[messageId]` (replay protection).
+3. Confirms the message was delivered by the Mailbox (`_isDelivered`).
+4. Extracts the token amount and calls `_validateAndConsumeFilledLevel`.
+
+```solidity
+function verify(
+    bytes calldata,
+    bytes calldata _message
+) external onlyRecipient(_message) validateMessageOnce(_message) returns (bool) {
+    require(_isDelivered(_message.id()), "InvalidDeliveredMessage");
+    uint256 newAmount = _message.body().amount();
+    _validateAndConsumeFilledLevel(newAmount);
+    return true;
+}
+```
+
+### RateLimitedHook
+
+The `_postDispatch()` function:
+
+1. Requires the message sender matches the configured `sender` address (`onlySender`).
+2. Requires the message has not already been processed (replay protection).
+3. Confirms this is the most recently dispatched message (`_isLatestDispatched`).
+4. Extracts the token amount and calls `_validateAndConsumeFilledLevel`.
+
+```solidity
+function _postDispatch(
+    bytes calldata,
+    bytes calldata _message
+) internal override onlySender(_message) validateMessageOnce(_message) {
+    require(_isLatestDispatched(_message.id()), "InvalidDispatchedMessage");
+    uint256 newAmount = _message.body().amount();
+    _validateAndConsumeFilledLevel(newAmount);
+}
+```
+
+## Properties
+
+### Blast radius containment
+
+Rate limits directly bound the maximum loss from a compromised bridge. If an attacker finds an exploit in the token contract or a validator key is leaked, they can drain at most `maxCapacity` tokens before the bucket empties and all transfers revert with `RateLimitExceeded`. This gives warp route owners time to detect the incident and pause or upgrade the route before a full treasury loss.
+
+### Replay protection
+
+Both contracts maintain a `messageValidated[messageId]` mapping. A message that has already consumed capacity cannot be re-submitted, preventing double-spend attacks via message replay.
+
+### Recipient and sender binding
+
+`RateLimitedIsm` is constructed with a fixed `recipient` address and rejects any message bound for a different contract. `RateLimitedHook` is constructed with a fixed `sender` address and rejects messages from unauthorized callers. This prevents the contracts from being used to validate or throttle transfers for unintended warp routes.
+
+### Owner-controlled capacity
+
+`setRefillRate(uint256 _capacity)` is `onlyOwner`, allowing warp route owners to adjust the cap without redeploying:
+
+```solidity
+// capacity must be >= DURATION (86400)
+// capacity is truncated to nearest multiple of DURATION due to integer division:
+// e.g. 86401 → refillRate = 1 → effective maxCapacity = 86400 (1 unit lost)
+ism.setRefillRate(newCapacity); // new refillRate = newCapacity / DURATION
+```
+
+### Aggregation ISM compatibility
+
+`RateLimitedIsm` can be nested inside an `AggregationIsm` to layer rate limiting on top of other security checks — for example, requiring both a `MultisigIsm` and a `RateLimitedIsm` to pass before a message is delivered. This requires relayer version [`agents-v2.2.0`](https://github.com/hyperlane-xyz/hyperlane-monorepo/releases/tag/agents-v2.2.0) or later.
+
+For defense in depth, pair `RateLimitedIsm` with a [`PausableIsm`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/PausableIsm.sol) inside an `AggregationIsm`. The rate limit caps the damage during an active exploit while the owner detects the incident and pauses the route to fully close it.
+
+## SDK configuration
+
+The TypeScript SDK and CLI support `IsmType.RATE_LIMITED`, enabling warp route configs to specify a `RateLimitedIsm` directly. The SDK type string is `'rateLimitedIsm'`. See [`typescript/sdk/src/ism/types.ts`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/feat/cli-rate-limit-isms/typescript/sdk/src/ism/types.ts).
+
+The config schema accepts:
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `type` | `'rateLimitedIsm'` | Yes | — |
+| `maxCapacity` | `string` (bigint) | Yes | Must be ≥ 86400; rounded down to nearest multiple of 86400 |
+| `recipient` | address | No | Defaults to the warp route address |
+
+Example warp route ISM config:
+
+```yaml
+interchainSecurityModule:
+  type: rateLimitedIsm
+  maxCapacity: "1000000000000"   # 1M USDC (6 decimals) per day
+```
+
+## Deployment
+
+```solidity
+// Destination chain — ISM
+RateLimitedIsm ism = new RateLimitedIsm(
+    mailbox,        // Mailbox address on destination
+    1_000_000e6,    // maxCapacity in token base units
+    warpRouteAddress
+);
+
+// Origin chain — Hook (optional, for bidirectional enforcement)
+RateLimitedHook hook = new RateLimitedHook(
+    mailbox,        // Mailbox address on origin
+    1_000_000e6,    // maxCapacity in token base units
+    warpRouteAddress
+);
+```
+
