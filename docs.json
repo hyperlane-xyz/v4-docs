@@ -243,7 +243,8 @@
                       },
                       "docs/protocol/ISM/standard-ISMs/routing-ISM",
                       "docs/protocol/ISM/standard-ISMs/aggregation-ISM",
-                      "docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM"
+                      "docs/protocol/ISM/standard-ISMs/offchain-lookup-ISM",
+                      "docs/protocol/ISM/standard-ISMs/rate-limited-ISM"
                     ]
                   },
                   {
