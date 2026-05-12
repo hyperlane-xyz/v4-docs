@@ -117,6 +117,7 @@ The config schema accepts:
 | `type` | `'rateLimitedIsm'` | Yes | — |
 | `maxCapacity` | `string` (bigint) | Yes | Must be ≥ 86400; rounded down to nearest multiple of 86400 |
 | `recipient` | address | No | Defaults to the warp route address |
+| `owner` | address | No | Defaults to the deployer; receives `onlyOwner` rights (e.g. `setRefillRate`) |
 
 Example warp route ISM config:
 
