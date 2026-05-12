@@ -95,8 +95,7 @@ Both contracts maintain a `messageValidated[messageId]` mapping. A message that 
 `setRefillRate(uint256 _capacity)` is `onlyOwner`, allowing warp route owners to adjust the cap without redeploying:
 
 ```solidity
-// capacity must be >= DURATION (86400)
-// capacity is truncated to nearest multiple of DURATION due to integer division:
+// SDK enforces capacity >= DURATION (86400) and rounds down to nearest multiple
 // e.g. 86401 → refillRate = 1 → effective maxCapacity = 86400 (1 unit lost)
 ism.setRefillRate(newCapacity); // new refillRate = newCapacity / DURATION
 ```
@@ -109,7 +108,7 @@ For defense in depth, pair `RateLimitedIsm` with a [`PausableIsm`](https://githu
 
 ## SDK configuration
 
-The TypeScript SDK and CLI support `IsmType.RATE_LIMITED`, enabling warp route configs to specify a `RateLimitedIsm` directly. The SDK type string is `'rateLimitedIsm'`. See [`typescript/sdk/src/ism/types.ts`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/feat/cli-rate-limit-isms/typescript/sdk/src/ism/types.ts).
+The TypeScript SDK and CLI support `IsmType.RATE_LIMITED`, enabling warp route configs to specify a `RateLimitedIsm` directly. The SDK type string is `'rateLimitedIsm'`. See [`typescript/sdk/src/ism/types.ts`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/sdk/src/ism/types.ts).
 
 The config schema accepts:
 
