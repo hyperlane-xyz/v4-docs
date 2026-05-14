@@ -40,9 +40,17 @@ For the issuer, this changes three things:
 
 ## Key Capabilities
 
-- **Cross-chain and same-chain swaps** in a single transfer model
-- **Per-route fees:** protocol and external fees are configured per destination domain and per target router, so each leg of a route can carry its own pricing
-- **Native rebalancing**: inventory is automatically balanced across chains to keep routes available
+<CardGroup cols={3}>
+  <Card title="Cross-chain & same-chain" icon="arrows-left-right">
+    One transfer model handles both paths.
+  </Card>
+  <Card title="Per-route fees" icon="coins">
+    Protocol and external fees configured per destination domain and target router.
+  </Card>
+  <Card title="Native rebalancing" icon="scale-balanced">
+    Inventory automatically balanced across chains to keep routes available.
+  </Card>
+</CardGroup>
 
 ## How It Works
 
@@ -83,9 +91,17 @@ Every router maintains an owner-managed allowlist of trusted peer `CrossCollater
 
 ### Cross-chain swap flow
 
-1. User calls `transferRemoteTo` on the source chain router with the destination domain, recipient, amount, and target router.
-2. The source router validates that the target router is enrolled, deducts configured fees, and dispatches a single interchain message via Hyperlane.
-3. The destination router receives the message, verifies the sender is a trusted router, and releases the target stablecoin to the recipient.
+<Steps>
+  <Step title="User calls transferRemoteTo">
+    On the source chain router, with the destination domain, recipient, amount, and target router address.
+  </Step>
+  <Step title="Source router validates and dispatches">
+    Validates that the target router is enrolled, deducts configured fees, and dispatches a single interchain message via Hyperlane.
+  </Step>
+  <Step title="Destination router releases tokens">
+    Receives the message, verifies the sender is a trusted router, and releases the target stablecoin to the recipient.
+  </Step>
+</Steps>
 
 Routers expose a `transferRemoteTo` function used for both cross-chain and same-chain swaps:
 
@@ -127,8 +143,16 @@ See [Native Rebalancing](/docs/guides/warp-routes/evm/multi-collateral-warp-rout
 
 ## Get Started
 
-To learn more about the underlying architecture or explore what a route deployment looks like, see:
+To learn more about the underlying architecture or explore what a route deployment looks like:
 
-- [Hyperlane Warp Routes 2.0](/docs/applications/warp-routes/multi-collateral-warp-routes)
-- [Deploy a Hyperlane Warp Route 2.0](/docs/guides/warp-routes/evm/deploy-multi-collateral-warp-routes)
-- [Native Rebalancing](/docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing)
+<CardGroup cols={3}>
+  <Card title="Hyperlane Warp Routes 2.0" icon="route" href="/docs/applications/warp-routes/multi-collateral-warp-routes">
+    Architecture overview and the model StableLane is built on.
+  </Card>
+  <Card title="Deploy HWR 2.0" icon="rocket" href="/docs/guides/warp-routes/evm/deploy-multi-collateral-warp-routes">
+    Walkthrough for deploying a multi-collateral route.
+  </Card>
+  <Card title="Native Rebalancing" icon="scale-balanced" href="/docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing">
+    How collateral stays balanced across chains automatically.
+  </Card>
+</CardGroup>
