@@ -1,15 +1,15 @@
 ---
-title: "StableSwap Overview"
+title: "StableLane Overview"
 ---
 
 <Warning>
-  StableSwap is under active development. Interfaces, fees, and supported routes
+  StableLane is under active development. Interfaces, fees, and supported routes
   may change.
 </Warning>
 
-StableSwap lets users move between like assets (most commonly stablecoins) across different chains in a single step.
+StableLane lets users move between like assets (most commonly stablecoins) across different chains in a single step.
 
-For example: a user holds USDC on Arbitrum and wants a branded stablecoin on a new chain. With StableSwap, that happens in one transaction. No manual bridging, no extra steps.
+For example: a user holds USDC on Arbitrum and wants a branded stablecoin on a new chain. With StableLane, that happens in one transaction. No manual bridging, no extra steps.
 
 ## The Problem It Solves
 
@@ -17,7 +17,7 @@ Launching a branded stablecoin is now easy. Getting users to actually use it is 
 
 Most users already hold USDC or USDT, and those balances are spread across many chains. For a new branded stablecoin to grow, the issuer needs to make it simple for users to swap into it from wherever they already have funds.
 
-Without something like StableSwap, a user who wants to move from USDC into a new branded stablecoin has to:
+Without something like StableLane, a user who wants to move from USDC into a new branded stablecoin has to:
 
 1. Bridge USDC from their chain to the chain where the branded stablecoin is issued
 2. Get gas on that destination chain
@@ -28,7 +28,7 @@ Each step loses some users. Many give up before they finish.
 
 Step 3 has an extra problem. A new stablecoin has no DEX liquidity until it has trading volume, and it cannot get trading volume until it has liquidity. To break this cycle, issuers usually pay for LP rewards, market maker deals, and DEX listings. This spending is expensive and does not directly bring in users. It only creates the conditions where users might come.
 
-StableSwap replaces all of this with a single transaction. The user sends USDC from any supported chain and receives the branded stablecoin on the destination chain. There is no bridge step, no DEX, and no need to bootstrap liquidity. The tokens held inside the routers _are_ the liquidity.
+StableLane replaces all of this with a single transaction. The user sends USDC from any supported chain and receives the branded stablecoin on the destination chain. There is no bridge step, no DEX, and no need to bootstrap liquidity. The tokens held inside the routers _are_ the liquidity.
 
 The same flow works in the other direction. This matters: if users cannot see a clear way out, they are less willing to come in. Making both directions simple removes a major reason people hesitate to try a new stablecoin.
 
@@ -49,7 +49,7 @@ For the issuer, this changes three things:
 At a high level:
 
 1. A user sends USDC (or another supported collateral) on the source chain.
-2. StableSwap routes it to the destination chain.
+2. StableLane routes it to the destination chain.
 3. The user receives the target stablecoin on the destination chain.
 
 The same flow works for same-chain swaps, for example USDC to a branded stable on the same network.
@@ -71,9 +71,9 @@ flowchart LR
 
 ## Technical Details
 
-StableSwap is built on top of [Hyperlane Warp Routes 2.0](/docs/applications/warp-routes/multi-collateral-warp-routes).
+StableLane is built on top of [Hyperlane Warp Routes 2.0](/docs/applications/warp-routes/multi-collateral-warp-routes).
 
-Each chain in a StableSwap route has a **`CrossCollateralRouter`** deployed for each collateral token (e.g. one for USDC, one for the branded stable). `CrossCollateralRouter` extends `HypERC20Collateral`, so each instance holds collateral for exactly one ERC20.
+Each chain in a StableLane route has a **`CrossCollateralRouter`** deployed for each collateral token (e.g. one for USDC, one for the branded stable). `CrossCollateralRouter` extends `HypERC20Collateral`, so each instance holds collateral for exactly one ERC20.
 
 Every router maintains an owner-managed allowlist of trusted peer `CrossCollateralRouter`s across domains — a router can be enrolled per remote domain (the standard primary remote router) and additional routers can be enrolled per domain via the `CrossCollateral` allowlist. This trusted-router graph defines which source/destination pairs are valid for a given route.
 
@@ -120,7 +120,7 @@ The returned quote covers interchain gas, the token amount plus protocol fee, an
 As swap volume flows in one direction, a router can run low on the collateral it holds. The HWR 2.0 rebalancer monitors inventory levels and moves collateral to restore target weights, keeping routes available without manual intervention.
 
 <Note>
-  **Why rebalancing is different in StableSwap:** In a same-asset multi-collateral route, restoring balance is straightforward — the rebalancer moves the same token between chains. StableSwap routes hold *different* assets on each side, so an imbalance often can't be fixed by moving the source token: the scarce asset has to be sourced directly (e.g. acquiring more of the branded stable on a chain where it's been drawn down). That extra step relies on external liquidity and carries real cost beyond the cross-chain transfer itself. The mechanics stay automatic; the operating economics are what change.
+  **Why rebalancing is different in StableLane:** In a same-asset multi-collateral route, restoring balance is straightforward — the rebalancer moves the same token between chains. StableLane routes hold *different* assets on each side, so an imbalance often can't be fixed by moving the source token: the scarce asset has to be sourced directly (e.g. acquiring more of the branded stable on a chain where it's been drawn down). That extra step relies on external liquidity and carries real cost beyond the cross-chain transfer itself. The mechanics stay automatic; the operating economics are what change.
 </Note>
 
 See [Native Rebalancing](/docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing) for details.

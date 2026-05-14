@@ -76,9 +76,9 @@
                 ]
               },
               {
-                "group": "StableSwap",
+                "group": "StableLane",
                 "pages": [
-                  "docs/applications/stableswap/overview"
+                  "docs/applications/stablelane/overview"
                 ]
               },
               {
