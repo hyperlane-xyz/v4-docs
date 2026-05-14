@@ -1,5 +1,5 @@
 ---
-title: "StableLane Overview"
+title: "StableLane"
 ---
 
 <Warning>
@@ -18,7 +18,7 @@ Launching a branded stablecoin is now easy. Getting users to actually use it is 
 Most users already hold USDC or USDT across many chains. For a new branded stablecoin to grow, the issuer has to meet users where they already have funds.
 
 <CardGroup cols={2}>
-  <Card title="Without StableLane — 4 steps" icon="circle-x">
+  <Card title="Without StableLane" icon="circle-x">
     1. Bridge USDC to the destination chain
     2. Acquire gas on that chain
     3. Find a DEX with the USDC ↔ branded pair
@@ -26,7 +26,7 @@ Most users already hold USDC or USDT across many chains. For a new branded stabl
 
     Each step loses users.
   </Card>
-  <Card title="With StableLane — 1 step" icon="circle-check">
+  <Card title="With StableLane" icon="circle-check">
     User sends USDC from any supported chain → receives the branded stablecoin on the destination chain.
 
     No bridge. No DEX. No liquidity bootstrap. The routers _are_ the liquidity.
@@ -76,7 +76,7 @@ flowchart LR
         SR["CrossCollateralRouter<br/>e.g. USDC"]
     end
     subgraph destination["Destination Chain"]
-        DR["CrossCollateralRouter<br/>e.g. branded stable"]
+        DR["CrossCollateralRouter<br/>e.g. branded stablecoin"]
         R((Recipient))
     end
     U -- "transferRemoteTo()" --> SR
@@ -90,7 +90,7 @@ StableLane is built on top of [Hyperlane Warp Routes 2.0](/docs/applications/war
 
 Each chain in a StableLane route has a **`CrossCollateralRouter`** deployed for each collateral token (e.g. one for USDC, one for the branded stable). `CrossCollateralRouter` extends `HypERC20Collateral`, so each instance holds collateral for exactly one ERC20.
 
-Every router maintains an owner-managed allowlist of trusted peer `CrossCollateralRouter`s across domains — a router can be enrolled per remote domain (the standard primary remote router) and additional routers can be enrolled per domain via the `CrossCollateral` allowlist. This trusted-router graph defines which source/destination pairs are valid for a given route.
+Every router maintains an owner-managed allowlist of trusted peer `CrossCollateralRouter`s per domain. The owner manages this allowlist with `enrollCrossCollateralRouters` and `unenrollCrossCollateralRouters`, which write to the `_crossCollateralRouters` mapping (domain → set of router addresses). A single primary remote router can also be enrolled per domain through the standard `Router` enrollment. Together these define which source/destination pairs are valid for a given route, and allow multiple target routers on the same destination chain (for example, several branded stablecoins).
 
 <Note>
   **Token support:** standard ERC20s only. Rebasing tokens, fee-on-transfer tokens, and ERC777 are not supported — the contract relies on exact-amount accounting.
@@ -99,8 +99,8 @@ Every router maintains an owner-managed allowlist of trusted peer `CrossCollater
 ### Cross-chain swap flow
 
 1. User calls `transferRemoteTo` on the source chain router with the destination domain, recipient, amount, and target router.
-2. The source router validates that the target router is enrolled, deducts configured fees, and dispatches a single interchain message via Hyperlane.
-3. The destination router receives the message, verifies the sender is a trusted router, and releases the target stablecoin to the recipient.
+2. The source router validates that the target router is enrolled, pulls `amount + protocol fee + external fee` from the user, sends the fees to their respective recipients, and dispatches a single interchain message via Hyperlane.
+3. The destination router receives the message, verifies the sender is a trusted router, and releases the full `amount` of the target stablecoin to the recipient.
 
 Routers expose a `transferRemoteTo` function used for both cross-chain and same-chain swaps:
 
@@ -110,10 +110,12 @@ transferRemoteTo(
     bytes32 recipient,     // recipient address on destination
     uint256 amount,        // amount of source token
     bytes32 targetRouter   // enrolled CrossCollateralRouter on destination
-)
+) public payable returns (bytes32 messageId)
 ```
 
-**Same-chain swaps** use the same interface with the local domain as the destination. In this path the source router skips mailbox dispatch and calls the target router's `handle` directly — there's no interchain relay and no gas payment.
+The returned `messageId` is the Hyperlane message ID used to track delivery (for example, in the Hyperlane Explorer). For same-chain swaps, where no message is dispatched, the return value is the zero hash.
+
+**Same-chain swaps** use the same interface with the local domain as the destination. In this path the source router skips mailbox dispatch and calls the target router's `handle` directly — there's no interchain relay and no gas payment. To make this possible, `CrossCollateralRouter` overrides `handle` to drop the standard `onlyMailbox` modifier: when the caller is the mailbox, the origin must be a different domain; when the caller is another local contract, it must be a `CrossCollateralRouter` enrolled in this router's local-domain allowlist.
 
 ### Fee quoting
 
@@ -125,10 +127,16 @@ quoteTransferRemoteTo(
     bytes32 recipient,
     uint256 amount,
     bytes32 targetRouter
-)
+) public view returns (Quote[] memory quotes)
 ```
 
-The returned quote covers interchain gas, the token amount plus protocol fee, and any external fee component. For same-chain swaps the gas portion is zero.
+Each `Quote` is `{ address token, uint256 amount }`. The function returns an array of **three** entries, in this order:
+
+1. **Interchain gas** — paid in `feeToken()`. Zero for same-chain swaps.
+2. **Token amount + protocol fee** — the source token amount the user is transferring, plus the protocol fee.
+3. **External fee** — additional fee in the source token. Zero when no external fee is configured for the route.
+
+The user transfers entries 2 and 3 from their source-token balance; sum them to display the total source-token cost. Entry 1 is paid separately in `feeToken()` for interchain gas. The recipient on the destination chain receives the original `amount` of the target token.
 
 ### Rebalancing
 

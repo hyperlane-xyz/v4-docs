@@ -75,12 +75,7 @@
                   "docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing"
                 ]
               },
-              {
-                "group": "StableLane",
-                "pages": [
-                  "docs/applications/stablelane/overview"
-                ]
-              },
+              "docs/applications/stablelane/overview",
               {
                 "group": "Interchain Accounts",
                 "pages": [
