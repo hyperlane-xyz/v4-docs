@@ -33,10 +33,6 @@ Most users already hold USDC or USDT across many chains. For a new branded stabl
   </Card>
 </CardGroup>
 
-<Accordion title="Why the DEX step alone is so expensive">
-  A new stablecoin has no DEX liquidity until it has trading volume, and it cannot get trading volume until it has liquidity. To break this cycle, issuers usually pay for LP rewards, market maker deals, and DEX listings. This spending is expensive and does not directly bring in users. It only creates the conditions where users might come.
-</Accordion>
-
 The same flow works in the other direction. If users cannot see a clear way out, they are less willing to come in. Making both directions simple removes a major reason people hesitate to try a new stablecoin.
 
 For the issuer, this changes three things:
@@ -88,9 +84,9 @@ flowchart LR
 
 StableLane is built on top of [Hyperlane Warp Routes 2.0](/docs/applications/warp-routes/multi-collateral-warp-routes).
 
-Each chain in a StableLane route has a **`CrossCollateralRouter`** deployed for each collateral token (e.g. one for USDC, one for the branded stable). `CrossCollateralRouter` extends `HypERC20Collateral`, so each instance holds collateral for exactly one ERC20.
+Each chain in a StableLane route has a [**`CrossCollateralRouter`**](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol) deployed for each collateral token (e.g. one for USDC, one for the branded stable). `CrossCollateralRouter` extends `HypERC20Collateral`, so each instance holds collateral for exactly one ERC20.
 
-Every router maintains an owner-managed allowlist of trusted peer `CrossCollateralRouter`s per domain. The owner manages this allowlist with `enrollCrossCollateralRouters` and `unenrollCrossCollateralRouters`, which write to the `_crossCollateralRouters` mapping (domain → set of router addresses). A single primary remote router can also be enrolled per domain through the standard `Router` enrollment. Together these define which source/destination pairs are valid for a given route, and allow multiple target routers on the same destination chain (for example, several branded stablecoins).
+Every router maintains an owner-managed allowlist of trusted peer `CrossCollateralRouter`s per domain. The owner manages this allowlist with [`enrollCrossCollateralRouters`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol#L85) and [`unenrollCrossCollateralRouters`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol#L98), which write to the `_crossCollateralRouters` mapping (domain → set of router addresses). A single primary remote router can also be enrolled per domain through the standard `Router` enrollment. Together these define which source/destination pairs are valid for a given route, and allow multiple target routers on the same destination chain (for example, several branded stablecoins).
 
 <Note>
   **Token support:** standard ERC20s only. Rebasing tokens, fee-on-transfer tokens, and ERC777 are not supported — the contract relies on exact-amount accounting.
@@ -98,7 +94,7 @@ Every router maintains an owner-managed allowlist of trusted peer `CrossCollater
 
 ### Cross-chain swap flow
 
-1. User calls `transferRemoteTo` on the source chain router with the destination domain, recipient, amount, and target router.
+1. User calls [`transferRemoteTo`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol#L327) on the source chain router with the destination domain, recipient, amount, and target router.
 2. The source router validates that the target router is enrolled, pulls `amount + protocol fee + external fee` from the user, sends the fees to their respective recipients, and dispatches a single interchain message via Hyperlane.
 3. The destination router receives the message, verifies the sender is a trusted router, and releases the full `amount` of the target stablecoin to the recipient.
 
@@ -115,11 +111,11 @@ transferRemoteTo(
 
 The returned `messageId` is the Hyperlane message ID used to track delivery (for example, in the Hyperlane Explorer). For same-chain swaps, where no message is dispatched, the return value is the zero hash.
 
-**Same-chain swaps** use the same interface with the local domain as the destination. In this path the source router skips mailbox dispatch and calls the target router's `handle` directly — there's no interchain relay and no gas payment. To make this possible, `CrossCollateralRouter` overrides `handle` to drop the standard `onlyMailbox` modifier: when the caller is the mailbox, the origin must be a different domain; when the caller is another local contract, it must be a `CrossCollateralRouter` enrolled in this router's local-domain allowlist.
+**Same-chain swaps** use the same interface with the local domain as the destination. In this path the source router skips mailbox dispatch and calls the target router's [`handle`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol#L180) directly — there's no interchain relay and no gas payment. To make this possible, `CrossCollateralRouter` overrides `handle` to drop the standard `onlyMailbox` modifier: when the caller is the mailbox, the origin must be a different domain; when the caller is another local contract, it must be a `CrossCollateralRouter` enrolled in this router's local-domain allowlist.
 
 ### Fee quoting
 
-Fees are configured per destination domain and per target router. Before executing a swap, integrators can call `quoteTransferRemoteTo` on the source router to get the exact cost for a route:
+Fees are configured per destination domain and per target router. Before executing a swap, integrators can call [`quoteTransferRemoteTo`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol#L394) on the source router to get the exact cost for a route:
 
 ```solidity
 quoteTransferRemoteTo(
@@ -145,8 +141,6 @@ As swap volume flows in one direction, a router can run low on the collateral it
 <Note>
   **Why rebalancing is different in StableLane:** In a same-asset multi-collateral route, restoring balance is straightforward — the rebalancer moves the same token between chains. StableLane routes hold *different* assets on each side, so an imbalance often can't be fixed by moving the source token: the scarce asset has to be sourced directly (e.g. acquiring more of the branded stable on a chain where it's been drawn down). That extra step relies on external liquidity and carries real cost beyond the cross-chain transfer itself. The mechanics stay automatic; the operating economics are what change.
 </Note>
-
-See [Native Rebalancing](/docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing) for details.
 
 ## More Resources
 
