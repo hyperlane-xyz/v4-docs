@@ -91,17 +91,9 @@ Every router maintains an owner-managed allowlist of trusted peer `CrossCollater
 
 ### Cross-chain swap flow
 
-<Steps>
-  <Step title="User calls transferRemoteTo">
-    On the source chain router, with the destination domain, recipient, amount, and target router address.
-  </Step>
-  <Step title="Source router validates and dispatches">
-    Validates that the target router is enrolled, deducts configured fees, and dispatches a single interchain message via Hyperlane.
-  </Step>
-  <Step title="Destination router releases tokens">
-    Receives the message, verifies the sender is a trusted router, and releases the target stablecoin to the recipient.
-  </Step>
-</Steps>
+1. User calls `transferRemoteTo` on the source chain router with the destination domain, recipient, amount, and target router.
+2. The source router validates that the target router is enrolled, deducts configured fees, and dispatches a single interchain message via Hyperlane.
+3. The destination router receives the message, verifies the sender is a trusted router, and releases the target stablecoin to the recipient.
 
 Routers expose a `transferRemoteTo` function used for both cross-chain and same-chain swaps:
 
