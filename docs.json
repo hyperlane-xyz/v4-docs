@@ -76,6 +76,12 @@
                 ]
               },
               {
+                "group": "StableSwap",
+                "pages": [
+                  "docs/applications/stableswap/overview"
+                ]
+              },
+              {
                 "group": "Interchain Accounts",
                 "pages": [
                   "docs/applications/interchain-account/overview",
