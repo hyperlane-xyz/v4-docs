@@ -15,22 +15,29 @@ For example: a user holds USDC on Arbitrum and wants a branded stablecoin on a n
 
 Launching a branded stablecoin is now easy. Getting users to actually use it is the hard part.
 
-Most users already hold USDC or USDT, and those balances are spread across many chains. For a new branded stablecoin to grow, the issuer needs to make it simple for users to swap into it from wherever they already have funds.
+Most users already hold USDC or USDT across many chains. For a new branded stablecoin to grow, the issuer has to meet users where they already have funds.
 
-Without something like StableLane, a user who wants to move from USDC into a new branded stablecoin has to:
+<CardGroup cols={2}>
+  <Card title="Without StableLane — 4 steps" icon="circle-x">
+    1. Bridge USDC to the destination chain
+    2. Acquire gas on that chain
+    3. Find a DEX with the USDC ↔ branded pair
+    4. Swap, often at a bad price
 
-1. Bridge USDC from their chain to the chain where the branded stablecoin is issued
-2. Get gas on that destination chain
-3. Find a DEX that supports the USDC ↔ branded stablecoin pair
-4. Swap on that DEX, often at a bad price
+    Each step loses users.
+  </Card>
+  <Card title="With StableLane — 1 step" icon="circle-check">
+    User sends USDC from any supported chain → receives the branded stablecoin on the destination chain.
 
-Each step loses some users. Many give up before they finish.
+    No bridge. No DEX. No liquidity bootstrap. The routers _are_ the liquidity.
+  </Card>
+</CardGroup>
 
-Step 3 has an extra problem. A new stablecoin has no DEX liquidity until it has trading volume, and it cannot get trading volume until it has liquidity. To break this cycle, issuers usually pay for LP rewards, market maker deals, and DEX listings. This spending is expensive and does not directly bring in users. It only creates the conditions where users might come.
+<Accordion title="Why the DEX step alone is so expensive">
+  A new stablecoin has no DEX liquidity until it has trading volume, and it cannot get trading volume until it has liquidity. To break this cycle, issuers usually pay for LP rewards, market maker deals, and DEX listings. This spending is expensive and does not directly bring in users. It only creates the conditions where users might come.
+</Accordion>
 
-StableLane replaces all of this with a single transaction. The user sends USDC from any supported chain and receives the branded stablecoin on the destination chain. There is no bridge step, no DEX, and no need to bootstrap liquidity. The tokens held inside the routers _are_ the liquidity.
-
-The same flow works in the other direction. This matters: if users cannot see a clear way out, they are less willing to come in. Making both directions simple removes a major reason people hesitate to try a new stablecoin.
+The same flow works in the other direction. If users cannot see a clear way out, they are less willing to come in. Making both directions simple removes a major reason people hesitate to try a new stablecoin.
 
 For the issuer, this changes three things:
 
@@ -133,7 +140,7 @@ As swap volume flows in one direction, a router can run low on the collateral it
 
 See [Native Rebalancing](/docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing) for details.
 
-## Get Started
+## More Resources
 
 To learn more about the underlying architecture or explore what a route deployment looks like:
 
