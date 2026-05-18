@@ -48,9 +48,7 @@ jobs:
         with:
           node-version: '22'
           cache: 'pnpm'
-          cache-dependency-path: |
-            scripts/package.json
-            scripts/pnpm-lock.yaml
+          cache-dependency-path: 'scripts/pnpm-lock.yaml'
 
       - name: Get latest SDK and Registry versions
         id: get-versions
