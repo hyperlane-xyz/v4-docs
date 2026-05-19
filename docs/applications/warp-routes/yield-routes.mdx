@@ -2,7 +2,7 @@
 title: "Yield Routes"
 ---
 
-A **yield route** is a [Hyperlane Warp Route](/docs/applications/warp-routes/overview) variant that puts bridged collateral to work. While the assets sit locked on the origin chain, they are deposited into an [ERC-4626 vault](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/) that earns yield. Yield routes use the ERC-4626 standard, so any compliant vault can be used without modification.
+A **yield route** is a [Hyperlane Warp Route](/docs/applications/warp-routes/overview) variant that puts bridged collateral to work. While the assets sit locked on the origin chain, they are deposited into an [ERC-4626 vault](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/) that earns yield — any vault that implements the standard can be used without modification.
 
 <Note>
   **ERC-4626** is the Ethereum standard for tokenized yield-bearing vaults. When
@@ -47,7 +47,7 @@ Each yield route has two core contracts:
 | **Origin**      | [`HypERC4626OwnerCollateral`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/extensions/HypERC4626OwnerCollateral.sol) or [`HypERC4626Collateral`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/extensions/HypERC4626Collateral.sol) | Accepts the deposited collateral and forwards it into an ERC-4626 vault. The vault generates yield.                 |
 | **Destination** | [`HypERC20`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/HypERC20.sol) or [`HypERC4626`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/extensions/HypERC4626.sol)                                                                  | Mints a synthetic representation of the deposited collateral. Holders on the destination chain hold this synthetic. |
 
-Depending on the type of route, yield is distributed to different parties. The two standard types are **owner-yield**, where yield goes to the route owner (the team that deploys and operates the route), and **user-yield**, where yield goes back to the holders of the synthetic token.
+Depending on the type of route, yield is distributed to different parties. The two standard types are **owner-yield** (`HypERC4626OwnerCollateral`), where yield goes to the route owner (the team that deploys and operates the route), and **user-yield** (`HypERC4626Collateral`), where yield goes back to the holders of the synthetic token.
 
 ### Example flow
 
