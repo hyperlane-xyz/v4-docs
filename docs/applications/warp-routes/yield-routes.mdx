@@ -2,7 +2,7 @@
 title: "Yield Routes"
 ---
 
-A **yield route** is a [Hyperlane Warp Route](/docs/applications/warp-routes/overview) variant that puts bridged collateral to work. While the assets sit locked on the source chain, they are deposited into an [ERC-4626 vault](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/) that earns yield. Yield routes use the ERC-4626 standard, so any vault that implements it can be used as-is.
+A **yield route** is a [Hyperlane Warp Route](/docs/applications/warp-routes/overview) variant that puts bridged collateral to work. While the assets sit locked on the origin chain, they are deposited into an [ERC-4626 vault](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/) that earns yield. Yield routes use the ERC-4626 standard, so any compliant vault can be used without modification.
 
 <Note>
   **ERC-4626** is the Ethereum standard for tokenized yield-bearing vaults. When
@@ -13,7 +13,7 @@ A **yield route** is a [Hyperlane Warp Route](/docs/applications/warp-routes/ove
 
 ## Why Yield Routes
 
-Bridged assets typically sit locked in a collateral contract on the source chain. A yield route deposits that collateral into an ERC-4626 vault — such as one provided by Aave or Morpho — so it earns yield while the bridge experience for the holder stays the same.
+Bridged assets typically sit locked in a collateral contract on the origin chain. A yield route deposits that collateral into an ERC-4626 vault — such as one provided by Aave or Morpho — so it earns yield while the bridge experience for the holder stays the same.
 
 <CardGroup cols={1}>
   <Card title="Put bridged assets to work" icon="chart-line">
@@ -84,21 +84,11 @@ flowchart LR
     YR -->|Returns USDC| R((Recipient))
 ```
 
-## Vault integration
+## Vault Integration
 
-The route deployer specifies the vault address at deploy time. From then on, the yield route calls the standard ERC-4626 methods (`deposit`, `withdraw`, `previewDeposit`, `convertToAssets`, `convertToShares`) on the vault. The vault itself is not modified or redeployed.
+The route deployer specifies the vault address at deploy time. From then on, the yield route calls the standard ERC-4626 methods (`deposit`, `withdraw`, `previewDeposit`, `convertToAssets`, `convertToShares`) on the vault. The vault itself does not need any Hyperlane-specific implementation.
 
-The vault must:
-
-- Implement the ERC-4626 standard without modifications
-- Not charge fees on deposit or withdrawal
-- Use a non-rebasing underlying asset
-- Use standard share math (no custom overrides on `previewDeposit`, `convertToAssets`, `convertToShares`)
-
-<Warning>
-  If the vault doesn't meet these requirements, the route can produce incorrect
-  exchange rates or accounting errors.
-</Warning>
+See the [Vault compatibility requirements](/docs/guides/warp-routes/evm/deploy-yield-routes#pre-requisites) in the deploy guide for the specific vault requirements.
 
 ## Deploy a Yield Route
 

@@ -20,7 +20,7 @@ Hyperlane v4 Documentation is a Mintlify-powered documentation site for the Hype
 mint dev
 
 # Check for broken links
-mintlify broken-links
+mint broken-links
 ```
 
 ## Architecture
