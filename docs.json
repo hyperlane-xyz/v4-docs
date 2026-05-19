@@ -72,7 +72,8 @@
                   "docs/applications/warp-routes/types",
                   "docs/applications/warp-routes/example-usage",
                   "docs/applications/warp-routes/multi-collateral-warp-routes",
-                  "docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing"
+                  "docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing",
+                  "docs/applications/warp-routes/yield-routes"
                 ]
               },
               "docs/applications/stablelane/overview",
