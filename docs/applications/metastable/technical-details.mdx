@@ -65,7 +65,7 @@ The stablecoin holder (`msg.sender`) pays entries 2 and 3 in the source token (s
 
 ## Liquidity and rebalancing
 
-Liquidity for a Metastable route lives directly in the router contracts. Adding liquidity works like depositing into a DEX pool — deposit stablecoins into the relevant `CrossCollateralRouter`, and the route uses that pool to settle swaps.
+Liquidity for a Metastable route lives directly in the router contracts. The issuing team funds each `CrossCollateralRouter` with its collateral token, and swaps are settled from those reserves.
 
 As swap volume flows in one direction, a router can run low on the collateral it holds. The HWR 2.0 rebalancer monitors inventory levels and moves collateral between chains to restore target weights, keeping routes available without manual intervention.
 
