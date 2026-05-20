@@ -76,13 +76,19 @@
                   "docs/applications/warp-routes/yield-routes"
                 ]
               },
-              "docs/applications/stablelane/overview",
               {
                 "group": "Interchain Accounts",
                 "pages": [
                   "docs/applications/interchain-account/overview",
                   "docs/applications/interchain-account/example-usage",
                   "docs/applications/interchain-account/overrides"
+                ]
+              },
+              {
+                "group": "Metastable",
+                "pages": [
+                  "docs/applications/metastable/overview",
+                  "docs/applications/metastable/technical-details"
                 ]
               },
               {
