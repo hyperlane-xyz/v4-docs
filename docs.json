@@ -155,7 +155,9 @@
                     "group": "HWR Deployment",
                     "pages": [
                       "docs/guides/production/warp-route-deployment/remove-trusted-relayer",
-                      "docs/guides/production/warp-route-deployment/transfer-warp-route-ownership"
+                      "docs/guides/production/warp-route-deployment/transfer-warp-route-ownership",
+                      "docs/guides/production/warp-route-deployment/configure-rate-limit-ism",
+                      "docs/guides/production/warp-route-deployment/configure-pausable-ism"
                     ]
                   }
                 ]

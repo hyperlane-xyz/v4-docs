@@ -1,0 +1,169 @@
+---
+title: "Configure Rate Limit ISM"
+description: "Learn how to set, update, or remove the Rate Limit ISM on your Hyperlane Warp Route using the Hyperlane CLI"
+---
+
+import WarpReadSymbolChainPartial from "/snippets/warp-routes/warp-read-symbol-chain.mdx";
+import WarpApplySymbolConfigDefaultPartial from "/snippets/warp-routes/warp-apply-symbol-config-default.mdx";
+
+This guide explains how to configure the Rate Limit ISM on your Hyperlane Warp Route (HWR) using the Hyperlane CLI. The Rate Limit ISM caps the total token volume that can be delivered to your HWR on each destination chain within a rolling 24-hour window.
+
+The cap is set by the HWR owner and bounds the worst-case loss from a single incident. If a token contract is exploited, a validator key is leaked, or a relayer is compromised, an attacker can drain at most `maxCapacity` per day before further deliveries are blocked. This gives the owner time to detect the incident and [pause the route](/docs/guides/production/warp-route-deployment/configure-pausable-ism).
+
+<Note>
+  This page covers the operator workflow. For protocol-level detail and contract
+  reference, see [Rate Limited
+  ISM](/docs/protocol/ISM/standard-ISMs/rate-limited-ISM).
+</Note>
+
+## Overview
+
+The Rate Limit ISM puts a daily ceiling on how much volume can move through your HWR into a given destination chain. It uses a token bucket that refills continuously throughout the day:
+
+- The bucket starts full at `maxCapacity`.
+- It refills at a steady rate — `maxCapacity / 86400` per second — so one full bucket every 24 hours.
+- Each incoming transfer uses up part of the bucket, equal to the amount being transferred.
+- If a transfer would exceed the available bucket capacity, it does not go through right away. The message stays pending and becomes deliverable again as the bucket refills.
+
+The Rate Limit ISM does not work in isolation. It is one of the security checks bundled together (an aggregation), and a transfer must pass every check in the bundle to be delivered. The rate limit adds a volume ceiling on top of your existing security.
+
+<Note>
+  `maxCapacity` is denominated in the token's smallest base unit. For a 6-decimal token like USDC, `1000000000000` means 1,000,000 USDC per day. For an 18-decimal token, `5000000000000000000000000` means 5,000,000 tokens per day.
+
+The SDK requires `maxCapacity` to be at least `86400` and rounds it down to the nearest multiple of `86400` so the per-second refill rate is a whole number. For example, `5000000000000000000000000` rounds down to `4999999999999999999968000`.
+
+</Note>
+
+## What you control as the owner
+
+The `RateLimitedIsm` contract is `Ownable`. The owner — typically the same multisig that owns the HWR — is the only address allowed to update the cap (via `setRefillRate`).
+
+As the owner, you are responsible for:
+
+- **Sizing the cap.** Leave enough headroom for normal use while keeping the cap low enough that a compromise has a meaningful limit.
+- **Monitoring saturation.** Sustained use near the cap is a signal to raise the limit. Large unexplained spikes are a signal to investigate before raising it.
+- **Adjusting over time.** Caps should be revisited as volume grows.
+
+<Note>
+  `setRefillRate` updates the refill rate going forward. It does not reset the
+  current bucket level. If the bucket is half-empty when you raise the cap, it
+  stays half-empty in absolute terms and refills toward the new ceiling at the
+  new rate. The same applies when you lower the cap.
+</Note>
+
+## Update the cap
+
+<Info>
+  **This section is for HWR owners.** Only the address that owns the
+  `RateLimitedIsm` can update the cap. If you are not the owner, you can still
+  use `warp read` to inspect the current cap, but you will not be able to apply
+  changes.
+</Info>
+
+The Rate Limit ISM is updated the same way as any other HWR configuration: edit the YAML in your local registry, then run `warp apply`. The SDK detects the change and submits a `setRefillRate` transaction signed by the ISM owner.
+
+### Prerequisites
+
+- The warp route ID.
+  - After deployment, the warp route ID is saved to the registry at `$HOME/.hyperlane/deployments/warp_routes/<warpRouteId>`.
+  - The format is `SYMBOL/id` (e.g., `ETH/yourid`).
+  - To list existing warp route IDs: `ls $HOME/.hyperlane/deployments/warp_routes/`
+- Access to the private key that currently owns the HWR.
+
+To fetch the current on-chain config, run the following:
+
+<WarpReadSymbolChainPartial />
+
+After running `warp read`, you should see a similar config under `interchainSecurityModule`. One of the modules inside the `staticAggregationIsm` will be `type: rateLimitedIsm` with the current `maxCapacity`:
+
+```yaml {7-10}
+yourchain:
+  ...
+  interchainSecurityModule:
+    address: "0x..."
+    type: "staticAggregationIsm"
+    modules:
+      - type: "rateLimitedIsm"
+        address: "0x..."
+        owner: "0x..."
+        maxCapacity: "1000000000000"
+      - owner: "0x..."
+        address: "0x..."
+        type: "defaultFallbackRoutingIsm"
+        domains: {}
+    threshold: 2
+```
+
+<Info>
+Warp route configs are stored in your local registry at `$HOME/.hyperlane/deployments/warp_routes/<warpRouteId>/`. The `warp read` command outputs the current on-chain config for reference.
+</Info>
+
+Follow these steps using the CLI to update the cap.
+
+### Step 1: Configuration
+
+Update `maxCapacity` on the `rateLimitedIsm` module in your warp route deployment config. For example, to raise the cap from 1M to 5M USDC per day:
+
+```diff title="warp-route-deployment.yaml"
+yourchain:
+  mailbox: '0x...'
+  owner: '0x...'
+  interchainSecurityModule:
+    address: '0x...'
+    type: 'staticAggregationIsm'
+    modules:
+      - type: rateLimitedIsm
+        address: '0x...'
+        owner: '0x...'
+-       maxCapacity: '1000000000000'
++       maxCapacity: '5000000000000'
+      - owner: '0x...'
+        address: '0x...'
+        type: 'defaultFallbackRoutingIsm'
+        domains: {}
+    threshold: 2
+```
+
+<Note>
+  The SDK fills in operational fields (such as the bound recipient address)
+  automatically when it deploys the ISM. You only need to edit `maxCapacity` and
+  `owner`.
+</Note>
+
+### Step 2: Apply
+
+Using the CLI, execute by providing the warp route ID:
+
+<WarpApplySymbolConfigDefaultPartial />
+
+You should see a single transaction calling `setRefillRate` on the ISM contract, signed by the owner.
+
+### Step 3: Confirm
+
+To confirm the new cap is on-chain, re-run the read command:
+
+<WarpReadSymbolChainPartial />
+
+After running `warp read`, you should see the updated `maxCapacity` (rounded down to the nearest multiple of `86400` if needed):
+
+```yaml {4}
+- type: "rateLimitedIsm"
+  address: "0x..."
+  owner: "0x..."
+  maxCapacity: "4999999968000"
+```
+
+## Removing the Rate Limit ISM
+
+The Rate Limit ISM is an effective defense against a bridge compromise and has no effect on traffic below the cap.
+
+If you have a specific reason to remove it — for example, you are layering an alternative volume-control mechanism upstream — you can do so by removing the `rateLimitedIsm` entry from the aggregation:
+
+1. Run `warp read` to fetch the current config.
+2. In your local deployment config, delete the entire `rateLimitedIsm` entry from the aggregation's `modules` list. Keep the other modules in place.
+3. Run `warp apply`. The SDK deploys a new aggregation ISM without the rate limit module and points the warp route at it. The old `RateLimitedIsm` contract remains on chain but is no longer referenced.
+4. Re-run `warp read` to confirm the `rateLimitedIsm` is no longer in the module list.
+
+You can re-add it later by adding the module back to the config and running `warp apply` again. This deploys a fresh `RateLimitedIsm` with the cap you specify.
+
+By completing these steps, you have configured the Rate Limit ISM on your HWR.

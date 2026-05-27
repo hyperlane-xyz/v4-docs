@@ -1,0 +1,163 @@
+---
+title: "Configure Pausable ISM"
+description: "Learn how to pause and unpause your Hyperlane Warp Route in an incident using the Hyperlane CLI"
+---
+
+import WarpReadSymbolChainPartial from "/snippets/warp-routes/warp-read-symbol-chain.mdx";
+import WarpApplySymbolConfigDefaultPartial from "/snippets/warp-routes/warp-apply-symbol-config-default.mdx";
+
+This guide explains how the Pausable ISM works on a Hyperlane Warp Route (HWR) and how to use it in an incident. The Pausable ISM is an emergency stop: when it is paused, every inbound delivery on that destination chain is rejected, regardless of what the other security checks would have accepted.
+
+You can confirm an HWR includes a Pausable ISM by running `warp read` and looking for `type: pausableIsm` inside the aggregation's modules.
+
+<Note>
+  This page covers the operator workflow. For the contract source, see
+  [`PausableIsm.sol`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/isms/PausableIsm.sol).
+</Note>
+
+## Overview
+
+The Pausable ISM has two states:
+
+- **Unpaused.** It accepts every inbound message. Deliveries on the destination chain proceed as normal.
+- **Paused.** It rejects every inbound message. Deliveries on the destination chain revert at the ISM step.
+
+Each HWR has its own Pausable ISM on each destination chain it routes to. Pausing it blocks deliveries into that chain, for that HWR only — the HWR's other destinations keep operating, and any other HWR is unaffected.
+
+For example, if a USDC HWR routes into Ethereum, Arbitrum, and Base, pausing the Arbitrum ISM stops only USDC deliveries into Arbitrum on this HWR. USDC deliveries into Ethereum and Base keep going, and any other HWR on Arbitrum (such as a USDT or ETH route) is also unaffected. To stop the whole route, the ISM has to be paused on each of its destinations.
+
+Pausing takes effect immediately. Once the `pause()` transaction is confirmed on-chain, deliveries on that destination stop. There is no waiting period.
+
+The Pausable ISM is one of the security checks bundled together (an aggregation), and a transfer must pass every check to be delivered. While the Pausable ISM is paused, the aggregation can never accept a message — regardless of what the other modules would have decided.
+
+## What pausing does and does not do
+
+**Pausing does:**
+
+- Cause all inbound deliveries on the paused destination chain to revert at the ISM step.
+- Take effect as soon as the `pause()` transaction is confirmed on-chain.
+
+**Pausing does not:**
+
+- Stop users from sending messages on origin chains. Dispatches still succeed; those messages just will not be delivered until the ISM is unpaused. They accumulate as pending in the meantime.
+- Refund already-dispatched messages or fees.
+- Affect any other warp route or any other ISM. The pause is scoped to the single Pausable ISM contract being called.
+- Reset the rate limit bucket, change ownership, or modify any other module in the aggregation.
+
+When the ISM is unpaused, pending messages become deliverable again and the relayer processes them normally (subject to the other modules in the aggregation — for example, the rate limit cap still applies). No action is required on the queued messages themselves.
+
+## What you control as the owner
+
+The `PausableIsm` contract is `Ownable`. The owner is the only address allowed to call `pause()` and `unpause()`. The same signing process used for other HWR admin actions applies here.
+
+## Pause the HWR
+
+<Info>
+  **Pausing and unpausing requires the owner of the `PausableIsm`** — typically
+  the same multisig that owns the HWR. If you are not the owner, you can still
+  use `warp read` to inspect the current state, but you will not be able to
+  change it.
+</Info>
+
+There are two ways to pause: a direct contract call, or via `warp apply`. The direct call is the recommended path for incidents because it has fewer moving parts and reaches finality faster.
+
+### Emergency pause (recommended)
+
+In an active incident, skip `warp apply` and call the contract directly.
+
+#### Step 1: Find the Pausable ISM address
+
+Run `warp read` and locate the `pausableIsm` entry inside the aggregation's modules. The `address` field on that entry is the contract to call.
+
+<WarpReadSymbolChainPartial />
+
+After running `warp read`, you should see a similar config under `interchainSecurityModule`. One of the modules inside the `staticAggregationIsm` will be `type: pausableIsm`:
+
+```yaml {7-10}
+yourchain:
+  ...
+  interchainSecurityModule:
+    address: "0x..."
+    type: "staticAggregationIsm"
+    modules:
+      - type: "pausableIsm"
+        address: "0x..."
+        owner: "0x..."
+        paused: false
+      - owner: "0x..."
+        address: "0x..."
+        type: "defaultFallbackRoutingIsm"
+        domains: {}
+    threshold: 2
+```
+
+#### Step 2: Send the pause transaction
+
+From the owner multisig, send a single transaction:
+
+- **to:** the Pausable ISM address
+- **data:** `pause()` (function selector `0x8456cb59`)
+- **value:** `0`
+
+#### Step 3: Verify
+
+Once the transaction is confirmed on-chain, the next inbound delivery on that chain will revert. Reading `paused()` on the contract should return `true`.
+
+Repeat on each destination chain that needs to be stopped.
+
+### Pause via warp apply
+
+For non-urgent changes — for example, planned downtime or a drill — the state can also be flipped through `warp apply`.
+
+#### Prerequisites
+
+- The warp route ID.
+  - After deployment, the warp route ID is saved to the registry at `$HOME/.hyperlane/deployments/warp_routes/<warpRouteId>`.
+  - The format is `SYMBOL/id` (e.g., `ETH/yourid`).
+  - To list existing warp route IDs: `ls $HOME/.hyperlane/deployments/warp_routes/`
+- Access to the private key that currently owns the HWR.
+
+#### Step 1: Configuration
+
+Set `paused: true` on the `pausableIsm` entry in your warp route deployment config.
+
+```diff title="warp-route-deployment.yaml"
+      - type: pausableIsm
+        address: '0x...'
+        owner: '0x...'
+-       paused: false
++       paused: true
+```
+
+#### Step 2: Apply
+
+Using the CLI, execute by providing the warp route ID:
+
+<WarpApplySymbolConfigDefaultPartial />
+
+The SDK submits a `pause()` transaction signed by the owner.
+
+#### Step 3: Confirm
+
+Re-run `warp read` and verify `paused: true` on the `pausableIsm` entry.
+
+<Note>
+  Do not rely on this path in an emergency. It adds CLI invocation, transaction
+  building, and YAML editing on top of the multisig signing process. The direct
+  contract call is faster and has fewer moving parts.
+</Note>
+
+## Unpause the HWR
+
+Unpause mirrors the pause flow.
+
+- **Emergency path:** Send a transaction from the owner multisig to the Pausable ISM address calling `unpause()` (function selector `0x3f4ba83a`). Pending messages will start delivering as the relayer processes them.
+- **Via `warp apply`:** Set `paused: false` in the config and run `warp apply`.
+
+Verify with `paused()` on the contract or re-run `warp read` — the value should now be `false`.
+
+## Recommendations
+
+- **Practice on a testnet route before you need it.** A short drill — find the address, build the `pause()` transaction, collect signatures, broadcast — surfaces issues with the signing process while the stakes are low.
+- **Document signer availability out of band.** The Pausable ISM is only as responsive as the signers behind the owner multisig.
+- **Pause is containment, not resolution.** Pausing stops new deliveries but does not fix the underlying issue. Unpausing requires confidence that the incident has been resolved or mitigated.
