@@ -23,20 +23,19 @@ The Rate Limit ISM puts a daily ceiling on how much volume can move through your
 - The bucket starts full at `maxCapacity`.
 - It refills at a steady rate — `maxCapacity / 86400` per second — so one full bucket every 24 hours.
 - Each incoming transfer uses up part of the bucket, equal to the amount being transferred.
-- If a transfer would exceed the available bucket capacity, it does not go through right away. The message stays pending and becomes deliverable again as the bucket refills.
+- If a transfer would exceed the available bucket capacity, it does not go through right away. The message stays pending and becomes deliverable again as the bucket refills, subject to the relayer's retry behavior.
 
 The Rate Limit ISM does not work in isolation. It is one of the security checks bundled together (an aggregation), and a transfer must pass every check in the bundle to be delivered. The rate limit adds a volume ceiling on top of your existing security.
 
 <Note>
   `maxCapacity` is denominated in the token's smallest base unit. For a 6-decimal token like USDC, `1000000000000` means 1,000,000 USDC per day. For an 18-decimal token, `5000000000000000000000000` means 5,000,000 tokens per day.
 
-The SDK requires `maxCapacity` to be at least `86400` and rounds it down to the nearest multiple of `86400` so the per-second refill rate is a whole number. For example, `5000000000000000000000000` rounds down to `4999999999999999999968000`.
-
+  The SDK requires `maxCapacity` to be at least `86400` and rounds it down to the nearest multiple of `86400` so the per-second refill rate is a whole number. For example, `5000000000000000000000000` rounds down to `4999999999999999999968000`.
 </Note>
 
 ## What you control as the owner
 
-The `RateLimitedIsm` contract is `Ownable`. The owner — typically the same multisig that owns the HWR — is the only address allowed to update the cap (via `setRefillRate`).
+The `RateLimitedIsm` contract is `Ownable`. The owner — typically the same multisig that owns the HWR — is the only address allowed to update the cap. You change it by editing `maxCapacity` in your warp route config; the SDK applies the change by calling `setRefillRate` on the ISM.
 
 As the owner, you are responsible for:
 
@@ -86,7 +85,7 @@ yourchain:
       - type: "rateLimitedIsm"
         address: "0x..."
         owner: "0x..."
-        maxCapacity: "1000000000000"
+        maxCapacity: "999999993600"
       - owner: "0x..."
         address: "0x..."
         type: "defaultFallbackRoutingIsm"
@@ -115,7 +114,7 @@ yourchain:
       - type: rateLimitedIsm
         address: '0x...'
         owner: '0x...'
--       maxCapacity: '1000000000000'
+-       maxCapacity: '999999993600'
 +       maxCapacity: '5000000000000'
       - owner: '0x...'
         address: '0x...'

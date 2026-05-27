@@ -22,7 +22,7 @@ The Pausable ISM has two states:
 - **Unpaused.** It accepts every inbound message. Deliveries on the destination chain proceed as normal.
 - **Paused.** It rejects every inbound message. Deliveries on the destination chain revert at the ISM step.
 
-Each HWR has its own Pausable ISM on each destination chain it routes to. Pausing it blocks deliveries into that chain, for that HWR only — the HWR's other destinations keep operating, and any other HWR is unaffected.
+An HWR that includes a Pausable ISM has one instance per destination chain it routes to. Pausing it blocks deliveries into that chain, for that HWR only — the HWR's other destinations keep operating, and any other HWR is unaffected.
 
 For example, if a USDC HWR routes into Ethereum, Arbitrum, and Base, pausing the Arbitrum ISM stops only USDC deliveries into Arbitrum on this HWR. USDC deliveries into Ethereum and Base keep going, and any other HWR on Arbitrum (such as a USDT or ETH route) is also unaffected. To stop the whole route, the ISM has to be paused on each of its destinations.
 
@@ -44,7 +44,7 @@ The Pausable ISM is one of the security checks bundled together (an aggregation)
 - Affect any other warp route or any other ISM. The pause is scoped to the single Pausable ISM contract being called.
 - Reset the rate limit bucket, change ownership, or modify any other module in the aggregation.
 
-When the ISM is unpaused, pending messages become deliverable again and the relayer processes them normally (subject to the other modules in the aggregation — for example, the rate limit cap still applies). No action is required on the queued messages themselves.
+When the ISM is unpaused, pending messages become deliverable again and the relayer resumes processing them (subject to its retry window and the other modules in the aggregation — for example, the rate limit cap still applies). Messages that aged out of the relayer's retry window during the pause may require manual re-relay.
 
 ## What you control as the owner
 
