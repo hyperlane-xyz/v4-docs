@@ -8,7 +8,7 @@ import WarpApplySymbolConfigDefaultPartial from "/snippets/warp-routes/warp-appl
 
 This guide explains how to configure the Rate Limit ISM on your Hyperlane Warp Route (HWR) using the Hyperlane CLI. The Rate Limit ISM caps the total token volume that can be delivered to your HWR on each destination chain within a rolling 24-hour window.
 
-The cap is set by the HWR owner and bounds the worst-case loss from a single incident. If a token contract is exploited, a validator key is leaked, or a relayer is compromised, an attacker can drain at most `maxCapacity` per day before further deliveries are blocked. This gives the owner time to detect the incident and [pause the route](/docs/guides/production/warp-route-deployment/configure-pausable-ism).
+The cap is set by the HWR owner and bounds the worst-case loss from a single incident. If a token contract is exploited, a validator key is leaked, or a relayer is compromised, an attacker can drain at most `maxCapacity` per day before further deliveries are blocked.
 
 <Note>
   This page covers the operator workflow. For protocol-level detail and contract
