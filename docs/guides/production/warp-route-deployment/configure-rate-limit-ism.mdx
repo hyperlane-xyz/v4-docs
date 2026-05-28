@@ -21,11 +21,11 @@ The cap is set by the HWR owner and bounds the worst-case loss from a single inc
 The Rate Limit ISM puts a daily ceiling on how much volume can move through your HWR into a given destination chain. It uses a token bucket that refills continuously throughout the day:
 
 - The bucket starts full at `maxCapacity`.
-- It refills at a steady rate — `maxCapacity / 86400` per second — so one full bucket every 24 hours.
+- It refills continuously at `maxCapacity / 86400` per second, every second. This is a **rolling window**, not a daily quota that resets at midnight or any other fixed time. If the bucket is drained at any moment, capacity starts returning the very next second; after 24 hours with no transfers, the bucket is fully topped up again.
 - Each incoming transfer uses up part of the bucket, equal to the amount being transferred.
 - If a transfer would exceed the available bucket capacity, it does not go through right away. The message stays pending and becomes deliverable again as the bucket refills, subject to the relayer's retry behavior.
 
-The Rate Limit ISM does not work in isolation. It is one of the security checks bundled together (an aggregation), and a transfer must pass every check in the bundle to be delivered. The rate limit adds a volume ceiling on top of your existing security.
+The Rate Limit ISM can be deployed alone, but a typical aggregation contains Pausable + Rate Limit + Default Fallback in a 3/3 setup — all three modules must accept a message for it to be delivered. The rate limit adds a volume ceiling on top of the other security checks.
 
 <Note>
   `maxCapacity` is denominated in the token's smallest base unit. For a 6-decimal token like USDC, `1000000000000` means 1,000,000 USDC per day. For an 18-decimal token, `5000000000000000000000000` means 5,000,000 tokens per day.

@@ -8,7 +8,7 @@ import WarpApplySymbolConfigDefaultPartial from "/snippets/warp-routes/warp-appl
 
 This guide explains how the Pausable ISM works on a Hyperlane Warp Route (HWR) and how to use it in an incident. The Pausable ISM is an emergency stop: when it is paused, every inbound delivery on that destination chain is rejected, regardless of what the other security checks would have accepted.
 
-You can confirm an HWR includes a Pausable ISM by running `warp read` and looking for `type: pausableIsm` inside the aggregation's modules.
+You can confirm an HWR includes a Pausable ISM by running `warp read` and looking for `type: pausableIsm` inside the aggregation's modules. You can also check the [Hyperlane explorer](https://explorer.hyperlane.xyz/) under the **Warp Route Security** section for your route.
 
 <Note>
   This page covers the operator workflow. For the contract source, see
@@ -28,7 +28,7 @@ For example, if a USDC HWR routes into Ethereum, Arbitrum, and Base, pausing the
 
 Pausing takes effect immediately. Once the `pause()` transaction is confirmed on-chain, deliveries on that destination stop. There is no waiting period.
 
-The Pausable ISM is one of the security checks bundled together (an aggregation), and a transfer must pass every check to be delivered. While the Pausable ISM is paused, the aggregation can never accept a message — regardless of what the other modules would have decided.
+A typical aggregation contains Pausable + Rate Limit + Default Fallback in a 3/3 setup — all three modules must accept a message for it to be delivered. While the Pausable ISM is paused, the aggregation can never accept a message: the paused module rejects everything, and the aggregation requires every module to accept.
 
 ## What pausing does and does not do
 
