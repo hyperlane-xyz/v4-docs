@@ -8,20 +8,20 @@ sidebarTitle: "Overview"
   may change.
 </Warning>
 
-Metastable is a way to swap between like assets (most commonly stablecoins) across different chains in a single step. Any stablecoin — USDC, USDT, or a branded stablecoin — can be enrolled.
+Metastable instantly converts one stablecoin into another across chains — in a single transaction. Send USDC on one chain, receive a different stablecoin on another, with no bridging, no DEX, and no slippage. Any stablecoin — USDC, USDT, or a branded stablecoin — can be enrolled.
 
 For example: a USDC holder on Arbitrum wants a branded stablecoin on a new chain. With Metastable, that happens in one transaction. No manual bridging, no extra steps.
 
 ## The Problem It Solves
 
-Launching a branded stablecoin is now easy. Getting stablecoin holders to actually use it is the hard part.
+Stablecoins are scattered across dozens of chains and dozens of forms. Getting the right one, on the right chain, is still slow and manual — both for the people holding them and the teams building on them.
 
 <Info>
   A **branded stablecoin** is a stablecoin issued by a specific project, app, or
   chain — distinct from broad-market stablecoins like USDC or USDT.
 </Info>
 
-Most stablecoin holders already keep their balances in USDC or USDT, spread across many chains. For a new branded stablecoin to grow, the issuing team has to meet those holders where their funds already are.
+Take a branded stablecoin. Launching one is now easy; getting holders to actually use it is the hard part. Most holders already keep their balances in USDC or USDT, spread across many chains — so to grow, a new stablecoin has to meet them where their funds already are.
 
 <CardGroup cols={2}>
   <Card title="Without Metastable" icon="circle-x">
@@ -43,11 +43,11 @@ Most stablecoin holders already keep their balances in USDC or USDT, spread acro
 
 The same flow works in the other direction — holders won't enter a stablecoin they can't easily exit.
 
-For the issuing team, this changes three things:
+For teams building on stablecoins, this changes three things:
 
 - **Less friction**: bridging, getting gas, and swapping on a DEX collapse into a single transaction, so fewer holders drop off along the way
 - **Wider reach**: stablecoin holders can come from any supported chain, so growth does not depend on getting listed on a DEX on every chain
-- **Flexible pricing**: fees are set per route, so the issuing team can charge on the way in, on the way out, on both, or set fees to zero to encourage adoption. Fees can also be quoted off-chain, so the team can give chosen users — for example retail — a preferential rate such as 1:1, while everyone else pays the standard route fee
+- **Flexible pricing**: fees are set per route, so the team can charge on the way in, on the way out, on both, or set fees to zero to encourage adoption. Fees can also be quoted off-chain, so the team can give chosen users a preferential rate such as 1:1, while everyone else pays the standard route fee
 
 ## Use Cases
 
@@ -74,7 +74,9 @@ For the issuing team, this changes three things:
     One transfer model handles both paths.
   </Card>
   <Card title="Per-route fees" icon="coins">
-    Fees configured per route, per direction.
+    Set fees per route and direction — charge on the way in, out, both, or not at
+    all. Fees can also be quoted off-chain to give chosen users a lower or fee-free
+    rate.
   </Card>
   <Card title="Automatic rebalancing" icon="scale-balanced">
     Add collateral to a route once, and the system keeps it balanced across
@@ -141,8 +143,8 @@ Every swap can be tracked end-to-end in the [Hyperlane Explorer](https://explore
   <Accordion title="Are fees configurable?">
     Yes — fees are set per route, per direction. Routes can charge on inbound
     swaps, outbound swaps, both, or be fee-free. Routes can also use off-chain
-    signed quotes to give specific users (for example retail) a preferential
-    rate such as 1:1, while everyone else pays the standard route fee.
+    signed quotes to give specific users a preferential rate such as 1:1, while
+    everyone else pays the standard route fee.
   </Accordion>
   <Accordion title="How do I get started?">
     Reach out to the [Abacus Works team](https://www.hyperlane.xyz/contact) to
