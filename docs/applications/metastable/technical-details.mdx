@@ -63,11 +63,13 @@ Each `Quote` is `{ address token, uint256 amount }`. The function returns an arr
 
 The stablecoin holder (`msg.sender`) pays entries 2 and 3 in the source token (sum them for total source-token cost) plus entry 1 in `feeToken()` for interchain gas. The recipient — usually the same holder on the destination chain — receives the full `amount` of the target token.
 
+The fee comes from a fee contract set as the router's `feeRecipient`. By default, that's [`CrossCollateralRoutingFee`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRoutingFee.sol), which points each route at its own pricing contract — a fixed schedule, or an off-chain signed quote ([`OffchainQuotedLinearFee`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/fees/OffchainQuotedLinearFee.sol)) for cases like a preferential 1:1 rate. Routes with no fee recipient charge no protocol fee.
+
 ## Liquidity and rebalancing
 
 Liquidity for a Metastable route lives directly in the router contracts. The issuing team funds each `CrossCollateralRouter` with its collateral token, and swaps are settled from those reserves.
 
-As swap volume flows in one direction, a router can run low on the collateral it holds. The HWR 2.0 rebalancer monitors inventory levels and moves collateral between chains to restore target weights, keeping routes available without manual intervention.
+As swap volume flows in one direction, a router can run low on the collateral it holds. Metastable uses the same on-chain rebalancing as [HWR 2.0](/docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing): the rebalancer monitors inventory levels and moves collateral between chains to restore target weights, keeping routes available without manual intervention.
 
 The route handles liquidity and rebalancing internally, without external market makers or OTC arrangements.
 
