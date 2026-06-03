@@ -71,8 +71,6 @@ Liquidity for a Metastable route lives directly in the router contracts. The iss
 
 As swap volume flows in one direction, a router can run low on the collateral it holds. Metastable uses the same on-chain rebalancing as [HWR 2.0](/docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing): the rebalancer monitors inventory levels and moves collateral between chains to restore target weights, keeping routes available without manual intervention.
 
-The route handles liquidity and rebalancing internally, without external market makers or OTC arrangements.
-
 <Note>
   **Why rebalancing is different in Metastable:** In a same-asset multi-collateral route, restoring balance is straightforward — the rebalancer moves the same token between chains. Metastable routes hold *different* assets on each side, so an imbalance often can't be fixed by moving the source token: the scarce asset has to be sourced directly (e.g. acquiring more of the branded stablecoin on a chain where it's been drawn down). That extra step relies on external liquidity and carries real cost beyond the cross-chain transfer itself. The mechanics stay automatic; the operating economics are what change.
 </Note>
