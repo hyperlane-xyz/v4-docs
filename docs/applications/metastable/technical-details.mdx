@@ -8,7 +8,7 @@ Metastable is built on top of [Hyperlane Warp Routes 2.0](/docs/applications/war
 
 Each chain in a Metastable route has a [**`CrossCollateralRouter`**](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol) deployed for each collateral token (e.g. one for USDC, one for the branded stablecoin). `CrossCollateralRouter` extends `HypERC20Collateral`, so each instance holds collateral for exactly one ERC20.
 
-Every router has an **owner** — the admin address set at deployment, typically a wallet or multisig held by the issuing team. The owner manages a per-domain allowlist of trusted peer `CrossCollateralRouter`s, using [`enrollCrossCollateralRouters`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol#L85) and [`unenrollCrossCollateralRouters`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol#L98), which write to the `_crossCollateralRouters` mapping (domain → set of router addresses). A single primary remote router can also be enrolled per domain through the standard `Router` enrollment. Together these define which source/destination pairs are valid for a given route, and allow multiple target routers on the same destination chain (for example, several branded stablecoins).
+Every router has an **owner**, the admin address set at deployment, typically a wallet or multisig held by the issuing team. The owner manages a per-domain allowlist of trusted peer `CrossCollateralRouter`s, using [`enrollCrossCollateralRouters`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol#L85) and [`unenrollCrossCollateralRouters`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol#L98), which write to the `_crossCollateralRouters` mapping (domain → set of router addresses). A single primary remote router can also be enrolled per domain through the standard `Router` enrollment. Together these define which source/destination pairs are valid for a given route, and allow multiple target routers on the same destination chain (for example, several branded stablecoins).
 
 <Note>
   **Token support:** standard ERC20s only. Rebasing tokens, fee-on-transfer tokens, and ERC777 are not supported — the contract relies on exact-amount accounting.
@@ -39,8 +39,8 @@ Same-chain swaps use the same `transferRemoteTo` function — pass the local dom
 
 To allow this, `CrossCollateralRouter` overrides `handle` to drop the standard `onlyMailbox` modifier. The override accepts two callers:
 
-- **The mailbox**, for cross-chain messages — origin must be a different domain.
-- **Another local `CrossCollateralRouter`**, for same-chain swaps — the caller must be enrolled in this router's local-domain allowlist.
+- **The mailbox**, for cross-chain messages (origin must be a different domain).
+- **Another local `CrossCollateralRouter`**, for same-chain swaps (the caller must be enrolled in this router's local-domain allowlist).
 
 ## Fee quoting
 
@@ -57,13 +57,13 @@ quoteTransferRemoteTo(
 
 Each `Quote` is `{ address token, uint256 amount }`. The function returns an array of **three** entries, in this order:
 
-1. **Interchain gas** — paid in `feeToken()`. Zero for same-chain swaps.
-2. **Token amount + protocol fee** — the source token amount being transferred, plus the protocol fee.
-3. **External fee** — additional fee in the source token. Zero when no external fee is configured for the route.
+1. **Interchain gas**: paid in `feeToken()`. Zero for same-chain swaps.
+2. **Token amount + protocol fee**: the source token amount being transferred, plus the protocol fee.
+3. **External fee**: additional fee in the source token. Zero when no external fee is configured for the route.
 
-The stablecoin holder (`msg.sender`) pays entries 2 and 3 in the source token (sum them for total source-token cost) plus entry 1 in `feeToken()` for interchain gas. The recipient — usually the same holder on the destination chain — receives the full `amount` of the target token.
+The stablecoin holder (`msg.sender`) pays entries 2 and 3 in the source token (sum them for total source-token cost) plus entry 1 in `feeToken()` for interchain gas. The recipient (usually the same holder on the destination chain) receives the full `amount` of the target token.
 
-The fee comes from a fee contract set as the router's `feeRecipient`. By default, that's [`CrossCollateralRoutingFee`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRoutingFee.sol), which points each route at its own pricing contract — a fixed schedule, or an off-chain signed quote ([`OffchainQuotedLinearFee`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/fees/OffchainQuotedLinearFee.sol)) for cases like a preferential 1:1 rate. Routes with no fee recipient charge no protocol fee.
+The fee comes from a fee contract set as the router's `feeRecipient`. By default, that's [`CrossCollateralRoutingFee`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRoutingFee.sol), which points each route at its own pricing contract: a fixed schedule, or an off-chain signed quote ([`OffchainQuotedLinearFee`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/fees/OffchainQuotedLinearFee.sol)) for cases like a preferential 1:1 rate. Routes with no fee recipient charge no protocol fee.
 
 ## Liquidity and rebalancing
 

@@ -8,40 +8,42 @@ sidebarTitle: "Overview"
   may change.
 </Warning>
 
-Metastable instantly converts one stablecoin into another across chains — in a single transaction. Send USDC on one chain, receive a different stablecoin on another, with no bridging, no DEX, and no slippage. Any stablecoin — USDC, USDT, or a branded stablecoin — can be enrolled.
+Metastable is an on-chain clearing solution for stablecoins. It instantly converts one stablecoin into another across chains, in a single transaction. Send USDC on one chain, receive a different stablecoin on another, with no bridging, no DEX, and no slippage.
+
+Any stablecoin (USDC, USDT, or a branded stablecoin) can be enrolled.
 
 For example: a USDC holder on Arbitrum wants a branded stablecoin on a new chain. With Metastable, that happens in one transaction. No manual bridging, no extra steps.
 
 ## The Problem It Solves
 
-Stablecoins are scattered across dozens of chains and dozens of forms. Getting the right one, on the right chain, is still slow and manual — both for the people holding them and the teams building on them.
+Stablecoins are scattered across dozens of chains and dozens of forms. Getting the right one, on the right chain, is still slow and manual, both for the people holding them and the teams building on them.
 
 <Info>
   A **branded stablecoin** is a stablecoin issued by a specific project, app, or
-  chain — distinct from broad-market stablecoins like USDC or USDT.
+  chain, distinct from broad-market stablecoins like USDC or USDT.
 </Info>
 
-Take a branded stablecoin. Launching one is now easy; getting holders to actually use it is the hard part. Most holders already keep their balances in USDC or USDT, spread across many chains — so to grow, a new stablecoin has to meet them where their funds already are.
+Take a branded stablecoin. Launching one is now easy; getting holders to actually use it is the hard part. Most holders already keep their balances in USDC or USDT, spread across many chains. So to grow, a new stablecoin has to meet them where their funds already are.
 
 <CardGroup cols={2}>
   <Card title="Without Metastable" icon="circle-x">
     1. Bridge USDC to the destination chain
     2. Acquire gas on that chain
     3. Find a decentralized exchange (DEX) with the USDC ↔ branded stablecoin pair
-    4. Swap, often with high slippage
+    4. Swap, often with slippage and a rate below 1:1
 
     Each step loses stablecoin holders.
 
   </Card>
   <Card title="With Metastable" icon="circle-check">
-    Send USDC from any supported chain — receive the branded stablecoin on the destination chain. One transaction.
+    Send USDC from any supported chain, receive the branded stablecoin on the destination chain. One transaction.
 
-    No bridge. No DEX. No liquidity bootstrap. The system itself holds reserves of both tokens.
+    1:1 stablecoin conversions. No bridge, no DEX, no liquidity bootstrap. The system itself holds reserves of both tokens.
 
   </Card>
 </CardGroup>
 
-The same flow works in the other direction — holders won't enter a stablecoin they can't easily exit.
+The same flow works in the other direction. Holders won't enter a stablecoin they can't easily exit.
 
 For teams building on stablecoins, this changes three things:
 
@@ -53,13 +55,13 @@ For teams building on stablecoins, this changes three things:
 
 <CardGroup cols={1}>
   <Card title="Branded stablecoin issuers" icon="building-columns">
-    Metastable handles conversions between the branded stablecoin and broad-market
-    stablecoins like USDC and USDT.
+    Metastable handles conversions between the branded stablecoin and
+    broad-market stablecoins like USDC and USDT.
   </Card>
   <Card title="Stablecoin payment apps" icon="credit-card">
-    A payment app may accept deposits in one stablecoin, hold balances in another,
-    and send payments in a third. Metastable handles the conversions between
-    them.
+    A payment app may accept deposits in one stablecoin, hold balances in
+    another, and send payments in a third. Metastable handles the conversions
+    between them.
   </Card>
   <Card title="Multi-chain stablecoin operators" icon="network-wired">
     Adding support for a stablecoin on a new chain happens through route
@@ -74,17 +76,17 @@ For teams building on stablecoins, this changes three things:
     One transfer model handles both paths.
   </Card>
   <Card title="Per-route fees" icon="coins">
-    Set fees per route and direction — charge on the way in, out, both, or not at
-    all. Fees can also be quoted off-chain to give chosen users a lower or fee-free
-    rate.
+    Set fees per route and direction: charge on the way in, out, both, or not at
+    all. Fees can also be quoted off-chain to give chosen users a lower or
+    fee-free rate.
   </Card>
   <Card title="Automatic rebalancing" icon="scale-balanced">
     Add collateral to a route once, and the system keeps it balanced across
-    chains automatically — no active management needed.
+    chains automatically, with no active management needed.
   </Card>
   <Card title="Direct destination delivery" icon="bullseye">
-    Conversions land on the destination chain directly — no intermediate-chain
-    hops.
+    Conversions land on the destination chain directly, with no
+    intermediate-chain hops.
   </Card>
 </CardGroup>
 
@@ -92,8 +94,8 @@ For teams building on stablecoins, this changes three things:
 
 Metastable works with any standard ERC-20 token that can be enrolled in a route. In practice, this is most commonly stablecoins:
 
-- **Broad-market stablecoins** — USDC, USDT
-- **Branded stablecoins** — issued by chains, apps, or platforms
+- **Broad-market stablecoins**: USDC, USDT
+- **Branded stablecoins**: issued by chains, apps, or platforms
 
 ## How It Works
 
@@ -120,7 +122,7 @@ flowchart LR
     DR --> R
 ```
 
-Every swap can be tracked end-to-end in the [Hyperlane Explorer](https://explorer.hyperlane.xyz) — origin transaction, destination transaction, and the cross-chain message linking them.
+Every swap can be tracked end-to-end in the [Hyperlane Explorer](https://explorer.hyperlane.xyz): origin transaction, destination transaction, and the cross-chain message linking them.
 
 ## FAQ
 
@@ -141,7 +143,7 @@ Every swap can be tracked end-to-end in the [Hyperlane Explorer](https://explore
     infrastructure to coordinate with.
   </Accordion>
   <Accordion title="Are fees configurable?">
-    Yes — fees are set per route, per direction. Routes can charge on inbound
+    Yes. Fees are set per route, per direction. Routes can charge on inbound
     swaps, outbound swaps, both, or be fee-free. Routes can also use off-chain
     signed quotes to give specific users a preferential rate such as 1:1, while
     everyone else pays the standard route fee.
