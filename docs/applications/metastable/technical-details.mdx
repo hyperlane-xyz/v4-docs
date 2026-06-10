@@ -6,12 +6,14 @@ title: "Technical Details"
 
 Metastable is built on top of [Hyperlane Warp Routes 2.0](/docs/applications/warp-routes/multi-collateral-warp-routes).
 
-Each chain in a Metastable route has a [**`CrossCollateralRouter`**](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol) deployed for each collateral token (e.g. one for USDC, one for the branded stablecoin). `CrossCollateralRouter` extends `HypERC20Collateral`, so each instance holds collateral for exactly one ERC20.
+Each chain in a Metastable route has a [**`CrossCollateralRouter`**](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol) deployed for each collateral token (e.g. one for USDC, one for the branded stablecoin). `CrossCollateralRouter` extends `HypERC20Collateral`, so each instance holds collateral for exactly one ERC-20.
 
-Every router has an **owner**, the admin address set at deployment, typically a wallet or multisig held by the issuing team. The owner manages a per-domain allowlist of trusted peer `CrossCollateralRouter`s, using [`enrollCrossCollateralRouters`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol#L85) and [`unenrollCrossCollateralRouters`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol#L98), which write to the `_crossCollateralRouters` mapping (domain → set of router addresses). A single primary remote router can also be enrolled per domain through the standard `Router` enrollment. Together these define which source/destination pairs are valid for a given route, and allow multiple target routers on the same destination chain (for example, several branded stablecoins).
+Every router has an **owner**, the admin address set at deployment. It's typically a wallet or multisig held by the issuing team. The owner manages a per-domain allowlist of trusted peer `CrossCollateralRouter`s, using [`enrollCrossCollateralRouters`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol#L85) and [`unenrollCrossCollateralRouters`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol#L98), which write to the `_crossCollateralRouters` mapping (domain → set of router addresses). A single primary remote router can also be enrolled per domain through the standard `Router` enrollment. Together these define which source/destination pairs are valid for a given route, and allow multiple target routers on the same destination chain (for example, several branded stablecoins).
 
 <Note>
-  **Token support:** standard ERC20s only. Rebasing tokens, fee-on-transfer tokens, and ERC777 are not supported — the contract relies on exact-amount accounting.
+  **Token support:** standard ERC-20s only. Rebasing tokens, fee-on-transfer
+  tokens, and ERC-777 are not supported. The contract relies on exact-amount
+  accounting.
 </Note>
 
 ## Cross-chain swap flow
@@ -35,7 +37,7 @@ The returned `messageId` is the Hyperlane message ID used to track delivery (for
 
 ## Same-chain swap flow
 
-Same-chain swaps use the same `transferRemoteTo` function — pass the local domain as the destination. The source router skips mailbox dispatch and calls the target router's [`handle`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol#L180) directly. No interchain relay, no gas payment. The function returns the zero hash since no message is dispatched.
+Same-chain swaps use the same `transferRemoteTo` function, but pass the local domain as the destination. The source router skips mailbox dispatch and calls the target router's [`handle`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRouter.sol#L180) directly. No interchain relay, no gas payment. The function returns the zero hash since no message is dispatched.
 
 To allow this, `CrossCollateralRouter` overrides `handle` to drop the standard `onlyMailbox` modifier. The override accepts two callers:
 
@@ -63,14 +65,22 @@ Each `Quote` is `{ address token, uint256 amount }`. The function returns an arr
 
 The stablecoin holder (`msg.sender`) pays entries 2 and 3 in the source token (sum them for total source-token cost) plus entry 1 in `feeToken()` for interchain gas. The recipient (usually the same holder on the destination chain) receives the full `amount` of the target token.
 
-The fee comes from a fee contract set as the router's `feeRecipient`. By default, that's [`CrossCollateralRoutingFee`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRoutingFee.sol), which points each route at its own pricing contract: a fixed schedule, or an off-chain signed quote ([`OffchainQuotedLinearFee`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/fees/OffchainQuotedLinearFee.sol)) for cases like a preferential 1:1 rate. Routes with no fee recipient charge no protocol fee.
+The fee comes from a fee contract set as the router's `feeRecipient`. By default, that's [`CrossCollateralRoutingFee`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/CrossCollateralRoutingFee.sol), which points each route at its own pricing contract, either a fixed schedule or an off-chain signed quote ([`OffchainQuotedLinearFee`](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/token/fees/OffchainQuotedLinearFee.sol)) for cases like a preferential 1:1 rate. Routes with no fee recipient charge no protocol fee.
 
 ## Liquidity and rebalancing
 
 Liquidity for a Metastable route lives directly in the router contracts. The issuing team funds each `CrossCollateralRouter` with its collateral token, and swaps are settled from those reserves.
 
-As swap volume flows in one direction, a router can run low on the collateral it holds. Metastable uses the same on-chain rebalancing as [HWR 2.0](/docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing): the rebalancer monitors inventory levels and moves collateral between chains to restore target weights, keeping routes available without manual intervention.
+As swap volume flows in one direction, a router can run low on the collateral it holds. Metastable uses the same onchain rebalancing as [HWR 2.0](/docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing): the rebalancer monitors inventory levels and moves collateral between chains to restore target weights, keeping routes available without manual intervention.
 
 <Note>
-  **Why rebalancing is different in Metastable:** In a same-asset multi-collateral route, restoring balance is straightforward — the rebalancer moves the same token between chains. Metastable routes hold *different* assets on each side, so an imbalance often can't be fixed by moving the source token: the scarce asset has to be sourced directly (e.g. acquiring more of the branded stablecoin on a chain where it's been drawn down). That extra step relies on external liquidity and carries real cost beyond the cross-chain transfer itself. The mechanics stay automatic; the operating economics are what change.
+  **Why rebalancing is different in Metastable:** In a same-asset
+  multi-collateral route, restoring balance is straightforward — the rebalancer
+  moves the same token between chains. Metastable routes hold *different* assets
+  on each side, so an imbalance often can't be fixed by moving the source token,
+  since the scarce asset has to be sourced directly (e.g. acquiring more of the
+  branded stablecoin on a chain where it's been drawn down). That extra step
+  relies on external liquidity and carries real cost beyond the cross-chain
+  transfer itself. The mechanics stay automatic; the operating economics are
+  what change.
 </Note>

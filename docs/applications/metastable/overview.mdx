@@ -3,18 +3,11 @@ title: "Metastable"
 sidebarTitle: "Overview"
 ---
 
-<Warning>
-  Metastable is under active development. Interfaces, fees, and supported routes
-  may change.
-</Warning>
+Metastable is an onchain clearing solution for stablecoins. It instantly converts one stablecoin into another across chains, in a single transaction. Send USDC on one chain, receive a different stablecoin on another, with no bridging, no DEX, and no slippage. Any stablecoin (USDC, USDT, or a branded stablecoin) can be enrolled.
 
-Metastable is an on-chain clearing solution for stablecoins. It instantly converts one stablecoin into another across chains, in a single transaction. Send USDC on one chain, receive a different stablecoin on another, with no bridging, no DEX, and no slippage.
+_For example:_ a USDC holder on Arbitrum wants a branded stablecoin on a new chain. With Metastable, that happens in one transaction. No manual bridging, no extra steps.
 
-Any stablecoin (USDC, USDT, or a branded stablecoin) can be enrolled.
-
-For example: a USDC holder on Arbitrum wants a branded stablecoin on a new chain. With Metastable, that happens in one transaction. No manual bridging, no extra steps.
-
-## The Problem It Solves
+## The problem it solves
 
 Stablecoins are scattered across dozens of chains and dozens of forms. Getting the right one, on the right chain, is still slow and manual, both for the people holding them and the teams building on them.
 
@@ -23,7 +16,9 @@ Stablecoins are scattered across dozens of chains and dozens of forms. Getting t
   chain, distinct from broad-market stablecoins like USDC or USDT.
 </Info>
 
-Take a branded stablecoin. Launching one is now easy; getting holders to actually use it is the hard part. Most holders already keep their balances in USDC or USDT, spread across many chains. So to grow, a new stablecoin has to meet them where their funds already are.
+Take a branded stablecoin. Launching one is now easy, but getting holders to actually use it is the hard part. Most holders already keep their balances in USDC or USDT, which are spread across many chains. So to grow, a new stablecoin has to meet them where their funds already are.
+
+The same flow works in the other direction. Holders won't enter a stablecoin they can't easily exit.
 
 <CardGroup cols={2}>
   <Card title="Without Metastable" icon="circle-x">
@@ -43,15 +38,13 @@ Take a branded stablecoin. Launching one is now easy; getting holders to actuall
   </Card>
 </CardGroup>
 
-The same flow works in the other direction. Holders won't enter a stablecoin they can't easily exit.
-
 For teams building on stablecoins, this changes three things:
 
 - **Less friction**: bridging, getting gas, and swapping on a DEX collapse into a single transaction, so fewer holders drop off along the way
 - **Wider reach**: stablecoin holders can come from any supported chain, so growth does not depend on getting listed on a DEX on every chain
-- **Flexible pricing**: fees are set per route, so the team can charge on the way in, on the way out, on both, or set fees to zero to encourage adoption. Fees can also be quoted off-chain, so the team can give chosen users a preferential rate such as 1:1, while everyone else pays the standard route fee
+- **Flexible pricing**: fees are set per route, so the team can charge on the way in, on the way out, on both, or set fees to zero to encourage adoption. Fees can also be quoted off-chain, so the team can give chosen users a preferential rate such as 1:1
 
-## Use Cases
+## Use cases
 
 <CardGroup cols={1}>
   <Card title="Branded stablecoin issuers" icon="building-columns">
@@ -65,11 +58,11 @@ For teams building on stablecoins, this changes three things:
   </Card>
   <Card title="Multi-chain stablecoin operators" icon="network-wired">
     Adding support for a stablecoin on a new chain happens through route
-    configuration, without a separate integration per chain.
+    configuration, without needing a separate integration per chain.
   </Card>
 </CardGroup>
 
-## Key Capabilities
+## Key capabilities
 
 <CardGroup cols={2}>
   <Card title="Cross-chain & same-chain" icon="arrows-left-right">
@@ -78,7 +71,7 @@ For teams building on stablecoins, this changes three things:
   <Card title="Per-route fees" icon="coins">
     Set fees per route and direction: charge on the way in, out, both, or not at
     all. Fees can also be quoted off-chain to give chosen users a lower or
-    fee-free rate.
+    fee-free rate (1:1 conversion).
   </Card>
   <Card title="Automatic rebalancing" icon="scale-balanced">
     Add collateral to a route once, and the system keeps it balanced across
@@ -97,15 +90,13 @@ Metastable works with any standard ERC-20 token that can be enrolled in a route.
 - **Broad-market stablecoins**: USDC, USDT
 - **Branded stablecoins**: issued by chains, apps, or platforms
 
-## How It Works
+## How it works
 
 At a high level:
 
 1. A stablecoin holder starts the swap on the source chain by sending USDC (or another supported collateral).
 2. Metastable routes the funds to the destination chain.
 3. The holder receives the target stablecoin on the destination chain.
-
-The same flow works for same-chain swaps, for example USDC to a branded stablecoin on the same network.
 
 ```mermaid
 flowchart LR
@@ -122,7 +113,9 @@ flowchart LR
     DR --> R
 ```
 
-Every swap can be tracked end-to-end in the [Hyperlane Explorer](https://explorer.hyperlane.xyz): origin transaction, destination transaction, and the cross-chain message linking them.
+The same flow works for same-chain swaps, for example USDC to a branded stablecoin on the same network.
+
+Every swap can be tracked end-to-end in the [Hyperlane Explorer](https://explorer.hyperlane.xyz).
 
 ## FAQ
 
@@ -154,7 +147,7 @@ Every swap can be tracked end-to-end in the [Hyperlane Explorer](https://explore
   </Accordion>
 </AccordionGroup>
 
-## More Resources
+## More resources
 
 To dive deeper into how Metastable works under the hood, or learn about the underlying architecture:
 
