@@ -341,6 +341,7 @@
                 "group": "HTTP API",
                 "pages": [
                   "docs/operate/relayer/api",
+                  "docs/operate/relayer/api/relay/post-relay",
                   "docs/operate/relayer/api/operations/get-operations",
                   "docs/operate/relayer/api/operations/post-message-retry",
                   "docs/operate/relayer/api/operations/post-reprocess-message",

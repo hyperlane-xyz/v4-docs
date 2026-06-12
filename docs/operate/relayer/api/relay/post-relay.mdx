@@ -1,0 +1,137 @@
+---
+title: 'Submit Transaction for Relay'
+api: 'POST http://localhost:9090/relay'
+---
+
+Submit an on-chain transaction for fast relay. The relayer extracts any Hyperlane messages from the transaction, filters to eligible messages (currently CCTP V2 only), and immediately enqueues them for delivery — bypassing the normal block-polling delay.
+
+<Note>
+Non-eligible messages (e.g. non-CCTP V2) are silently skipped. The response only contains messages that were accepted. An empty `messages` array means the transaction contained no eligible Hyperlane messages.
+</Note>
+
+<Expandable title="Request Body">
+  <ParamField body="origin_chain" type="string" required>
+    The canonical chain name of the origin chain (e.g. `"ethereum"`, `"base"`). Must be 1–128 characters.
+  </ParamField>
+  <ParamField body="tx_hash" type="string" required>
+    Hex-encoded transaction hash on the origin chain, with or without `0x` prefix. Must be 1–512 characters.
+  </ParamField>
+</Expandable>
+
+<Expandable title="Response Body">
+  <ResponseField name="messages" type="MessageInfo[]">
+    Array of accepted messages that were enqueued for relay. Empty if no eligible messages were found.
+  </ResponseField>
+  <Expandable title="MessageInfo">
+    <ResponseField name="message_id" type="string">
+      Hex-encoded Hyperlane message ID (without `0x` prefix).
+    </ResponseField>
+    <ResponseField name="origin" type="number">
+      Origin chain domain ID (u32).
+    </ResponseField>
+    <ResponseField name="destination" type="number">
+      Destination chain domain ID (u32).
+    </ResponseField>
+    <ResponseField name="nonce" type="number">
+      Message nonce (u32).
+    </ResponseField>
+  </Expandable>
+</Expandable>
+
+<RequestExample>
+```bash curl
+curl -X POST http://localhost:9090/relay \
+  -H "Content-Type: application/json" \
+  -d '{
+    "origin_chain": "base",
+    "tx_hash": "0xabc123..."
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:9090/relay', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    origin_chain: 'base',
+    tx_hash: '0xabc123...',
+  }),
+});
+const { messages } = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.post('http://localhost:9090/relay', json={
+    'origin_chain': 'base',
+    'tx_hash': '0xabc123...',
+})
+messages = response.json()['messages']
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 OK — messages accepted
+{
+  "messages": [
+    {
+      "message_id": "a1b2c3d4e5f6...",
+      "origin": 8453,
+      "destination": 1,
+      "nonce": 42
+    }
+  ]
+}
+```
+
+```json 200 OK — no eligible messages
+{
+  "messages": []
+}
+```
+
+```json 400 Bad Request
+"origin_chain cannot be empty"
+```
+
+```json 429 Too Many Requests
+"Transaction already submitted recently"
+```
+
+```json 408 Request Timeout
+"Request timeout"
+```
+</ResponseExample>
+
+## Errors
+
+| Status | Reason | Description |
+|--------|--------|-------------|
+| `400 Bad Request` | `invalid_request` | `origin_chain` or `tx_hash` is empty, exceeds max length, or the chain is not found. |
+| `400 Bad Request` | `message_not_whitelisted` | A message in the transaction does not match the relayer's whitelist. |
+| `400 Bad Request` | `message_blacklisted` | A message in the transaction matches the relayer's blacklist. |
+| `400 Bad Request` | `unsupported_destination` | The message destination chain is not configured on this relayer. |
+| `400 Bad Request` | `too_many_messages` | The transaction contains more than 10 Hyperlane messages. |
+| `408 Request Timeout` | `timeout` | The transaction receipt was not found within 10 seconds. Retry after the transaction is confirmed. |
+| `429 Too Many Requests` | `rate_limited` | The global rate limit has been exceeded. Retry after a short backoff. |
+| `429 Too Many Requests` | `duplicate_tx` | The same `(origin_chain, tx_hash)` was already submitted within the last 5 minutes. |
+| `503 Service Unavailable` | `cache_full` | The deduplication cache is full. Retry shortly. |
+| `500 Internal Server Error` | — | An internal error occurred. The request can be retried safely unless messages were partially enqueued. |
+
+## Eligibility
+
+Currently only **CCTP V2 messages on EVM chains** are eligible. A transaction qualifies when the number of `MessageSent` events from Circle's `MessageTransmitter V2` contract equals the number of Hyperlane `Dispatch` events. Messages that do not meet this criterion are silently omitted from the response rather than causing an error.
+
+## Deduplication
+
+The relayer maintains a 5-minute deduplication window per `(origin_chain, tx_hash)` pair. Submitting the same transaction a second time within this window returns `429 Too Many Requests`. After 5 minutes the same hash can be resubmitted. If the request fails with a non-`2xx` status the reservation is released immediately so the client can retry right away.
+
+## Health Check
+
+A `GET /relay` request returns `200 OK` with body `up` and can be used as a liveness probe.
+
+```bash
+curl http://localhost:9090/relay
+# up
+```
