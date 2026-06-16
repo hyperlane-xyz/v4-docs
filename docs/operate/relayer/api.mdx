@@ -12,6 +12,9 @@ Make sure to update the server URL to match your relayer instance before testing
 
 The following endpoints are available for interacting with the relayer:
 
+### Relay Submission
+- [Submit Transaction for Relay](/docs/operate/relayer/api/relay/post-relay) - Submit a transaction for fast relay; enqueues eligible CCTP V2 messages immediately, bypassing block-polling delay
+
 ### Messages API
 - [Get Messages](/docs/operate/relayer/api/messages/get-messages) - Query messages by domain and nonce range in the database
 - [Insert Messages](/docs/operate/relayer/api/messages/post-messages) - Add new messages to the database
