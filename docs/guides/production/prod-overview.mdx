@@ -51,5 +51,23 @@ To begin you'll need to set up and productionize the core components of your Hyp
 Transfer ownership of the HWR to the designated production owner. This step ensures that only trusted parties have control over critical HWR settings, such as ISM configurations, Validator options, and relayer settings.
 
 </Card>
+    <Card
+      title="Configure Rate Limit ISM"
+      icon="link"
+      href="./warp-route-deployment/configure-rate-limit-ism"
+    >
+      Set, update, or remove the Rate Limit ISM on your HWR. The Rate Limit ISM
+      caps the daily token volume that can be delivered to your HWR on each
+      destination chain, bounding the worst-case loss from a bridge compromise.
+    </Card>
+    <Card
+      title="Configure Pausable ISM"
+      icon="link"
+      href="./warp-route-deployment/configure-pausable-ism"
+    >
+      Pause and unpause your HWR in an incident. The Pausable ISM is an
+      emergency stop: while paused, all inbound deliveries on that destination
+      chain are rejected.
+    </Card>
 
   </Columns>

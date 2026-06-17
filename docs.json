@@ -72,7 +72,8 @@
                   "docs/applications/warp-routes/types",
                   "docs/applications/warp-routes/example-usage",
                   "docs/applications/warp-routes/multi-collateral-warp-routes",
-                  "docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing"
+                  "docs/guides/warp-routes/evm/multi-collateral-warp-routes-rebalancing",
+                  "docs/applications/warp-routes/yield-routes"
                 ]
               },
               {
@@ -154,7 +155,9 @@
                     "group": "HWR Deployment",
                     "pages": [
                       "docs/guides/production/warp-route-deployment/remove-trusted-relayer",
-                      "docs/guides/production/warp-route-deployment/transfer-warp-route-ownership"
+                      "docs/guides/production/warp-route-deployment/transfer-warp-route-ownership",
+                      "docs/guides/production/warp-route-deployment/configure-rate-limit-ism",
+                      "docs/guides/production/warp-route-deployment/configure-pausable-ism"
                     ]
                   }
                 ]
@@ -338,6 +341,7 @@
                 "group": "HTTP API",
                 "pages": [
                   "docs/operate/relayer/api",
+                  "docs/operate/relayer/api/relay/post-relay",
                   "docs/operate/relayer/api/operations/get-operations",
                   "docs/operate/relayer/api/operations/post-message-retry",
                   "docs/operate/relayer/api/operations/post-reprocess-message",

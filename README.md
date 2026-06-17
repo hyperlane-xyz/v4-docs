@@ -18,6 +18,12 @@ This documentation provides comprehensive guides, API references, and examples f
 Follow the Mintlify setup guide for the most updated instructions:  
 [Mintlify Installation Docs](https://www.mintlify.com/docs/installation)
 
+Then start the local dev server:
+
+```bash
+mint dev
+```
+
 ## Contributing
 
 This documentation is open source and contributions are welcome. To contribute:
