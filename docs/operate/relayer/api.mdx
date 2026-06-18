@@ -47,9 +47,14 @@ Most endpoints do not require authentication for read operations. Write operatio
 
 ## Base URL
 
-The default base URL for local development is:
+Hyperlane hosts public relay API endpoints:
+
+| Network | URL |
+|---------|-----|
+| Mainnet | `https://relay-api.hyperlane.xyz/relay` |
+| Testnet | `https://testnet-relay-api.hyperlane.xyz/relay` |
+
+For self-hosted relayers, the default base URL for local development is:
 ```
 http://localhost:9090
 ```
-
-Update this to match your relayer's actual endpoint when deployed.

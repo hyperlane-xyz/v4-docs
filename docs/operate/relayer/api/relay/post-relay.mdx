@@ -38,9 +38,17 @@ Non-eligible messages (e.g. non-CCTP V2) are silently skipped. The response only
   </Expandable>
 </Expandable>
 
+<Note>
+Hyperlane hosts public relay API endpoints:
+- **Mainnet**: `https://relay-api.hyperlane.xyz/relay`
+- **Testnet**: `https://testnet-relay-api.hyperlane.xyz/relay`
+
+For self-hosted relayers, replace the URL with your relayer's address (default: `http://localhost:9090/relay`).
+</Note>
+
 <RequestExample>
-```bash curl
-curl -X POST http://localhost:9090/relay \
+```bash Mainnet
+curl -X POST https://relay-api.hyperlane.xyz/relay \
   -H "Content-Type: application/json" \
   -d '{
     "origin_chain": "base",
@@ -48,8 +56,17 @@ curl -X POST http://localhost:9090/relay \
   }'
 ```
 
+```bash Testnet
+curl -X POST https://testnet-relay-api.hyperlane.xyz/relay \
+  -H "Content-Type: application/json" \
+  -d '{
+    "origin_chain": "basesepolia",
+    "tx_hash": "0xabc123..."
+  }'
+```
+
 ```javascript JavaScript
-const response = await fetch('http://localhost:9090/relay', {
+const response = await fetch('https://relay-api.hyperlane.xyz/relay', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -63,7 +80,7 @@ const { messages } = await response.json();
 ```python Python
 import requests
 
-response = requests.post('http://localhost:9090/relay', json={
+response = requests.post('https://relay-api.hyperlane.xyz/relay', json={
     'origin_chain': 'base',
     'tx_hash': '0xabc123...',
 })
