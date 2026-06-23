@@ -85,6 +85,13 @@
                 ]
               },
               {
+                "group": "Metastable",
+                "pages": [
+                  "docs/applications/metastable/overview",
+                  "docs/applications/metastable/technical-details"
+                ]
+              },
+              {
                 "group": "Use Cases",
                 "pages": [
                   "docs/applications/use-cases/cross-chain-swaps",
