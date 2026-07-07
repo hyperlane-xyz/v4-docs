@@ -1,0 +1,10 @@
+# pnpm 11 fails installs until dependency build scripts are explicitly
+# allowed or denied. None of these native builds are needed to run the
+# docs generation scripts, so deny them all.
+allowBuilds:
+  bigint-buffer: false
+  bufferutil: false
+  core-js: false
+  protobufjs: false
+  secp256k1: false
+  utf-8-validate: false
