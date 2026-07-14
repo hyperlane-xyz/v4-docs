@@ -115,12 +115,14 @@ jobs:
                 --base main \
                 --head ci/update-hl-deps \
                 --title "$PR_TITLE" \
-                --body "$PR_BODY"
+                --body "$PR_BODY" \
+                --reviewer edakturk14
             else
               echo "Pull request already exists. Updating title and description..."
               gh pr edit ci/update-hl-deps \
                 --title "$PR_TITLE" \
-                --body "$PR_BODY"
+                --body "$PR_BODY" \
+                --add-reviewer edakturk14
             fi
           else
             echo "No changes detected. Skipping PR creation."
