@@ -4,7 +4,7 @@
   "type": "module",
   "dependencies": {
     "@hyperlane-xyz/registry": "25.3.0",
-    "@hyperlane-xyz/sdk": "38.0.0"
+    "@hyperlane-xyz/sdk": "39.1.0"
   },
   "packageManager": "pnpm@11.1.3"
 }
