@@ -58,7 +58,9 @@ Timelocks do not replace good key management, good ISM design, or monitoring. Th
 
 ## Hyperlane setup
 
-A typical setup uses one governance Safe on an owner chain, usually Ethereum, and one timelock on each chain where contracts are governed.
+A typical setup starts with one governance Safe on an owner chain, usually Ethereum. For contracts on that same chain, the Safe can govern directly. For contracts on remote chains, the Safe uses an [Interchain Account (ICA)](/docs/applications/interchain-account) to make authenticated calls on the remote chain.
+
+Timelocks are then added as the owner of each governed contract. The Safe or ICA does not execute owner actions immediately. Instead, it proposes actions to the timelock, and the timelock enforces the delay and cancellation window before execution.
 
 ```mermaid
 flowchart LR
@@ -87,7 +89,11 @@ flowchart LR
   Executor -. "execute ready operation" .-> RemoteTimelock
 ```
 
-There are two governance paths: same-chain governance for contracts on the owner chain, and ICA-based governance for contracts on remote chains.
+There are three pieces in the governance path:
+
+- Same-chain multisig governance: the owner-chain Safe is the source of governance decisions.
+- ICA-based remote governance: the Safe controls remote-chain ICAs so it can govern contracts on other chains from the owner chain.
+- Timelock-controlled ownership: each governed contract is owned by its local timelock, which delays execution and allows cancellation.
 
 For same-chain governance:
 
@@ -98,7 +104,7 @@ For same-chain governance:
 For remote-chain governance:
 
 - The governed contract is owned by a timelock on that remote chain.
-- The proposer is an [Interchain Account (ICA)](/docs/applications/interchain-account) on that remote chain.
+- The proposer is an ICA on that remote chain.
 - That ICA is controlled by the governance Safe on the owner chain.
 - The Safe sends an ICA message, and the ICA schedules the action on the remote timelock.
 
