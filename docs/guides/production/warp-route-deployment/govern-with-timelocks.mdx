@@ -87,16 +87,18 @@ flowchart LR
   Executor -. "execute ready operation" .-> RemoteTimelock
 ```
 
-On the owner chain:
+There are two governance paths: same-chain governance for contracts on the owner chain, and ICA-based governance for contracts on remote chains.
+
+For same-chain governance:
 
 - The governed contract is owned by the timelock on that same chain.
 - The governance Safe has `PROPOSER_ROLE` on that timelock.
 - The Safe schedules actions directly on the timelock.
 
-On each remote EVM chain:
+For remote-chain governance:
 
 - The governed contract is owned by a timelock on that remote chain.
-- The proposer is an Interchain Account (ICA) on that remote chain.
+- The proposer is an [Interchain Account (ICA)](/docs/applications/interchain-account) on that remote chain.
 - That ICA is controlled by the governance Safe on the owner chain.
 - The Safe sends an ICA message, and the ICA schedules the action on the remote timelock.
 
