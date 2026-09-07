@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@hyperlane-xyz/registry": "25.5.0",
-    "@hyperlane-xyz/sdk": "41.3.1"
+    "@hyperlane-xyz/registry": "26.1.0",
+    "@hyperlane-xyz/sdk": "44.0.2"
   },
   "packageManager": "pnpm@11.1.3"
 }
