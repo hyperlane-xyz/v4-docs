@@ -1,6 +1,7 @@
 ---
-name: claude-review
-description: Review documentation changes using Hyperlane docs standards. Use when reviewing PRs, checking your own changes, or doing self-review before committing.
+name: code-review
+description: Review documentation changes using Hyperlane docs standards. Use when
+  reviewing PRs, checking your own changes, or doing self-review before committing.
 ---
 
 # Docs Review Skill
