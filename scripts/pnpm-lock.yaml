@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@hyperlane-xyz/registry':
-        specifier: 26.1.0
-        version: 26.1.0
+        specifier: 26.2.0
+        version: 26.2.0
       '@hyperlane-xyz/sdk':
         specifier: 45.0.1
         version: 45.0.1(@ethersproject/abi@5.8.0)(@ethersproject/providers@5.8.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/sinon-chai@4.0.0)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(utf-8-validate@5.0.10)
@@ -392,6 +392,10 @@ packages:
     resolution: {integrity: sha512-zk433OpCZcMPsK3r0qG0MqalHYxycp8ydOokpGlQParhnBUO4KukA0K0Nku3HhPIv8Qt8Y45oMpTc6+00svnqg==}
     engines: {node: '>=24'}
 
+  '@hyperlane-xyz/registry@26.2.0':
+    resolution: {integrity: sha512-iJbu19AD/3fin+90yX12sGFDwJN+E4gN2ad+lInzIk+BxCp7AogO/qEdnTQnznakZNw0tJmUd2y5LNuSkvoyTA==}
+    engines: {node: '>=24'}
+
   '@hyperlane-xyz/sdk@45.0.1':
     resolution: {integrity: sha512-NKf31up6mpzqKO4Ia5J6bmWHkZ7mZi9Mf7sP5yaeHj95bRcibzB00Pi0kV/6ksMGaagXQPQX9QQSA663EnOl7g==}
     engines: {node: '>=22'}
@@ -756,6 +760,7 @@ packages:
   '@smithy/smithy-client@4.10.1':
     resolution: {integrity: sha512-1ovWdxzYprhq+mWqiGZlt3kF69LJthuQcfY9BIyHx9MywTFKzFapluku1QXoaBB43GCsLDxNqS+1v30ure69AA==}
     engines: {node: '>=18.0.0'}
+    deprecated: Deprecated due to a bug in custom logger data redaction. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/types@4.10.0':
     resolution: {integrity: sha512-K9mY7V/f3Ul+/Gz4LJANZ3vJ/yiBIwCyxe0sPT4vNJK63Srvd+Yk1IzP0t+nE7XFSpIGtzR71yljtnqpUTYFlQ==}
@@ -3552,6 +3557,13 @@ snapshots:
       - utf-8-validate
 
   '@hyperlane-xyz/registry@26.1.0':
+    dependencies:
+      jszip: 3.10.1
+      pino: 8.21.0
+      yaml: 2.9.0
+      zod: 4.5.4
+
+  '@hyperlane-xyz/registry@26.2.0':
     dependencies:
       jszip: 3.10.1
       pino: 8.21.0
