@@ -1,173 +1,193 @@
 ---
 title: "GraphQL API"
+description: "Explore messages, check delivery, count activity, and discover domains. Run queries directly from this page."
 ---
 
-The Hyperlane agents collect useful information about activity on the system, including all messages. That data can be queried via APIs. These APIs are currently available free of charge and without any required authentication. Connect your preferred GraphQL client or library to to query data!
+import { GraphQLExample } from "/snippets/explorer/graphql-example.jsx";
 
-### Example Query
+The Explorer GraphQL API answers three common questions: **what happened to a message**, **how many messages match a filter**, and **which domains are indexed**. Use it to build delivery trackers, message history, and activity dashboards. Add the [WebSocket API](./websocket-api) when you need live updates.
 
-The following query will retrieve useful information about a message:
+Send GraphQL queries to:
 
-```graphql
-query MyQuery {
-  message_view(limit: 10, where: {msg_id: {_eq: "\xYOUR_MSG_ID"}}) {
-    msg_id
-    nonce
-    sender
-    recipient
-    is_delivered
-    message_body
-    origin_mailbox
-    origin_domain_id
-    origin_chain_id
-    origin_block_id
-    origin_block_height
-    origin_block_hash
-    origin_tx_sender
-    origin_tx_recipient
-    origin_tx_nonce
-    origin_tx_max_priority_fee_per_gas
-    origin_tx_max_fee_per_gas
-    origin_tx_id
-    origin_tx_hash
-    origin_tx_gas_used
-    origin_tx_gas_price
-    origin_tx_gas_limit
-    origin_tx_effective_gas_price
-    origin_tx_cumulative_gas_used
-    destination_block_id
-    destination_block_hash
-    destination_block_height
-    destination_chain_id
-    destination_domain_id
-    destination_mailbox
-    destination_tx_cumulative_gas_used
-    destination_tx_effective_gas_price
-    destination_tx_gas_limit
-    destination_tx_gas_price
-    destination_tx_gas_used
-    destination_tx_hash
-    destination_tx_id
-    destination_tx_max_fee_per_gas
-    destination_tx_max_priority_fee_per_gas
-    destination_tx_nonce
-    destination_tx_recipient
-    destination_tx_sender
-    send_occurred_at
-    delivery_occurred_at
-    delivery_latency
-    num_payments
-    total_payment
-    total_gas_amount
-  }
-}
+```text
+https://explorer-api.hyperlane.xyz/graphql
 ```
 
-### GraphQL Schema Types
+The public endpoint is read-only and requires no API key. Send an HTTP `POST` with `Content-Type: application/json` and a JSON body containing `query` and, optionally, `variables`. GraphQL mutations, GraphQL subscriptions, and public schema introspection are not supported.
 
-````graphql
-type message_view {
-  msg_id: bytea
-  nonce: Int!
-  sender: bytea
-  recipient: bytea
-  is_delivered: Boolean!
-  message_body: bytea
-  origin_mailbox: bytea
-  origin_domain_id: Int!
-  origin_chain_id: Int!
-  origin_block_id: Int!
-  origin_block_height: Int!
-  origin_block_hash: bytea
-  origin_tx_sender: bytea
-  origin_tx_recipient: bytea
-  origin_tx_nonce: Int!
-  origin_tx_max_priority_fee_per_gas: Int!
-  origin_tx_max_fee_per_gas: Int!
-  origin_tx_id: Int!
-  origin_tx_hash: bytea
-  origin_tx_gas_used: Int!
-  origin_tx_gas_price: Int!
-  origin_tx_gas_limit: Int!
-  origin_tx_effective_gas_price: Int!
-  origin_tx_cumulative_gas_used: Int!
-  destination_block_id: Int!
-  destination_block_hash: bytea
-  destination_block_height: Int!
-  destination_chain_id: Int!
-  destination_domain_id: Int!
-  destination_mailbox: bytea
-  destination_tx_cumulative_gas_used: Int!
-  destination_tx_effective_gas_price: Int!
-  destination_tx_gas_limit: Int!
-  destination_tx_gas_price: Int!
-  destination_tx_gas_used: Int!
-  destination_tx_hash: bytea
-  destination_tx_id: Int!
-  destination_tx_max_fee_per_gas: Int!
-  destination_tx_max_priority_fee_per_gas: Int!
-  destination_tx_nonce: Int!
-  destination_tx_recipient: bytea
-  destination_tx_sender: bytea
-  send_occurred_at: timestamp!
-  delivery_occurred_at: timestamp!
-  delivery_latency: Int!
-  num_payments: Int!
-  total_payment: Int!
-  total_gas_amount: Int!
-}
+## Choose your query
 
-type block {
-  domain: Int!
-  domainByDomain: domain!
-  hash: String!
-  height: bigint!
-  id: bigint!
-  time_created: timestamp!
-  timestamp: timestamp!
-}
+| Query | Use it for | Key fields |
+| --- | --- | --- |
+| `message_view` | Look up a message, check delivery, or list messages by chain, application, transaction, or time | `msg_id`, `is_delivered`, `origin_domain_id`, `destination_domain_id`, transaction hashes, timestamps |
+| `message_view_aggregate` | Count messages matching the same filters | `aggregate { count }` |
+| `domain` | Discover known chains and translate domain IDs to names | `id`, `name`, `chain_id`, `is_test_net`, `is_deprecated` |
 
-type domain {
-  chain_id: bigint
-  id: Int!
-  is_deprecated: Boolean!
-  is_test_net: Boolean!
-  name: String!
-  native_token: String!
-  time_created: timestamp!
-  time_updated: timestamp!
-}
+`message_view` also includes the message body, sender and recipient, block details, transaction gas fields, and gas-payment totals. You only receive the fields you select.
 
-type gas_payment {
-  amount: numeric!
-  domain: Int!
-  domainByDomain: domain!
-  id: bigint!
-  msg_id: String
-  time_created: timestamp!
-  transaction: transaction!
-  tx_id: bigint!
-}
+These APIs expose the Explorer's indexed data, not every transaction or contract on every Hyperlane-connected chain. Coverage and freshness depend on the scraper. A `domain` record identifies a known chain; it does not guarantee current indexing health. Configuring a custom chain in the Explorer UI does not add that chain to the public API's indexed history.
 
-type transaction {
-  block: block!
-  block_id: bigint!
-  checkpoint_updates: [checkpoint_update!]!
-  cumulative_gas_used: float8!
-  delivered_messages: [delivered_message!]!
-  effective_gas_price: float8
-  gas_limit: float8!
-  gas_payments: [gas_payment!]!
-  gas_price: float8
-  gas_used: float8!
-  hash: String!
-  id: bigint!
-  max_fee_per_gas: float8
-  max_priority_fee_per_gas: float8
-  messages: [message!]!
-  nonce: bigint!
-  recipient: String
-  sender: String!
-  time_created: timestamp!
-}```
-````
+A message lookup joins its origin dispatch with the indexed destination delivery. `is_delivered: true` means the scraper has observed a matching delivery at the requested confirmation level. `false` or an empty result can also reflect indexing lag or missing coverage; neither proves that an on-chain transaction failed. These queries read the index rather than making a fresh destination RPC call.
+
+## Run any example
+
+Click **Run query** on any example below. The request runs against the public API, and its JSON response appears directly beneath that example. Edit the query or its variables and run it again; **Reset** restores the original example. Requests only run when you click the button.
+
+Message lookups include a sample ID so you can try them immediately. Replace the `id` variable with your own message ID to check its delivery. Use the [field reference](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/scraper-proxy/src/graphql/scraperdb-schema.graphql) to choose additional fields.
+
+<Note>
+  Check the response's `errors` array, even when the HTTP status is 200. A request can return partial `data` alongside errors.
+</Note>
+
+## Messages: message_view
+
+### Look up a message and its delivery
+
+<GraphQLExample
+  title="Message delivery"
+  initialQuery={"query MessageDelivery($id: bytea!) {\n  message_view(where: {msg_id: {_eq: $id}}, limit: 1) {\n    msg_id\n    nonce\n    sender\n    recipient\n    message_body\n    origin_domain_id\n    destination_domain_id\n    origin_tx_hash\n    origin_block_height\n    send_occurred_at\n    is_delivered\n    destination_tx_hash\n    destination_block_height\n    delivery_occurred_at\n    delivery_latency\n    num_payments\n    total_payment\n    total_gas_amount\n  }\n}"}
+  initialVariables={"{\n  \"id\": \"\\\\xaa685164e47066a0d198c034ffd5c656a3f418fba25f74446f9cb72ea414d7ac\"\n}"}
+/>
+
+<Tip>
+  To use a message ID copied from the Explorer, replace its leading `0x` with `\x`. Keep all 64 hexadecimal characters unchanged; no hashing or other conversion is needed.
+
+  In the **Variables** JSON editor above, write **two backslashes** (`\\x`) so JSON decodes them into one literal backslash:
+
+  ```json
+  {
+    "id": "\\xaa685164e47066a0d198c034ffd5c656a3f418fba25f74446f9cb72ea414d7ac"
+  }
+  ```
+
+  In JavaScript, convert the ID and let `JSON.stringify` handle JSON escaping:
+
+  ```javascript
+  const messageId = "0xaa685164e47066a0d198c034ffd5c656a3f418fba25f74446f9cb72ea414d7ac";
+  const variables = { id: messageId.replace(/^0x/i, "\\x") };
+  const body = JSON.stringify({ query, variables }); // query is the GraphQL query string
+  ```
+
+  The `bytea` value starts with one backslash and `x`; the second backslash only escapes it in JSON or JavaScript source.
+</Tip>
+
+Destination transaction details and delivery timestamps can be `null` before delivery or while enrichment is incomplete. `sender` and `recipient` are the Hyperlane application addresses; `origin_tx_sender` and `destination_tx_sender` identify transaction senders, which can be different accounts.
+
+### Choose your confirmation count
+
+Set `confirmations` to your own non-negative number of confirmations, such as `0`, `2`, or `5` (maximum **1,000**). The same number is checked independently against **each chain's own head**: origin dispatches wait for origin-chain confirmations, and destination deliveries wait for destination-chain confirmations.
+
+For example, with `confirmations: 5`, a delivery in destination block **100** becomes eligible once the observed destination head reaches **105** and the scraper has indexed the delivery. Origin-chain progress does not satisfy the destination's threshold. The message can appear earlier with `is_delivered: false` if its dispatch is eligible but its delivery is not.
+
+A GraphQL request returns the eligible state **at query time**; it does not stay open waiting for confirmations. Query again later or use the [WebSocket API](./websocket-api#advanced-domains-and-confirmations) for updates when the threshold is reached.
+
+Omitting `confirmations`, or passing `null`, returns canonical scraper data using the [configured default](#where-to-find-default-confirmations).
+
+Set `confirmations: 0` to include the most recently indexed dispatches and deliveries without waiting for that canonical boundary:
+
+<GraphQLExample
+  title="Zero-confirmation delivery"
+  initialQuery={"query ObservedDelivery($id: bytea!) {\n  message_view(\n    confirmations: 0\n    where: {msg_id: {_eq: $id}}\n    limit: 1\n  ) {\n    msg_id\n    is_delivered\n    is_provisional\n    destination_domain_id\n    destination_tx_hash\n    destination_block_height\n    delivery_occurred_at\n  }\n}"}
+  initialVariables={"{\n  \"id\": \"\\\\xaa685164e47066a0d198c034ffd5c656a3f418fba25f74446f9cb72ea414d7ac\"\n}"}
+/>
+
+Change `confirmations: 0` in this example to `confirmations: 5` to request five confirmations. For `confirmations: N`, eligible data is bounded by `min(indexed height, observed head height - N)` on each chain. Heights use the chain's native units, such as Sealevel slots.
+
+<Warning>
+  Zero confirmations means observed delivery, not final delivery. A reorganization can remove it. It does not accelerate relaying or remove RPC and indexing delays. Chains without near-head indexing state retain canonical behavior even when you request zero confirmations.
+</Warning>
+
+`is_provisional` indicates that the returned snapshot row differs from canonical scraper state. It is not a confirmation count or a separate finality flag for the destination. To check canonical delivery, query the same message again with `confirmations` omitted.
+
+Use the [WebSocket API](./websocket-api) for push updates. For polling, use a bounded interval and back off after errors; avoid a tight request loop.
+
+### Where to find default confirmations
+
+Look in `chains/<chain-name>/metadata.yaml` in the [Hyperlane Registry](https://github.com/hyperlane-xyz/hyperlane-registry/tree/main/chains), for example [Ethereum](https://github.com/hyperlane-xyz/hyperlane-registry/blob/main/chains/ethereum/metadata.yaml#L15-L18) or [Base](https://github.com/hyperlane-xyz/hyperlane-registry/blob/main/chains/base/metadata.yaml#L15-L18):
+
+- **`blocks.reorgPeriod`** configures the scraper's canonical confirmation boundary. It can be a numeric delay or a chain-specific finality selector, such as a block tag.
+- **`blocks.confirmations`** is a separate transaction-confirmation setting; it is not the Explorer API's default confirmation delay.
+
+Registry metadata is the configuration source, not a live report of the deployed scraper. Agent configuration can override it; see the [agent configuration builder](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/infra/src/agents/index.ts) and [scraper confirmation behavior](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/docs/scraper/near-head.md). An explicit API `confirmations` value requests your chosen delay on chains that support custom confirmations.
+
+### Search and filter messages
+
+Fetch recent indexed messages from Ethereum to Base. Replace these domain IDs with your route's domains:
+
+<GraphQLExample
+  title="Recent messages"
+  initialQuery={"query RecentMessages {\n  message_view(\n    where: {\n      origin_domain_id: {_eq: 1}\n      destination_domain_id: {_eq: 8453}\n    }\n    order_by: {id: desc}\n    limit: 20\n  ) {\n    id\n    msg_id\n    sender\n    recipient\n    is_delivered\n    send_occurred_at\n    origin_tx_hash\n    destination_tx_hash\n  }\n}"}
+/>
+
+`id` orders database records, not a globally ordered timeline across chains. To sort by dispatch time, use `order_by: [{send_occurred_at: desc}, {id: desc}]` for a bounded search.
+
+Find messages associated with either an origin or destination transaction:
+
+<GraphQLExample
+  title="Messages by transaction"
+  initialQuery={"query MessagesByTransaction($hash: bytea!) {\n  dispatched: message_view(where: {origin_tx_hash: {_eq: $hash}}, limit: 50) {\n    msg_id\n    origin_domain_id\n    destination_domain_id\n    is_delivered\n  }\n  delivered: message_view(where: {destination_tx_hash: {_eq: $hash}}, limit: 50) {\n    msg_id\n    origin_domain_id\n    destination_domain_id\n    is_delivered\n  }\n}"}
+  initialVariables={"{\n  \"hash\": \"\\\\xf1f2ba384b9eaf8a8b2d612cc0a335dbb4d20d68f0cf06dfed1060c6a6181c92\"\n}"}
+/>
+
+Pass `hash` in the same bytea format as the message ID. Query the two transaction fields separately, as above, to avoid a broad OR scan across origin and destination joins. Merge `data.dispatched` and `data.delivered` by `msg_id` if you need one list. You can also filter `sender`, `recipient`, `origin_tx_sender`, or `destination_tx_sender` by address.
+
+Filters support `_eq`, `_neq`, `_gt`, `_gte`, `_lt`, `_lte`, `_in`, `_nin`, and `_is_null`. Combine conditions with `_and`, `_or`, and `_not`. Multiple fields in a `where` object are combined with AND. For example, add `is_delivered: {_eq: false}` for indexed undelivered messages, or a `send_occurred_at` range to bound a search.
+
+### Paginate canonical history
+
+Fetch the first page with `order_by: {id: desc}` and an explicit `limit`. For the next page, use the last row's `id` as `$before`:
+
+<GraphQLExample
+  title="Message history"
+  initialQuery={"query OlderMessages($before: bigint!) {\n  message_view(\n    order_by: {id: desc}\n    cursor: [{initial_value: {id: $before}, ordering: DESC}]\n    limit: 100\n  ) {\n    id\n    msg_id\n    origin_domain_id\n    destination_domain_id\n    is_delivered\n    send_occurred_at\n  }\n}"}
+  initialVariables={"{\n  \"before\": \"165103325\"\n}"}
+/>
+
+Pass the cursor as a decimal string, for example `{"before":"165103325"}`, and retain your original `where` filter on each page. Continue until a page is empty. For ascending traversal, use `id: asc` and `ordering: ASC`.
+
+Cursors support only the `id` column and must match the sort direction. They are for canonical history: do not combine them with `confirmations`. Provisional and canonical IDs can come from different sequences; merge live records by `msg_id`, not database `id`.
+
+For a historical export, use bounded pages and retain a high-water mark. Delivery status on previously fetched rows can change later, so a one-time traversal is not an ongoing delivery monitor. Reconcile outstanding messages or consume WebSocket updates separately.
+
+## Counts: message_view_aggregate
+
+<GraphQLExample
+  title="Message count"
+  initialQuery={"query MessageCounts {\n  message_view_aggregate(\n    where: {\n      origin_domain_id: {_eq: 1}\n      destination_domain_id: {_eq: 8453}\n      send_occurred_at: {_gte: \"2026-11-01 00:00:00\", _lt: \"2026-11-02 00:00:00\"}\n    }\n  ) {\n    aggregate {\n      count\n    }\n  }\n}"}
+/>
+
+Replace the example time range as needed. Aggregates use canonical data and do not accept `confirmations`. Prefer filters on chain, message, or time over repeated full-history counts.
+
+## Chains: domain
+
+<GraphQLExample
+  title="Domains"
+  initialQuery={"query Domains {\n  domain(\n    where: {is_test_net: {_eq: false}, is_deprecated: {_eq: false}}\n    order_by: {id: asc}\n    limit: 500\n  ) {\n    id\n    name\n    chain_id\n    native_token\n    is_test_net\n  }\n}"}
+/>
+
+Results are under `data.domain`. `id` is the **Hyperlane domain ID** used in message filters and WebSocket subscriptions; it is not necessarily the chain's native `chain_id`. For example, Ethereum uses domain `1` and Base uses `8453`.
+
+Remove the `is_test_net` filter to include testnets. If the result fills a page, add `id: {_gt: LAST_ID}` to `where` and continue with the same ascending sort until a page is empty. For a known domain, `domain_by_pk(id: 1) { id name chain_id }` performs a single-record lookup.
+
+The [full schema](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/scraper-proxy/src/graphql/scraperdb-schema.graphql) also exposes raw dispatch records for specialized indexing use cases. Start with `message_view` for application integrations: it combines dispatch and delivery data in one result.
+
+## Data formats
+
+- **Hashes, addresses, and bodies:** `bytea` values use a literal `\x` prefix followed by hexadecimal bytes. In JSON or JavaScript string literals, escape the backslash as `"\\x..."`. Convert a `0x`-prefixed hex message ID by replacing the prefix. For non-hex chain addresses or transaction signatures, decode the chain-native representation into bytes first. Address filters must match the stored byte length; EVM addresses are commonly stored as 20 bytes.
+- **Large integers and amounts:** `bigint` and `numeric` values are returned as strings. Preserve their precision with `BigInt` for integers or a decimal library for amounts. Gas-payment totals are raw units, not USD values or decoded Warp Route transfer amounts.
+- **Times:** timestamps represent UTC and can be returned without a timezone suffix, for example `2026-11-04 08:55:51`. Parse them explicitly as UTC. `delivery_latency` is a PostgreSQL interval string, not a numeric seconds field.
+- **Missing fields:** transaction enrichment and delivery fields can be `null`. A provisional delivery may have a transaction hash and block height before every transaction field is available.
+
+## Limits and troubleshooting
+
+- Row queries return at most **500 rows** per query field; use smaller explicit pages. Offsets are capped at **5,000**. `_in` / `_nin` lists accept at most **200 values**.
+- Custom GraphQL confirmations accept **0–1,000**. These snapshots reject cursors and non-zero offsets, and cap affected events at **10,000**. If a snapshot exceeds the cap, narrow by `msg_id` using `_eq` or `_in`, or query canonical history.
+- Submit one GraphQL operation per request. Narrow queries and select only the fields you need. Back off on rate limits, timeouts, and transient server errors.
+- An error on a custom snapshot can return `null` for that field alongside successful results for other query fields. Handle `errors` before treating a result as empty.
+- An empty result can mean an incorrect byte encoding, an unindexed chain, indexing lag, or a dispatch that has not reached canonical visibility. Check the message ID, domains, and requested confirmation level.
+
+For the complete current field list and server limits, see the [GraphQL schema](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/scraper-proxy/src/graphql/scraperdb-schema.graphql), [query limits](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/scraper-proxy/src/scraperdb/sql.ts), and [snapshot contract](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/typescript/scraper-proxy#stream-and-snapshot-contracts).
+
+<Note>
+  Older integrations may reference the retired REST route `explorer.hyperlane.xyz/api` or a Hasura GraphQL URL. Use the endpoint on this page for new integrations; do not assume older endpoints support custom confirmations.
+</Note>
