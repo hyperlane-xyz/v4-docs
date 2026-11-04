@@ -209,10 +209,11 @@
                 "pages": [
                   "docs/reference/explorer/overview",
                   "docs/reference/explorer/configuring-pi-chains",
-                  "docs/reference/explorer/graphql-api",
                   "docs/reference/explorer/explorer-debugging"
                 ]
-              }
+              },
+              "docs/reference/explorer/graphql-api",
+              "docs/reference/explorer/websocket-api"
             ]
           }
         ]

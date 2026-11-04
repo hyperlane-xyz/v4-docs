@@ -1,0 +1,193 @@
+---
+title: "WebSocket API"
+description: "Subscribe to new Hyperlane messages and watch a message for delivery updates."
+---
+
+Use the WebSocket API to receive new messages and updates to existing messages. Connect to the public endpoint; no API key or subscription request is needed:
+
+```text
+wss://explorer-api.hyperlane.xyz/messages
+```
+
+## Subscribe to new messages
+
+Open a connection and listen for `message_upsert` events. Each event contains a message under `data`:
+
+```javascript
+const socket = new WebSocket('wss://explorer-api.hyperlane.xyz/messages');
+
+socket.addEventListener('message', ({ data }) => {
+  const event = JSON.parse(data);
+  if (event.type !== 'message_upsert') return;
+
+  console.log('Message:', event.data.msg_id);
+  console.log('Delivered:', event.data.is_delivered);
+  console.log(event.data);
+});
+
+// When you no longer need updates:
+// socket.close();
+```
+
+Run this in a browser or a Node.js environment with a global `WebSocket`. The default feed covers all indexed domains and uses the scraper's canonical confirmation settings.
+
+You receive both newly indexed messages and changes to existing messages. The same `msg_id` can appear more than once; update the existing entry in your app instead of adding a duplicate.
+
+## Watch a single message
+
+Use the same connection and filter by `msg_id` in your listener. Replace `messageId` with the ID copied from the Explorer:
+
+```javascript
+const messageId = '0xaa685164e47066a0d198c034ffd5c656a3f418fba25f74446f9cb72ea414d7ac';
+const byteaId = messageId.toLowerCase().replace(/^0x/, '\\x');
+const socket = new WebSocket('wss://explorer-api.hyperlane.xyz/messages');
+
+socket.addEventListener('message', ({ data }) => {
+  const event = JSON.parse(data);
+  if (event.type !== 'message_upsert' || event.data.msg_id !== byteaId) return;
+
+  console.log('Message updated:', event.data);
+  if (event.data.is_delivered) {
+    console.log('Delivered in transaction:', event.data.destination_tx_hash);
+  }
+});
+```
+
+Message IDs in the feed use `\x` instead of `0x`; the example converts the prefix for you. Filtering happens in your client: there is no server-side subscription parameter for a single message ID.
+
+<Note>
+  The feed sends future updates, not history. If your message was already delivered before you connected, it may not appear. Use the [GraphQL message lookup](./graphql-api#look-up-a-message-and-its-delivery) to check its current state; see [snapshot and live updates](#combine-a-snapshot-with-live-updates) for combining both in an app.
+</Note>
+
+## Message updates
+
+A `message_upsert` frame contains an enriched message row under `data`. For example, this abbreviated frame represents a delivery update; actual rows include additional fields:
+
+```json
+{
+  "type": "message_upsert",
+  "data": {
+    "msg_id": "\\xaa685164e47066a0d198c034ffd5c656a3f418fba25f74446f9cb72ea414d7ac",
+    "origin_domain_id": 1,
+    "destination_domain_id": 8453,
+    "is_delivered": true,
+    "destination_block_height": "12345678"
+  }
+}
+```
+
+Match `data.msg_id` to your message, then read `data.is_delivered`, `data.destination_tx_hash`, and `data.destination_block_height`. The same message can be updated multiple times as dispatch, payment, delivery, or transaction details become available. Upsert by `msg_id`; do not treat every frame as a new message or an exactly-once delivery notification.
+
+Hashes and addresses use the same `\x`-prefixed bytea encoding as GraphQL. Large integers are decimal strings. See [data formats](./graphql-api#data-formats).
+
+## Advanced: domains and confirmations
+
+Configure the feed through URL parameters. This is a JSON WebSocket feed, not a GraphQL subscription endpoint.
+
+| Connection | Behavior |
+| --- | --- |
+| `/messages` | Canonical message updates across indexed domains |
+| `/messages?confirmations=0&domains=1,8453` | Near-head message updates involving Ethereum or Base, where custom confirmations are available |
+| `/messages?confirmations=2&domains=1,8453` | Message updates with a requested delay of two native chain heights |
+| `/messages?confirmations=0&domains=1,8453&blocks=true` | The same message feed, plus indexed block/head updates |
+
+Use **Hyperlane domain IDs**, not necessarily native chain IDs. Find them with the GraphQL `domain` query. When filtering messages by domain, both `confirmations` and `domains` are required. The filter matches messages whose origin **or** destination is in the list; it does not restrict the feed to a single route between those domains.
+
+For a route-specific view, include both origin and destination domains, then filter received rows by their domain pair. There is no public message-ID or address subscription filter; match those fields in your client.
+
+You can choose your own confirmation count, not just zero. For example, subscribe with **five confirmations**:
+
+```text
+wss://explorer-api.hyperlane.xyz/messages?confirmations=5&domains=1,8453
+```
+
+The count is checked independently against each supported chain's own head. A delivery in Base block **100** becomes eligible for a delivery update once Base's observed head reaches **105** and the delivery has been indexed. Ethereum's head does not count toward Base's confirmations. You may receive an earlier update for the origin dispatch before the destination delivery becomes eligible.
+
+One `confirmations=N` value applies to all requested domains on that connection; it is not a separate count per domain. Custom feeds include data through `min(indexed height, head height - N)` on each supported domain. Heights use native chain units, such as Sealevel slots. The feed pushes future eligible updates; it does not replay events that were already eligible when you connected.
+
+Omitting `confirmations` selects canonical scraper finality. See [where to find default confirmations](./graphql-api#where-to-find-default-confirmations) for the registry's per-chain `blocks.reorgPeriod` settings and how they differ from `blocks.confirmations`. Check the `ready` frame below to see which requested domains support your custom delay.
+
+<Warning>
+  `confirmations=0` reports observed activity that can be reorganized. It does not guarantee finality or instantaneous delivery notification. Indexing and RPC delays still apply. Handle rollback events before using provisional delivery state in your application.
+</Warning>
+
+### Check the ready frame
+
+After connecting, wait for `ready`. For the Ethereum/Base zero-confirmation example, a successful response can look like:
+
+```json
+{
+  "type": "ready",
+  "confirmations": 0,
+  "domains": [1, 8453],
+  "customDomains": [1, 8453],
+  "canonicalDomains": [],
+  "eventTypes": ["message_upsert", "rollback"]
+}
+```
+
+- `customDomains` identifies domains using the requested confirmation delay.
+- `canonicalDomains` identifies requested domains without near-head state; their data retains canonical finality.
+- These capabilities are negotiated for this connection. Recheck them after reconnecting.
+
+Do not infer support from an accepted URL alone. If your destination is in `canonicalDomains`, the connection is not providing zero-confirmation delivery for that destination. The default canonical feed's `ready` frame does not include the custom-confirmation fields.
+
+Canonical frames can omit the top-level `confirmations` field. WebSocket rows do not provide the GraphQL `is_provisional` snapshot flag as a guaranteed field. Use the negotiated domain capabilities and a canonical GraphQL lookup when you need to establish canonical delivery.
+
+## Handle rollbacks
+
+Custom-confirmation feeds can send:
+
+```json
+{
+  "type": "rollback",
+  "domain": 8453,
+  "confirmations": 0,
+  "fromHeight": "12345680",
+  "toHeight": "12345677"
+}
+```
+
+Invalidate observations above `toHeight` on the affected domain. This includes origin dispatches and destination deliveries. For a simple message tracker, invalidate the affected message state and reload it through GraphQL. For a list, clearing and reloading the provisional overlay is a straightforward approach. Replacement rows can follow; apply them idempotently.
+
+Do not make `is_delivered: true` irreversible when it came from provisional data. A subsequent snapshot or replacement row can show the message as undelivered again.
+
+## Optional block updates
+
+Add `blocks=true` to receive a block snapshot after `ready`, followed by changed heads:
+
+```json
+{
+  "type": "block",
+  "domain": 8453,
+  "height": "12345678",
+  "hash": "0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+  "headHeight": "12345680"
+}
+```
+
+`height` and `hash` identify the indexed block; `headHeight` is the observed chain tip. Heights are decimal strings. Updates can skip heights or move backward after a reorganization, so replace your stored head rather than incrementing it. Block hashes in these frames use `0x` encoding.
+
+`/messages?blocks=true` adds block updates for all available near-head domains to the canonical message feed. With `confirmations` and `domains`, block updates are scoped to those domains. Block updates do not wait for the requested message-confirmation delay and are not a full block or transaction stream.
+
+## Combine a snapshot with live updates
+
+The public message feed does not replay historical messages or accept a resume cursor. A message delivered before you connected may never produce another frame. To build a delivery tracker:
+
+1. Open the socket, install the message handler, and wait for `ready`.
+2. Buffer incoming updates while fetching the message's GraphQL snapshot with the same confirmation setting.
+3. Load the snapshot and reconcile buffered updates by `msg_id`. Keep ingestion idempotent. A concurrent snapshot and stream are not an atomic, versioned snapshot; refetch if observations conflict rather than assuming arrival order proves which is newer.
+4. Apply subsequent upserts. If a rollback happens during a snapshot request, discard that in-flight result and fetch again.
+5. After every reconnect, repeat the snapshot process. Do not assume the stream fills the disconnect gap.
+
+For a historical list, fetch canonical pages separately, then maintain an overlay of provisional rows keyed by `msg_id`. Only canonical pages should supply history cursors. Refresh outstanding messages to reconcile delivery changes on older history rows.
+
+## Connections and recovery
+
+- Reuse one connection for the domains your application needs. The public service currently permits at most **five connections per client IP**, including clients sharing an outbound IP.
+- Handle both `error` frames (`{"type":"error","error":"..."}`) and socket closure. Reconnect transient failures with exponential backoff and jitter, then reload snapshots. Correct invalid parameters before retrying.
+- Process messages promptly. Slow consumers can be disconnected when buffers fill. Use the GraphQL API for historical scans rather than trying to recover history over this feed.
+- The server uses WebSocket protocol ping/pong for liveness. Browsers handle these automatically; other clients must support protocol pong responses. An application-level JSON ping is not required for `/messages`.
+- Close the socket when the view or worker no longer needs it. The `/agents` stream is private infrastructure and is not part of this public API.
+
+See the [stream contract and connection limits](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/typescript/scraper-proxy) and [WebSocket implementation](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/typescript/scraper-proxy/src/live/event-websocket.ts) for protocol details.
