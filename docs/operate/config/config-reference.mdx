@@ -1063,6 +1063,33 @@ export HYP_ORIGINCHAINNAME="ethereum"
 
 </CodeGroup>
 
+## websocketurl
+
+**Description:** Optional public WebSocket endpoint for live Merkle Tree Hook insertions. Public endpoints should use a query-free `wss://` URL ending in `/validators`. The Validator supplies its origin domain and confirmation policy, verifies checkpoint roots through its configured RPC endpoints before signing, and uses RPC for historical indexing and recovery. See [Validator WebSocket setup](/docs/operate/validators/run-validators#validator-websocket-optional).
+
+**Optional:** Yes; omitted by default (RPC-only indexing).
+
+**Agents:** Validator
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--websocketUrl wss://explorer-api.hyperlane.xyz/validators
+```
+
+```bash As Env
+export HYP_WEBSOCKETURL="wss://explorer-api.hyperlane.xyz/validators"
+```
+
+```json As Config
+{
+  "websocketUrl": "wss://explorer-api.hyperlane.xyz/validators"
+}
+```
+
+</CodeGroup>
+
 ## validator
 
 **Description:** The signer that should be used by the validator.
@@ -1373,9 +1400,9 @@ export HYP_CHECKPOINTSYNCER_REGION="us-east-1"
 
 ## interval
 
-**Description:** How frequently the validator should check for new checkpoints in seconds? See also [latencies](/docs/reference/addresses/validators/latencies).
+**Description:** Polling and retry interval in seconds. The top-level `interval` overrides the origin chain's `index.interval`; if neither is set, the Validator defaults to 2 seconds. Fractional values are supported, with a minimum of `0.01` seconds. A healthy WebSocket wakes checkpoint verification immediately, so this remains the fallback polling and failed-verification retry interval. See also [latencies](/docs/reference/addresses/validators/latencies).
 
-**Optional:** No
+**Optional:** Yes; defaults to the origin chain's `index.interval`, then 2 seconds.
 
 **Agents:** Validator
 
@@ -1383,16 +1410,16 @@ export HYP_CHECKPOINTSYNCER_REGION="us-east-1"
 
 <CodeGroup>
 ```bash As Arg
---interval 30
+--interval 2
 ```
 
 ```bash As Env
-export HYP_INTERVAL=30
+export HYP_INTERVAL=2
 ```
 
 ```json As Config
 {
-  "interval": 30
+  "interval": 2
 }
 ```
 
