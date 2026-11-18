@@ -1,28 +1,13 @@
 ---
-title: "AWS Signatures Bucket Setup"
-description: "Configure your signing key and S3 bucket"
+title: "Amazon S3"
+description: "Set up the default checkpoint bucket for a Hyperlane Validator."
 ---
 
-<Note>
+Amazon S3 is the default checkpoint storage option in the Validator guide. You need an AWS IAM role or user that the Validator can use to write checkpoint files. [AWS KMS](/docs/operate/aws-kms) and [Google Cloud KMS](/docs/operate/google-cloud-kms) are separate signing options.
 
-These instructions are for a production environment where Validator keys exist in AWS's Key Management Service and Validator signatures are posted publicly in an S3 bucket.
+If your Validator uses AWS access keys, create an IAM user and set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the Validator's environment. These steps also apply when you use Google Cloud KMS for checkpoint signing. [Create an IAM user](/docs/operate/aws-kms#create-an-iam-user)
 
-If you're only intending to run a Validator for testing or development purposes, consider following the [local setup guide](/docs/guides/chains/deploy-hyperlane-with-local-agents) instead.
-
-</Note>
-
-### 1. Create an AWS IAM user, and a signing key
-
-Follow the instructions in [Agent Keys](/docs/operate/set-up-agent-keys) to generate an AWS IAM user and either a KMS or a hexadecimal key. You will use this key's credentials in the following steps.
-
-### 2. Create an S3 bucket
-
-<Note>
-  Note that Step 1 (creating the IAM user) is required for setting up the S3
-  bucket, so is required regardless of the type of key used.
-</Note>
-
-Your Validator will post their signatures to this bucket.
+## Create an S3 bucket
 
 1. Go to AWS's S3 in the AWS console.
 
@@ -30,7 +15,7 @@ Your Validator will post their signatures to this bucket.
 
 3. Pick an informative bucket name, such as `hyperlane-validator-signatures-${validator_name}-${chain_name}`
 
-4. Consider choosing the same region as the KMS key you created in the previous step.
+4. Choose a region and use that region in the checkpoint syncer settings.
 
 5. Keep the recommended "ACLs disabled" setting for object ownership.
 
@@ -43,19 +28,13 @@ Your Validator will post their signatures to this bucket.
 
 7. The remaining default settings are fine, click the orange "Create bucket" button on the bottom
 
-### 3. Configure S3 bucket permissions
+## Configure S3 bucket permissions
 
-Your Validator IAM user will need write permissions, and it should be publicly readable by the Relayer.
+Grant the Validator's IAM role or user write access. Relayers read signed checkpoints without AWS credentials.
 
-1. Navigate back to "Identity and Access Management (IAM)" in the AWS console
-2. Under "IAM resources" you should see at least one "User", click into that
-3. Click on the name of the user that you provisioned earlier (e.g. `hyperlane-validator-${chain_name}`)
-4. Copy the "User ARN" to your clipboard, it should look something like `arn:aws:iam::791444913613:user/hyperlane-validator-${chain_name}`
-5. Navigate back to "S3" in the AWS console
-6. Click on the name of the bucket you just created
-7. Just under the name of the bucket, click "Permissions"
-8. Scroll down to "Bucket policy" and click "Edit"
-9. Enter the following contents. The Bucket ARN is shown just above where you enter the policy
+1. In IAM, copy the ARN of the role or user that runs the Validator.
+2. In the S3 bucket's **Permissions** tab, edit the **Bucket policy**.
+3. Paste the policy below and replace `${BUCKET_ARN}` and `${VALIDATOR_IAM_ARN}` with your own ARNs.
 
 ```json
 {
@@ -64,13 +43,19 @@ Your Validator IAM user will need write permissions, and it should be publicly r
     {
       "Effect": "Allow",
       "Principal": "*",
-      "Action": ["s3:GetObject", "s3:ListBucket"],
-      "Resource": ["${BUCKET_ARN}", "${BUCKET_ARN}/*"]
+      "Action": "s3:GetObject",
+      "Resource": "${BUCKET_ARN}/*"
     },
     {
       "Effect": "Allow",
-      "Principal": { "AWS": "${USER_ARN}" },
-      "Action": ["s3:DeleteObject", "s3:PutObject"],
+      "Principal": "*",
+      "Action": "s3:ListBucket",
+      "Resource": "${BUCKET_ARN}"
+    },
+    {
+      "Effect": "Allow",
+      "Principal": { "AWS": "${VALIDATOR_IAM_ARN}" },
+      "Action": "s3:PutObject",
       "Resource": "${BUCKET_ARN}/*"
     }
   ]
@@ -82,3 +67,20 @@ Your Validator IAM user will need write permissions, and it should be publicly r
   module](/docs/operate/guides/deploy-with-terraform#modules) instead to create
   the S3 bucket with the correct permissions.
 </Tip>
+
+## Configure the Validator
+
+Add this block to your agent config and replace the example bucket and region. If Validators share a bucket, give each origin and signer a distinct folder.
+
+```json
+{
+  "checkpointSyncer": {
+    "type": "s3",
+    "bucket": "your-validator-bucket",
+    "region": "us-east-1",
+    "folder": "ethereum-validator-1"
+  }
+}
+```
+
+Start the agent and verify checkpoint publication. [Run Validators](/docs/operate/validators/run-validators#success)

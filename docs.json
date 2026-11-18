@@ -213,7 +213,8 @@
                 ]
               },
               "docs/reference/explorer/graphql-api",
-              "docs/reference/explorer/websocket-api"
+              "docs/reference/explorer/websocket-api",
+              "docs/reference/explorer/validator-websocket"
             ]
           }
         ]
@@ -332,13 +333,23 @@
           },
           {
             "group": "Key Management",
-            "pages": ["docs/operate//set-up-agent-keys"]
+            "pages": [
+              "docs/operate/set-up-agent-keys",
+              "docs/operate/aws-kms",
+              "docs/operate/google-cloud-kms"
+            ]
           },
           {
             "group": "Validators",
             "pages": [
               "docs/operate/validators/run-validators",
-              "docs/operate/validators/validator-signatures-aws",
+              {
+                "group": "Checkpoint Storage",
+                "pages": [
+                  "docs/operate/validators/validator-signatures-aws",
+                  "docs/operate/validators/validator-signatures-gcs"
+                ]
+              },
               "docs/operate/validators/monitoring-alerting"
             ]
           },

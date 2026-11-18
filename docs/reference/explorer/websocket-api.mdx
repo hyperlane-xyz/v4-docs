@@ -1,9 +1,9 @@
 ---
-title: "WebSocket API"
+title: "Message WebSocket API"
 description: "Subscribe to new Hyperlane messages and watch a message for delivery updates."
 ---
 
-Use the WebSocket API to receive new messages and updates to existing messages. Connect to the public endpoint; no API key or subscription request is needed:
+Use `/messages` for new messages and delivery updates, or the [Validator WebSocket](./validator-websocket) for live Merkle Tree Hook insertions. To follow messages, connect to the public endpoint without an API key or subscription request.
 
 ```text
 wss://explorer-api.hyperlane.xyz/messages

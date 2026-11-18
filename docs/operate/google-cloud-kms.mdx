@@ -1,0 +1,99 @@
+---
+title: "Google Cloud KMS"
+description: "Create a Cloud KMS signing key and configure a Hyperlane Validator to use it."
+---
+
+Use Google Cloud KMS to sign Validator checkpoints with a private key held in Cloud HSM. This setup uses agent v4.0.0.
+
+## Create a signing key
+
+Enable the Cloud KMS API in your Google Cloud project and sign in with a Google Cloud CLI identity that can create keys and manage key-level IAM bindings. Set the values below for your project and an HSM-supported location. Skip the key ring creation command if you already have a key ring. [Google Cloud key creation guide](https://docs.cloud.google.com/kms/docs/create-key)
+
+```bash
+PROJECT_ID="your-project-id"
+LOCATION="us-central1"
+KEY_RING="hyperlane-validators"
+KEY_NAME="validator-ethereum"
+
+gcloud kms keyrings create "$KEY_RING" \
+  --project="$PROJECT_ID" \
+  --location="$LOCATION"
+
+gcloud kms keys create "$KEY_NAME" \
+  --project="$PROJECT_ID" \
+  --location="$LOCATION" \
+  --keyring="$KEY_RING" \
+  --purpose=asymmetric-signing \
+  --default-algorithm=ec-sign-secp256k1-sha256 \
+  --protection-level=hsm
+```
+
+The Validator needs the full resource name of an enabled key **version**. Use version `1` for a newly created key. If you are using an existing key, set `KEY_VERSION` to the version that identifies your Validator.
+
+```bash
+KEY_VERSION=1
+KEY_VERSION_NAME="projects/${PROJECT_ID}/locations/${LOCATION}/keyRings/${KEY_RING}/cryptoKeys/${KEY_NAME}/cryptoKeyVersions/${KEY_VERSION}"
+```
+
+## Grant the Validator access
+
+Set `SERVICE_ACCOUNT_EMAIL` to the service account the Validator will run as. Bind the signing role to the specific key so the Validator can fetch the public key and request signatures.
+
+```bash
+SERVICE_ACCOUNT_EMAIL="validator@${PROJECT_ID}.iam.gserviceaccount.com"
+
+gcloud kms keys add-iam-policy-binding "$KEY_NAME" \
+  --project="$PROJECT_ID" \
+  --location="$LOCATION" \
+  --keyring="$KEY_RING" \
+  --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+  --role="roles/cloudkms.signerVerifier"
+```
+
+The agent uses Application Default Credentials (ADC). Attach the service account to the compute resource running the Validator. On GKE, configure Workload Identity Federation for the Validator's Kubernetes service account to impersonate the Google Cloud service account. The credentials must be available inside the Validator process or container. [Application Default Credentials](https://docs.cloud.google.com/docs/authentication/application-default-credentials) · [Workload Identity Federation for GKE](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/workload-identity)
+
+## Configure the Validator
+
+Add these flags to your Validator command using the full key version name from the previous step.
+
+```bash As Arg
+--validator.type gcp --validator.keyVersionName "$KEY_VERSION_NAME"
+```
+
+For JSON configuration, add the `validator` block to your existing agent config and replace the example resource name with your key version name.
+
+```json
+{
+  "validator": {
+    "type": "gcp",
+    "keyVersionName": "projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
+  }
+}
+```
+
+On EVM and Tron, if you leave the chain signer and `defaultSigner` unset, the Validator uses this key for its on-chain storage announcement. Fund that account with native tokens for gas. For other chains, configure a chain-specific transaction signer. [Transaction signer configuration](/docs/operate/validators/run-validators#transaction-signer-configuration)
+
+Choose checkpoint storage separately. The Validator guide uses [Amazon S3](/docs/operate/validators/validator-signatures-aws) by default. For a Google Cloud deployment, you can use [Google Cloud Storage](/docs/operate/validators/validator-signatures-gcs) with workload credentials.
+
+## Find the Validator's EVM address
+
+Use the same key version as the Validator. This command fetches its public key and derives the address using OpenSSL and Foundry's `cast`.
+
+```bash
+(
+  set -euo pipefail
+  public_key_hex=$(
+    gcloud kms keys versions get-public-key "$KEY_VERSION" \
+      --project="$PROJECT_ID" \
+      --location="$LOCATION" \
+      --keyring="$KEY_RING" \
+      --key="$KEY_NAME" \
+      --public-key-format=pem |
+    openssl ec -pubin -pubout -conv_form uncompressed -outform DER |
+    tail -c 64 |
+    xxd -p -c 64
+  )
+  address_hash=$(cast keccak "0x${public_key_hex}")
+  printf '0x%s\n' "${address_hash: -40}"
+)
+```

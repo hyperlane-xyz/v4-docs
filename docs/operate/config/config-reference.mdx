@@ -332,24 +332,29 @@ export HYP_CHAINS_${CHAIN_NAME}_SIGNER_*="...."
 
 ## chains.`<chain_name>`.signer.type
 
-**Description:** The type of signer that is defined. A `HexKey` signer uses a private key, an `Aws` signer uses an AWS based KMS, and `Node` assumes the local node will sign RPC calls.
+**Description:** The type of signer that is defined. Use `hexKey` for a private key, `aws` for AWS KMS, or `gcp` for Google Cloud KMS on EVM and Tron.
 
-**Optional:** Yes; Defaults to `node` unless a `key` is specified in which case it defaults to `hexKey`
+**Optional:** Inferred as `hexKey` when a key is provided or `aws` when AWS key settings are provided. Set `gcp` explicitly for Google Cloud KMS.
 
 **Agents:** All
 
-**Type:** `Enum ("hexKey" | "aws" | "cosmosKey" | "node")`
+**Type:** `Enum ("hexKey" | "aws" | "gcp" | "cosmosKey" | "starkKey" | "radixKey")`
 
-Accepted values for the different VMs are:
+| Chain | Transaction signer types |
+| --- | --- |
+| EVM and Tron | `hexKey`, `aws`, or `gcp` |
+| SVM (including Solana) | `hexKey` (Ed25519) |
+| Cosmos and Cosmos Native | `cosmosKey` |
+| Starknet | `starkKey` |
+| Radix | `radixKey` |
+| Aleo | `hexKey` (Aleo private key bytes). Requires an agent built with the `aleo` feature. |
 
-- EVM: `hexKey` (ECDSA) or `aws` (ECDSA)
-- sealevel: `hexKey` (ED25519)
-- cosmos: `cosmosKey`
+See the [Validator announcement signer table](/docs/operate/validators/run-validators#transaction-signer-configuration) for required fields and key formats on each chain. Google Cloud KMS requires the full `signer.keyVersionName` on EVM and Tron.
 
 <CodeGroup>
 ```bash As Arg
 --chains.${CHAIN_NAME}.signer.type hexKey
---chains.ethereum.signer.type node
+--chains.ethereum.signer.type hexKey
 ```
 
 ```bash As Env
@@ -366,7 +371,7 @@ export HYP_CHAINS_${CHAIN_NAME}_SIGNER_TYPE="hexKey"
     },
     "ethereum": {
       "signer": {
-        "type": "node"
+        "type": "hexKey"
       }
     }
   }
@@ -407,6 +412,44 @@ export HYP_CHAINS_${CHAIN_NAME}_SIGNER_KEY="8166f546bab6da521a8369cab06c5d2b9e46
     "ethereum": {
       "signer": {
         "key": "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"
+      }
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.signer.keyVersionName
+
+**Description:** Full Google Cloud KMS key version name for an EVM or Tron transaction signer. Replace the example resource name with your own enabled key version.
+
+**Requires:** `chains.<chain_name>.signer.type = "gcp"`
+
+**Optional:** Required when the chain signer uses Google Cloud KMS.
+
+**Agents:** Validator, Relayer
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--chains.ethereum.signer.type gcp
+--chains.ethereum.signer.keyVersionName "projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
+```
+
+```bash As Env
+export HYP_CHAINS_ETHEREUM_SIGNER_TYPE=gcp
+export HYP_CHAINS_ETHEREUM_SIGNER_KEYVERSIONNAME="projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
+```
+
+```json As Config
+{
+  "chains": {
+    "ethereum": {
+      "signer": {
+        "type": "gcp",
+        "keyVersionName": "projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
       }
     }
   }
@@ -525,46 +568,34 @@ export HYP_CHAINS_ARBITRUM_PROTOCOL="ethereum"
 
 ## chains.`<chain_name>`.rpcConsensusType
 
-<Info>
+For Validators, this setting selects the checkpoint signing policy across chain protocols. `majority` requires at least two thirds of configured state-read endpoints to match the Validator's local checkpoint history, rounded up. `quorum` requires half, rounded up. Both use fallback for indexing and auxiliary reads. `single` and `fallback` verify checkpoints through the chain provider without a vote across endpoints. See [Validator RPC configuration](/docs/operate/validators/run-validators#rpc-configuration).
 
-**The consensus type currently only applies to EVM chains.**
+For EVM Relayers and Scrapers, this setting selects the RPC transport. `single` uses one endpoint, `fallback` retries provider failures across endpoints, and `quorum` uses the provider's response voting.
 
-Connections to non-EVM chains only support a single RPC url. If more than one RPC url is specified in [rpcUrls](#chains-<chain-name>-rpcurls), only the first one will be used.
+When upgrading a Validator to v4.0.0, move any endpoints from `additionalQuorumRpcUrls` or `customAdditionalQuorumRpcUrls` into `rpcUrls` or `customRpcUrls` and remove the old fields.
 
-</Info>
+**Optional:** Defaults to `majority` for Validators and `fallback` for EVM Relayers and Scrapers.
 
-**Description:** How to communicate with the provider
+**Agents:** Validator, Relayer, Scraper. Only Validators accept `majority`.
 
-- `"single"` uses a basic http connection
-- `"fallback"` will try the first URL and then automatically "fall back" on a connection or other provider failure to the next provider; this should only retry calls which fail due to the provider and not the call itself such; an insufficient gas error for instance would not fall back.
-- `"quorum"` requires a majority of the URLs to agree with the exception of submitting transactions; it will automatically coordinate the "latest" block if not specified to reduce sync errors.
+**Type:** `Enum ("majority" | "quorum" | "fallback" | "single")`
 
-**Requires:** `chains.<chain_name>.protocol = "ethereum" | undefined`
-
-**Optional:** Defaults to `"fallback"`
-
-**Agents:** All
-
-**Type:** `Enum ("fallback", "single", "quorum")`
+The examples below use the Validator default.
 
 <CodeGroup>
 ```bash As Arg
---chains.${CHAIN_NAME}.rpcConsensusType single
+--chains.ethereum.rpcConsensusType majority
 ```
 
 ```bash As Env
-export HYP_CHAINS_${CHAIN_NAME}_RPCCONSENSUSTYPE="single"
-export HYP_CHAINS_ETHEREUM_RPCCONSENSUSTYPE="single"
+export HYP_CHAINS_ETHEREUM_RPCCONSENSUSTYPE="majority"
 ```
 
 ```json As Config
 {
   "chains": {
-    "<chain_name>": {
-      "rpcConsensusType": "single"
-    },
     "ethereum": {
-      "rpcConsensusType": "single"
+      "rpcConsensusType": "majority"
     }
   }
 }
@@ -574,13 +605,7 @@ export HYP_CHAINS_ETHEREUM_RPCCONSENSUSTYPE="single"
 
 ## chains.`<chain_name>`.customRpcUrls
 
-<Info>
-
-Connections to non-EVM chains only support a single RPC url. If more than one RPC url is specified, only the first one will be used.
-
-</Info>
-
-**Description:** Comma-separated URLs to connect the provider to. The difference between `customRpcUrls` and [rpcUrls](#chains-<chain-name>-rpcurls) is that `customRpcUrls` allows for more user friendly inputs from the CLI or environment variables (comma-separated vs array).
+**Description:** Comma-separated replacement for [`rpcUrls`](#chains-<chain-name>-rpcurls). In a standalone chain config, include the `rpcUrls` field even when you supply `customRpcUrls`. It can be an empty array when the override provides the endpoints.
 
 **Type:** `string` (comma separated list of urls without spaces)
 
@@ -608,45 +633,31 @@ export HYP_CHAINS_ETHEREUM_CUSTOMRPCURLS="http://127.0.0.1:8545,http://127.0.0.1
 </CodeGroup>
 ## chains.`<chain_name>`.rpcUrls
 
-<Info>
+**Description:** RPC endpoints for the chain. Their use depends on the chain protocol and the agent. See [Validator RPC configuration](/docs/operate/validators/run-validators#rpc-configuration) for checkpoint verification.
 
-Connections to non-EVM chains only support a single RPC url. If more than one RPC url is specified, only the first one will be used.
-
-</Info>
-
-**Description:** URLs to connect the provider to. The first one is initially used, and on failure the other ones are tried. See [rpcConsensusType](#chains-<chain-name>-rpcconsensustypee) for more information.
-
-**Requires:**
-
-```
-(chains.<chain_name>.protocol = "ethereum" | undefined)
-    AND (chains.<chain_name>.connection.type = "fallback" | "quorum")
-    OR chains.<chain_name>.protocol = "cosmos" | "sealevel" | "fuel"
-```
-
-**Optional:** No (iff requirements are met)
+**Required:** Yes. Use an empty array if `customRpcUrls` supplies the endpoints.
 
 **Agents:** All
 
-**Type:** `string`
+**Type:** Array of objects with an `http` URL. Use the `http` field for both HTTP and HTTPS URLs. Validators reject entries marked `public: true` unless `allowPublicRpcs` is enabled.
 
 <CodeGroup>
 ```bash As Arg
---chains.${CHAIN_NAME}.rpcurls.0.https "$CONNECTION_URL_0"
---chains.${CHAIN_NAME}.rpcurls.1.https "$CONNECTION_URL_1"
---chains.${CHAIN_NAME}.rpcurls.2.https "$CONNECTION_URL_2"
---chains.ethereum.rpcurls.0.https "http://127.0.0.1:8545"
---chains.ethereum.rpcurls.1.https "http://127.0.0.1:8546"
---chains.ethereum.rpcurls.2.https "http://127.0.0.1:8547"
+--chains.${CHAIN_NAME}.rpcurls.0.http "$CONNECTION_URL_0"
+--chains.${CHAIN_NAME}.rpcurls.1.http "$CONNECTION_URL_1"
+--chains.${CHAIN_NAME}.rpcurls.2.http "$CONNECTION_URL_2"
+--chains.ethereum.rpcurls.0.http "http://127.0.0.1:8545"
+--chains.ethereum.rpcurls.1.http "http://127.0.0.1:8546"
+--chains.ethereum.rpcurls.2.http "http://127.0.0.1:8547"
 ```
 
 ```bash As Env
-export HYP_CHAINS_${CHAIN_NAME}_RPCURLS_0_HTTPS="$CONNECTION_URL_0"
-export HYP_CHAINS_${CHAIN_NAME}_RPCURLS_1_HTTPS="$CONNECTION_URL_1"
-export HYP_CHAINS_${CHAIN_NAME}_RPCURLS_2_HTTPS="$CONNECTION_URL_2"
-export HYP_CHAINS_ETHEREUM_RPCURLS_0_HTTPS="http://127.0.0.1:8545"
-export HYP_CHAINS_ETHEREUM_RPCURLS_1_HTTPS="http://127.0.0.1:8546"
-export HYP_CHAINS_ETHEREUM_RPCURLS_2_HTTPS="http://127.0.0.1:8547"
+export HYP_CHAINS_${CHAIN_NAME}_RPCURLS_0_HTTP="$CONNECTION_URL_0"
+export HYP_CHAINS_${CHAIN_NAME}_RPCURLS_1_HTTP="$CONNECTION_URL_1"
+export HYP_CHAINS_${CHAIN_NAME}_RPCURLS_2_HTTP="$CONNECTION_URL_2"
+export HYP_CHAINS_ETHEREUM_RPCURLS_0_HTTP="http://127.0.0.1:8545"
+export HYP_CHAINS_ETHEREUM_RPCURLS_1_HTTP="http://127.0.0.1:8546"
+export HYP_CHAINS_ETHEREUM_RPCURLS_2_HTTP="http://127.0.0.1:8547"
 ```
 
 ```json As Config
@@ -682,11 +693,11 @@ export HYP_CHAINS_ETHEREUM_RPCURLS_2_HTTPS="http://127.0.0.1:8547"
 
 <Info>
 
-Connections to Cosmos chains require **both** RPC and gRPC URLs. There is **no `rpcConsensusType` configuration** for Cosmos chains, and gRPC URLs always operate in **fallback mode**—if the first URL fails, the next one is used.
+Connections to Cosmos chains require **both** RPC and gRPC URLs. Cosmos Validators use the gRPC endpoints for their checkpoint vote. See [Validator RPC configuration](/docs/operate/validators/run-validators#rpc-configuration).
 
 </Info>
 
-**Description:** Comma-separated gRPC URLs used to connect to the provider. Similar to [`customRpcUrls`](#chains-<chain-name>-customrpcurls).
+**Description:** Comma-separated replacement for `grpcUrls`. In a standalone Cosmos chain config, include the `grpcUrls` field. It can be an empty array when the override provides the endpoints.
 
 **Type:** `string` (comma-separated list of URLs without spaces)
 
@@ -829,13 +840,13 @@ export HYP_DEFAULTSIGNER_*="...."
 
 ## defaultsigner.type
 
-**Description:** The type of signer that is defined. A `HexKey` signer uses a private key, an `Aws` signer uses an AWS-based KMS, and `Node` assumes the local node will sign RPC calls.
+**Description:** The type of signer that is defined. Use `hexKey` for a private key, `aws` for AWS KMS, or `gcp` for Google Cloud KMS on EVM and Tron. For `gcp`, supply `defaultSigner.keyVersionName` as a full Cloud KMS key version name.
 
-**Optional:** Yes; Defaults to `node` unless a `key` is specified in which case it defaults to `hexKey`
+**Optional:** Inferred as `hexKey` when a key is provided or `aws` when AWS key settings are provided. Set `gcp` explicitly for Google Cloud KMS.
 
 **Agents:** All
 
-**Type:** `Enum ("hexKey" | "aws" | "cosmosKey" | "node")`
+**Type:** `Enum ("hexKey" | "aws" | "gcp" | "cosmosKey" | "starkKey" | "radixKey")`
 
 <CodeGroup>
 ```bash As Arg
@@ -882,6 +893,40 @@ export HYP_DEFAULTSIGNER_KEY="8166f546bab6da521a8369cab06c5d2b9e46670292d85c875e
   "defaultsigner": {
     "type": "hexKey",
     "key": "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"
+  }
+}
+```
+
+</CodeGroup>
+
+## defaultsigner.keyVersionName
+
+**Description:** Full Google Cloud KMS key version name for the default EVM or Tron transaction signer. Configure a chain-specific signer for chains that need a different key type. Replace the example resource name with your own enabled key version.
+
+**Requires:** `defaultSigner.type = "gcp"`
+
+**Optional:** Required when the default signer uses Google Cloud KMS.
+
+**Agents:** Validator, Relayer
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--defaultSigner.type gcp
+--defaultSigner.keyVersionName "projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
+```
+
+```bash As Env
+export HYP_DEFAULTSIGNER_TYPE=gcp
+export HYP_DEFAULTSIGNER_KEYVERSIONNAME="projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
+```
+
+```json As Config
+{
+  "defaultSigner": {
+    "type": "gcp",
+    "keyVersionName": "projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
   }
 }
 ```
@@ -963,7 +1008,7 @@ export HYP_DEFAULTSIGNER_REGION="us-east-1"
 
 <CodeGroup>
 ```bash As Arg
---metrics-port 9090
+--metricsPort 9090
 ```
 
 ```bash As Env
@@ -972,7 +1017,7 @@ export HYP_METRICSPORT=9090
 
 ```json As Config
 {
-  "metrics": 9090
+  "metricsPort": 9090
 }
 ```
 
@@ -1063,9 +1108,92 @@ export HYP_ORIGINCHAINNAME="ethereum"
 
 </CodeGroup>
 
+## allowPublicRpcs
+
+**Description:** Allow RPC entries marked `public: true`. Use private endpoints in production.
+
+**Optional:** Yes. Defaults to `false`.
+
+**Agents:** Validator
+
+**Type:** `boolean`
+
+<CodeGroup>
+```bash As Arg
+--allowPublicRpcs true
+```
+
+```bash As Env
+export HYP_ALLOWPUBLICRPCS=true
+```
+
+```json As Config
+{
+  "allowPublicRpcs": true
+}
+```
+
+</CodeGroup>
+
+## skipAnnounce
+
+**Description:** Skip the on-chain storage announcement for local testing. The Validator still writes the signed announcement and checkpoints to the configured storage.
+
+**Optional:** Yes. Defaults to `false`.
+
+**Agents:** Validator
+
+**Type:** `boolean`
+
+<CodeGroup>
+```bash As Arg
+--skipAnnounce true
+```
+
+```bash As Env
+export HYP_SKIPANNOUNCE=true
+```
+
+```json As Config
+{
+  "skipAnnounce": true
+}
+```
+
+</CodeGroup>
+
+## maxSignConcurrency
+
+**Description:** Maximum concurrent checkpoint signing operations per batch. Accepts integers from 1 to 1,000.
+
+**Optional:** Yes. Defaults to `50`.
+
+**Agents:** Validator
+
+**Type:** `integer`
+
+<CodeGroup>
+```bash As Arg
+--maxSignConcurrency 50
+```
+
+```bash As Env
+export HYP_MAXSIGNCONCURRENCY=50
+```
+
+```json As Config
+{
+  "maxSignConcurrency": 50
+}
+```
+
+</CodeGroup>
+
 ## websocketurl
 
 **Description:** Optional public WebSocket endpoint for live Merkle Tree Hook insertions. Public endpoints should use a query-free `wss://` URL ending in `/validators`. The Validator supplies its origin domain and confirmation policy, verifies checkpoint roots through its configured RPC endpoints before signing, and uses RPC for historical indexing and recovery. See [Validator WebSocket setup](/docs/operate/validators/run-validators#validator-websocket-optional).
+
+When upgrading to v4.0.0, remove the legacy `lightweight` and `leightweigt` settings. Both are rejected even when set to `false`.
 
 **Optional:** Yes; omitted by default (RPC-only indexing).
 
@@ -1092,40 +1220,25 @@ export HYP_WEBSOCKETURL="wss://explorer-api.hyperlane.xyz/validators"
 
 ## validator
 
-**Description:** The signer that should be used by the validator.
+**Description:** The signer the Validator uses for checkpoints and announcements.
 
-**Optional:** Yes
+**Optional:** No
 
-**Agents:** All
+**Agents:** Validator
 
 **Type:** `SignerConf (Object)`
 
-<CodeGroup>
-```bash As Arg
---validator.*
-```
-
-```bash As Env
-export HYP_VALIDATOR_*="...."
-```
-
-```json As Config
-{
-  "validator": {}
-}
-```
-
-</CodeGroup>
+Choose a signer and supply its required fields. See [checkpoint signer configuration](/docs/operate/validators/run-validators#checkpoint-signer-configuration).
 
 ## validator.type
 
-**Description:** The type of EVM signer that is defined. Note that regardless of the VM the validator is operating on, checkpoints are always signed using the EVM ECDSA curve. A `HexKey` signer uses a private key, an `Aws` signer uses an AWS based KMS, and `Node` assumes the local node will sign RPC calls.
+**Description:** Checkpoint signing backend. All Validators use secp256k1 checkpoint signatures, regardless of origin chain. For Google Cloud KMS, set `validator.type` to `gcp` and supply the full crypto key version resource name in `validator.keyVersionName`. See [checkpoint signer configuration](/docs/operate/validators/run-validators#checkpoint-signer-configuration).
 
-**Optional:** Yes; Defaults to `node` unless a `key` is specified in which case it defaults to `hexKey`
+**Optional:** Inferred as `hexKey` when `validator.key` is supplied or `aws` when an AWS key ID and region are supplied. Set `gcp` explicitly for Google Cloud KMS.
 
-**Agents:** All
+**Agents:** Validator
 
-**Type:** `Enum ("hexKey" | "aws" | "node")`
+**Type:** `Enum ("hexKey" | "aws" | "gcp")`
 
 <CodeGroup>
 ```bash As Arg
@@ -1146,32 +1259,63 @@ export HYP_VALIDATOR_TYPE="hexKey"
 
 </CodeGroup>
 
-## validator.key
+## validator.keyVersionName
 
-**Description:** A hex key. The hex string of a private key.
+**Description:** Full Google Cloud KMS key version resource name, ending in `/cryptoKeyVersions/<version>`. Replace the example project, location, key ring, key, and version with your own.
 
-**Requires:** `validator.type = "hexKey" | undefined`
+**Requires:** `validator.type = "gcp"`
 
-**Optional:** No (iff requirements are met)
+**Optional:** Required for Google Cloud KMS.
 
-**Agents:** All
+**Agents:** Validator
 
 **Type:** `string`
 
 <CodeGroup>
 ```bash As Arg
---validator.key 8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61
+--validator.keyVersionName "projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
 ```
 
 ```bash As Env
-export HYP_VALIDATOR_KEY="8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"
+export HYP_VALIDATOR_KEYVERSIONNAME="projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
+```
+
+```json As Config
+{
+  "validator": {
+    "keyVersionName": "projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
+  }
+}
+```
+
+</CodeGroup>
+
+## validator.key
+
+**Description:** A `0x`-prefixed 32-byte hex key for checkpoint signing. Set `VALIDATOR_PRIVATE_KEY` to your own key before using the command examples.
+
+**Requires:** `validator.type = "hexKey" | undefined`
+
+**Optional:** No (iff requirements are met)
+
+**Agents:** Validator
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--validator.key "$VALIDATOR_PRIVATE_KEY"
+```
+
+```bash As Env
+export HYP_VALIDATOR_KEY="$VALIDATOR_PRIVATE_KEY"
 ```
 
 ```json As Config
 {
   "validator": {
     "type": "hexKey",
-    "key": "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"
+    "key": "0xYOUR_PRIVATE_KEY"
   }
 }
 ```
@@ -1180,7 +1324,7 @@ export HYP_VALIDATOR_KEY="8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec
 
 ## validator.id
 
-**Description:** The UUID identifying the AWS KMS key
+**Description:** The AWS KMS key ID or an alias prefixed with `alias/`
 
 **Requires:** `validator.type = "aws"`
 
@@ -1244,13 +1388,13 @@ export HYP_VALIDATOR_REGION="us-east-1"
 
 ## checkpointsyncer.type
 
-**Description:** Defines the method of syncing checkpoints
+**Description:** Selects where the Validator writes checkpoints. See [checkpoint syncer configuration](/docs/operate/validators/run-validators#checkpoint-syncer-configuration) for storage credentials and local testing.
 
 **Optional:** No
 
 **Agents:** Validator
 
-**Type:** `Enum ("localStorage" | "s3")`
+**Type:** `Enum ("localStorage" | "s3" | "gcs")`
 
 <CodeGroup>
 ```bash As Arg
@@ -1304,9 +1448,9 @@ export HYP_CHECKPOINTSYNCER_PATH="/tmp/syncer"
 
 ## checkpointsyncer.bucket
 
-**Description:** S3 bucket name
+**Description:** S3 or GCS bucket name
 
-**Requires:** `checkpointsyncer.type = "s3"`
+**Requires:** `checkpointsyncer.type = "s3" | "gcs"`
 
 **Optional:** No (iff conditions are met)
 
@@ -1336,11 +1480,11 @@ export HYP_CHECKPOINTSYNCER_BUCKET="signatures-ethereum"
 
 ## checkpointsyncer.folder
 
-**Description:** Folder in the S3 bucket
+**Description:** Folder in the S3 or GCS bucket. For GCS, use a single path segment so the Relayer can parse the announced location.
 
-**Requires:** `checkpointsyncer.type = "s3"`
+**Requires:** `checkpointsyncer.type = "s3" | "gcs"`
 
-**Optional:** No (iff conditions are met)
+**Optional:** Yes
 
 **Agents:** Validator
 
@@ -1392,6 +1536,68 @@ export HYP_CHECKPOINTSYNCER_REGION="us-east-1"
   "checkpointsyncer": {
     "type": "s3",
     "region": "us-east-1"
+  }
+}
+```
+
+</CodeGroup>
+
+## checkpointSyncer.useApplicationDefault
+
+**Description:** Authenticate to Google Cloud Storage with Application Default Credentials, such as GKE Workload Identity. When enabled, the Validator uses ADC instead of a configured credential file.
+
+**Requires:** `checkpointSyncer.type = "gcs"`
+
+**Optional:** Yes. Defaults to `false`.
+
+**Agents:** Validator
+
+**Type:** `boolean`
+
+<CodeGroup>
+```bash As Arg
+--checkpointSyncer.useApplicationDefault true
+```
+
+```bash As Env
+export HYP_CHECKPOINTSYNCER_USEAPPLICATIONDEFAULT=true
+```
+
+```json As Config
+{
+  "checkpointSyncer": {
+    "useApplicationDefault": true
+  }
+}
+```
+
+</CodeGroup>
+
+## checkpointSyncer.serviceAccountKey
+
+**Description:** Path to a Google Cloud service account key JSON file. Use the path visible to the Validator process, including inside its container.
+
+**Requires:** `checkpointSyncer.type = "gcs"` and `checkpointSyncer.useApplicationDefault` is disabled.
+
+**Optional:** Yes. Use this when authenticating with a service account key file.
+
+**Agents:** Validator
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--checkpointSyncer.serviceAccountKey "/path/to/service-account.json"
+```
+
+```bash As Env
+export HYP_CHECKPOINTSYNCER_SERVICEACCOUNTKEY="/path/to/service-account.json"
+```
+
+```json As Config
+{
+  "checkpointSyncer": {
+    "serviceAccountKey": "/path/to/service-account.json"
   }
 }
 ```

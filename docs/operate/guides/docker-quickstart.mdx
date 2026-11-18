@@ -6,7 +6,7 @@ Using Docker Compose provides a structured way to manage validator deployments w
 
 ## 1. Setup validator key
 
-Follow the guide [here](/docs/operate/set-up-agent-keys#2-aws-kms) for creating agent keys with AWS KMS.
+Create your Validator's signing key using the [AWS KMS guide](/docs/operate/aws-kms).
 
 ## 2. Create S3 bucket for signatures
 
@@ -37,8 +37,8 @@ You can read more about Agent Configs [here](/docs/operate/config/agent-config).
 | `chains.ethereum`         | Should be changed to `chains.base` in the base/config.json, and `chains.optimism` in optimism/config.json.                                                                 |
 | `signer.region`           | Should be adjusted to your AWS region.                                                                                                                                     |
 | `validator.region`        | Should be adjusted to your AWS region.                                                                                                                                     |
-| `signer.id`               | Should be adjusted to your AWS KMS id you configured in step 3, prefixed with `alias/`.                                                                                    |
-| `validator.id`            | Should be adjusted to your AWS KMS id you configured in step 3, prefixed with `alias/`.                                                                                    |
+| `signer.id`               | The AWS KMS alias from step 1, including the `alias/` prefix. |
+| `validator.id`            | The AWS KMS alias from step 1, including the `alias/` prefix. |
 | `originChainName`         | Should be the chain you are validating.                                                                                                                                    |
 | `checkpointSyncer.bucket` | Should reflect the name of the S3 bucket.                                                                                                                                  |
 | `checkpointSyncer.folder` | The name of the folder the validator will use within the bucket. You may use the same bucket for multiple validators, but ensure each folder name is unique per validator. |
