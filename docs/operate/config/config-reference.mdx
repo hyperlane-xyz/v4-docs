@@ -332,24 +332,24 @@ export HYP_CHAINS_${CHAIN_NAME}_SIGNER_*="...."
 
 ## chains.`<chain_name>`.signer.type
 
-**Description:** The type of signer that is defined. A `HexKey` signer uses a private key, an `Aws` signer uses an AWS based KMS, and `Node` assumes the local node will sign RPC calls.
+**Description:** The type of signer that is defined. Use `hexKey` for a private key, `aws` for AWS KMS, or `gcp` for Google Cloud KMS on EVM and Tron.
 
-**Optional:** Yes; Defaults to `node` unless a `key` is specified in which case it defaults to `hexKey`
+**Optional:** Inferred as `hexKey` when a key is provided or `aws` when AWS key settings are provided. Set `gcp` explicitly for Google Cloud KMS.
 
 **Agents:** All
 
-**Type:** `Enum ("hexKey" | "aws" | "cosmosKey" | "node")`
+**Type:** `Enum ("hexKey" | "aws" | "gcp" | "cosmosKey" | "starkKey" | "radixKey")`
 
 Accepted values for the different VMs are:
 
-- EVM: `hexKey` (ECDSA) or `aws` (ECDSA)
+- EVM and Tron: `hexKey`, `aws`, or `gcp`. For `gcp`, supply `signer.keyVersionName` as a full Cloud KMS key version name.
 - sealevel: `hexKey` (ED25519)
 - cosmos: `cosmosKey`
 
 <CodeGroup>
 ```bash As Arg
 --chains.${CHAIN_NAME}.signer.type hexKey
---chains.ethereum.signer.type node
+--chains.ethereum.signer.type hexKey
 ```
 
 ```bash As Env
@@ -366,7 +366,7 @@ export HYP_CHAINS_${CHAIN_NAME}_SIGNER_TYPE="hexKey"
     },
     "ethereum": {
       "signer": {
-        "type": "node"
+        "type": "hexKey"
       }
     }
   }
@@ -525,30 +525,34 @@ export HYP_CHAINS_ARBITRUM_PROTOCOL="ethereum"
 
 ## chains.`<chain_name>`.rpcConsensusType
 
-For Validators, this setting selects the checkpoint signing policy across chain protocols. The default, `majority`, requires at least two thirds of configured state-read endpoints to match the Validator's local checkpoint history, rounded up. `quorum` requires half, rounded up. Both use fallback for indexing and auxiliary reads. `single` and `fallback` verify checkpoints through the chain provider without a vote across endpoints. See [Validator RPC configuration](/docs/operate/validators/run-validators#rpc-configuration).
+For Validators, this setting selects the checkpoint signing policy across chain protocols. `majority` requires at least two thirds of configured state-read endpoints to match the Validator's local checkpoint history, rounded up. `quorum` requires half, rounded up. Both use fallback for indexing and auxiliary reads. `single` and `fallback` verify checkpoints through the chain provider without a vote across endpoints. See [Validator RPC configuration](/docs/operate/validators/run-validators#rpc-configuration).
 
-For EVM Relayers and Scrapers, this setting selects the RPC transport. `single` uses one endpoint, `fallback` (the default) retries provider failures across endpoints, and `quorum` uses the provider's response voting. `majority` is specific to Validators.
+For EVM Relayers and Scrapers, this setting selects the RPC transport. `single` uses one endpoint, `fallback` retries provider failures across endpoints, and `quorum` uses the provider's response voting.
 
 When upgrading a Validator to v4.0.0, move any endpoints from `additionalQuorumRpcUrls` or `customAdditionalQuorumRpcUrls` into `rpcUrls` or `customRpcUrls` and remove the old fields.
 
+**Optional:** Defaults to `majority` for Validators and `fallback` for EVM Relayers and Scrapers.
+
+**Agents:** Validator, Relayer, Scraper. Only Validators accept `majority`.
+
+**Type:** `Enum ("majority" | "quorum" | "fallback" | "single")`
+
+The examples below use the Validator default.
+
 <CodeGroup>
 ```bash As Arg
---chains.${CHAIN_NAME}.rpcConsensusType single
+--chains.ethereum.rpcConsensusType majority
 ```
 
 ```bash As Env
-export HYP_CHAINS_${CHAIN_NAME}_RPCCONSENSUSTYPE="single"
-export HYP_CHAINS_ETHEREUM_RPCCONSENSUSTYPE="single"
+export HYP_CHAINS_ETHEREUM_RPCCONSENSUSTYPE="majority"
 ```
 
 ```json As Config
 {
   "chains": {
-    "<chain_name>": {
-      "rpcConsensusType": "single"
-    },
     "ethereum": {
-      "rpcConsensusType": "single"
+      "rpcConsensusType": "majority"
     }
   }
 }
@@ -793,13 +797,13 @@ export HYP_DEFAULTSIGNER_*="...."
 
 ## defaultsigner.type
 
-**Description:** The type of signer that is defined. A `HexKey` signer uses a private key, an `Aws` signer uses an AWS-based KMS, and `Node` assumes the local node will sign RPC calls.
+**Description:** The type of signer that is defined. Use `hexKey` for a private key, `aws` for AWS KMS, or `gcp` for Google Cloud KMS on EVM and Tron. For `gcp`, supply `defaultSigner.keyVersionName` as a full Cloud KMS key version name.
 
-**Optional:** Yes; Defaults to `node` unless a `key` is specified in which case it defaults to `hexKey`
+**Optional:** Inferred as `hexKey` when a key is provided or `aws` when AWS key settings are provided. Set `gcp` explicitly for Google Cloud KMS.
 
 **Agents:** All
 
-**Type:** `Enum ("hexKey" | "aws" | "cosmosKey" | "node")`
+**Type:** `Enum ("hexKey" | "aws" | "gcp" | "cosmosKey" | "starkKey" | "radixKey")`
 
 <CodeGroup>
 ```bash As Arg
@@ -927,7 +931,7 @@ export HYP_DEFAULTSIGNER_REGION="us-east-1"
 
 <CodeGroup>
 ```bash As Arg
---metrics-port 9090
+--metricsPort 9090
 ```
 
 ```bash As Env
@@ -936,7 +940,7 @@ export HYP_METRICSPORT=9090
 
 ```json As Config
 {
-  "metrics": 9090
+  "metricsPort": 9090
 }
 ```
 
@@ -1027,6 +1031,87 @@ export HYP_ORIGINCHAINNAME="ethereum"
 
 </CodeGroup>
 
+## allowPublicRpcs
+
+**Description:** Allow RPC entries marked `public: true`. Use private endpoints in production.
+
+**Optional:** Yes. Defaults to `false`.
+
+**Agents:** Validator
+
+**Type:** `boolean`
+
+<CodeGroup>
+```bash As Arg
+--allowPublicRpcs true
+```
+
+```bash As Env
+export HYP_ALLOWPUBLICRPCS=true
+```
+
+```json As Config
+{
+  "allowPublicRpcs": true
+}
+```
+
+</CodeGroup>
+
+## skipAnnounce
+
+**Description:** Skip the on-chain storage announcement for local testing. The Validator still writes the signed announcement and checkpoints to the configured storage.
+
+**Optional:** Yes. Defaults to `false`.
+
+**Agents:** Validator
+
+**Type:** `boolean`
+
+<CodeGroup>
+```bash As Arg
+--skipAnnounce true
+```
+
+```bash As Env
+export HYP_SKIPANNOUNCE=true
+```
+
+```json As Config
+{
+  "skipAnnounce": true
+}
+```
+
+</CodeGroup>
+
+## maxSignConcurrency
+
+**Description:** Maximum concurrent checkpoint signing operations per batch. Accepts integers from 1 to 1,000.
+
+**Optional:** Yes. Defaults to `50`.
+
+**Agents:** Validator
+
+**Type:** `integer`
+
+<CodeGroup>
+```bash As Arg
+--maxSignConcurrency 50
+```
+
+```bash As Env
+export HYP_MAXSIGNCONCURRENCY=50
+```
+
+```json As Config
+{
+  "maxSignConcurrency": 50
+}
+```
+
+</CodeGroup>
+
 ## websocketurl
 
 **Description:** Optional public WebSocket endpoint for live Merkle Tree Hook insertions. Public endpoints should use a query-free `wss://` URL ending in `/validators`. The Validator supplies its origin domain and confirmation policy, verifies checkpoint roots through its configured RPC endpoints before signing, and uses RPC for historical indexing and recovery. See [Validator WebSocket setup](/docs/operate/validators/run-validators#validator-websocket-optional).
@@ -1097,6 +1182,37 @@ export HYP_VALIDATOR_TYPE="hexKey"
 
 </CodeGroup>
 
+## validator.keyVersionName
+
+**Description:** Full Google Cloud KMS key version resource name, ending in `/cryptoKeyVersions/<version>`. Replace the example project, location, key ring, key, and version with your own.
+
+**Requires:** `validator.type = "gcp"`
+
+**Optional:** Required for Google Cloud KMS.
+
+**Agents:** Validator
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--validator.keyVersionName "projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
+```
+
+```bash As Env
+export HYP_VALIDATOR_KEYVERSIONNAME="projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
+```
+
+```json As Config
+{
+  "validator": {
+    "keyVersionName": "projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
+  }
+}
+```
+
+</CodeGroup>
+
 ## validator.key
 
 **Description:** A `0x`-prefixed 32-byte hex key for checkpoint signing. Set `VALIDATOR_PRIVATE_KEY` to your own key before using the command examples.
@@ -1131,7 +1247,7 @@ export HYP_VALIDATOR_KEY="$VALIDATOR_PRIVATE_KEY"
 
 ## validator.id
 
-**Description:** The UUID identifying the AWS KMS key
+**Description:** The AWS KMS key ID or an alias prefixed with `alias/`
 
 **Requires:** `validator.type = "aws"`
 
@@ -1343,6 +1459,68 @@ export HYP_CHECKPOINTSYNCER_REGION="us-east-1"
   "checkpointsyncer": {
     "type": "s3",
     "region": "us-east-1"
+  }
+}
+```
+
+</CodeGroup>
+
+## checkpointSyncer.useApplicationDefault
+
+**Description:** Authenticate to Google Cloud Storage with Application Default Credentials, such as GKE Workload Identity. When enabled, the Validator uses ADC instead of a configured credential file.
+
+**Requires:** `checkpointSyncer.type = "gcs"`
+
+**Optional:** Yes. Defaults to `false`.
+
+**Agents:** Validator
+
+**Type:** `boolean`
+
+<CodeGroup>
+```bash As Arg
+--checkpointSyncer.useApplicationDefault true
+```
+
+```bash As Env
+export HYP_CHECKPOINTSYNCER_USEAPPLICATIONDEFAULT=true
+```
+
+```json As Config
+{
+  "checkpointSyncer": {
+    "useApplicationDefault": true
+  }
+}
+```
+
+</CodeGroup>
+
+## checkpointSyncer.serviceAccountKey
+
+**Description:** Path to a Google Cloud service account key JSON file. Use the path visible to the Validator process, including inside its container.
+
+**Requires:** `checkpointSyncer.type = "gcs"` and `checkpointSyncer.useApplicationDefault` is disabled.
+
+**Optional:** Yes. Use this when authenticating with a service account key file.
+
+**Agents:** Validator
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--checkpointSyncer.serviceAccountKey "/path/to/service-account.json"
+```
+
+```bash As Env
+export HYP_CHECKPOINTSYNCER_SERVICEACCOUNTKEY="/path/to/service-account.json"
+```
+
+```json As Config
+{
+  "checkpointSyncer": {
+    "serviceAccountKey": "/path/to/service-account.json"
   }
 }
 ```

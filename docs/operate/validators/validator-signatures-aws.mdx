@@ -5,6 +5,8 @@ description: "Set up the default checkpoint bucket for a Hyperlane Validator."
 
 Amazon S3 is the default checkpoint storage option in the Validator guide. You need an AWS IAM role or user that the Validator can use to write checkpoint files. [AWS KMS](/docs/operate/aws-kms) and [Google Cloud KMS](/docs/operate/google-cloud-kms) are separate signing options.
 
+If your Validator uses AWS access keys, create an IAM user and set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the Validator's environment. These steps also apply when you use Google Cloud KMS for checkpoint signing. [Create an IAM user](/docs/operate/aws-kms#create-an-iam-user)
+
 ## Create an S3 bucket
 
 1. Go to AWS's S3 in the AWS console.

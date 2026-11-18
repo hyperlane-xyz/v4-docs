@@ -15,7 +15,7 @@ For those more familiar with deploying to AWS through infrastructure-as-code too
 
 The provided terraform has a few key parts:
 
-- IAM/KMS module: automatically completes [Agent Keys](/docs/operate/set-up-agent-keys) configuration for you.
+- The IAM/KMS module provisions the resources described in [AWS KMS setup](/docs/operate/aws-kms).
 - S3 module: automatically completes [AWS Signatures Bucket](/docs/operate/validators/validator-signatures-aws) configuration for you.
 - EFS module: sets up a persistent volume that can be mounted to the Validator.
 - Validator module: uses the above modules to run an instance of a Validator.

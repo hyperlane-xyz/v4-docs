@@ -300,7 +300,7 @@ There are numerous parameters that relayers can be configured with. For this gui
 | `--relayChains`                 | Comma separated names of the chains to relay between. E.g. `ethereum,polygon,avalanche`. |
 | `--allowLocalCheckpointSyncers` | Allows the relayer to look for validator signatures on the local filesystem.             |
 | `--defaultSigner.key`           | A hexadecimal private key used to sign transactions for all chains.                      |
-| `--metrics-port`                | Optional. The port to expose prometheus metrics on, defaults to `9090`.                  |
+| `--metricsPort`                | Optional. The port to expose prometheus metrics on, defaults to `9090`.                  |
 
 <Tip>
   Your set of relay chains should include both the origin chain and the
@@ -394,7 +394,7 @@ To learn more about all the parameters you can change, read the [agent configura
         --relayChains <chain_1_name>,<chain_2_name> \
         --allowLocalCheckpointSyncers true \
         --defaultSigner.key <your_relayer_key> \
-        --metrics-port 9091
+        --metricsPort 9091
     ```
 
     The metrics port is overridden to avoid clashing with the validator.
@@ -416,7 +416,7 @@ To learn more about all the parameters you can change, read the [agent configura
         --relayChains <chain_1_name>,<chain_2_name> \
         --allowLocalCheckpointSyncers true \
         --defaultSigner.key <your_relayer_key> \
-        --metrics-port 9091
+        --metricsPort 9091
     ```
     </Note>
 

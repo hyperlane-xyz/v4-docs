@@ -13,6 +13,8 @@ Validators support two HSM-backed KMS options.
 1. [AWS KMS](/docs/operate/aws-kms) is the default choice in the Validator guide.
 2. [Google Cloud KMS](/docs/operate/google-cloud-kms) is also supported for Validator checkpoint signing.
 
+Relayers can use [AWS KMS](/docs/operate/aws-kms) for transaction signing. Google Cloud KMS is also available for EVM and Tron transaction signers. [Signer configuration](/docs/operate/config/config-reference#defaultsignertype)
+
 Choose the signing provider independently of the bucket where the Validator publishes its signed checkpoints. See [checkpoint storage](/docs/operate/validators/run-validators#checkpoint-syncer-configuration).
 
 <a id="1-hexadecimal-keys"></a>

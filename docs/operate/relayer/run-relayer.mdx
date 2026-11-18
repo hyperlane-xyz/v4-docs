@@ -18,7 +18,7 @@ title: "Run a Relayer"
 - **One or more signing keys**
 
   - In order to deliver messages, the Relayer must be configured with a signing key to submit transactions on each destination chain (thus need funds on those chains).
-  - The Relayer uses this key to sign `Mailbox.process()` transactions. The Hyperlane Relayer agent currently supports configuration with AWS KMS keys that are accessed via API keys/secrets or raw hexadecimal private keys.
+  - The Relayer uses this key to sign `Mailbox.process()` transactions. EVM and Tron transaction signers support AWS KMS, Google Cloud KMS, and hexadecimal keys.
 
 - **A machine to run on**
   - Relayer operators can compile the Rust binary themselves, or run a Docker image provided by Abacus Works. The binary can be run using your favorite cloud service.
@@ -41,7 +41,7 @@ title: "Run a Relayer"
 
 ### Keys
 
-The Relayer needs to be able to submit transactions to many destination chains, and therefore requires access to a key for signing transactions. There are two supported key types: hexadecimal private keys (for in-memory signing), and AWS KMS based keys (best practice for production environments).
+The Relayer needs a funded signing key for each destination chain. For production on EVM and Tron, use an external, HSM-backed key. AWS KMS is the default setup in this guide. For Google Cloud KMS, configure the chain's signer with `type: gcp` and the full key version name. [Signer configuration](/docs/operate/config/config-reference#defaultsignertype)
 
 #### Hexadecimal keys
 
@@ -49,12 +49,17 @@ A hexadecimal private key used for in-memory signing can be used by your Relayer
 
 #### AWS KMS keys
 
-An AWS KMS key can be used by your Relayer to sign transactions. This is the recommended setup for a production Relayer.
+After creating the key, set `defaultSigner.type` to `aws`, `defaultSigner.id` to the key ID or an alias such as `alias/hyperlane-relayer-1`, and `defaultSigner.region` to the key's region. Use a chain-specific signer for destinations that require a different key type. [AWS KMS setup](/docs/operate/aws-kms)
 
-<Tip>
-  See the [Agent Keys](/docs/operate/set-up-agent-keys) page to set up your
-  Hexadecimal or AWS KMS keys.
-</Tip>
+```json
+{
+  "defaultSigner": {
+    "type": "aws",
+    "id": "alias/hyperlane-relayer-1",
+    "region": "us-east-1"
+  }
+}
+```
 
 ### Configuration
 
@@ -133,7 +138,7 @@ These configurations requirements differ depending on which key setup instructio
   </Tab>
   
   <Tab title="AWS KMS Key">
-    If you created an [AWS KMS key](../set-up-agent-keys), configure the default signer like so:
+    If you created an [AWS KMS key](/docs/operate/aws-kms), configure the default signer like so:
 
     | Argument                 | Description                                                                                                |
     | ------------------------ | ---------------------------------------------------------------------------------------------------------- |
@@ -192,14 +197,14 @@ The recommended installation method for a production environment is using a Dock
 
 ### Running the agent
 
-If the Relayer's keys have been configured with AWS KMS, you will have to provide the AWS access key and secret as environment variables.
+If the Relayer uses AWS KMS with access keys, provide the credentials as environment variables.
 
 | Environment variable    | Description                                           |
 | ----------------------- | ----------------------------------------------------- |
 | `AWS_ACCESS_KEY_ID`     | The access key ID of your Relayer's AWS IAM user.     |
 | `AWS_SECRET_ACCESS_KEY` | The secret access key of your Relayer's AWS IAM user. |
 
-For a refresher, check out the [Agent Keys](/docs/operate/set-up-agent-keys) guide.
+See [AWS KMS setup](/docs/operate/aws-kms) for credential and key configuration.
 
 <Tabs>
   <Tab title="Using Docker">

@@ -411,7 +411,7 @@ Multiple instances can improve availability. To increase signer redundancy on a 
 
 #### 2. Run Each Validator
 
-- Ensure each Validator is assigned a unique database path (e.g., `--db /hyperlane_db_validator1`).
+- Give each Validator a separate writable database directory. In Docker, use a dedicated volume at `/data` or a unique directory under a shared volume, such as `--db /data/validator_db_1`.
 - When processes share a network namespace, assign each Validator a unique metrics port (for example, `--metricsPort 9090` and `--metricsPort 9091`).
 - If running multiple validators on the same machine, allocate sufficient system resources (CPU, memory, and storage).
 - Ensure logs are directed to separate files or services for easier debugging and monitoring.
