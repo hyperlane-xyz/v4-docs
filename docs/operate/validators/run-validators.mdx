@@ -111,6 +111,7 @@ Like the local setup, there are a few base arguments you should provide when con
 | `--originChainName`                             | Name of the chain being validated. For example: `ethereum`.                                             |
 | `--chains.[originChainName].customRpcUrls`      | Override the default RPC URLs used by the Validator for your origin chain.                              |
 | `--chains.[originChainName].blocks.reorgPeriod` | Number of block confirmations the Validator needs to wait for before signing the `Mailbox` merkle root. |
+| `--interval`                                    | Optional polling and retry interval in seconds. Defaults to the origin chain's `index.interval`, then 2 seconds. Fractional values down to `0.01` are supported. |
 
 <Info>
   Your Validator takes both command line arguments and environment variables as
@@ -121,6 +122,53 @@ Like the local setup, there are a few base arguments you should provide when con
 </Info>
 
 You can also provide the path to additional configuration files as a comma separated list with the [`CONFIG_FILES` environment variable](/docs/operate/config/config-reference#config_files). If you choose to run in Docker, see the docker section of [agent configuration](/docs/operate/config/agent-config) for tips on mounting your config files into your Docker container.
+
+#### Validator WebSocket (optional)
+
+For faster updates, connect your Validator to the public WebSocket endpoint. It streams live Merkle Tree Hook insertions and wakes checkpoint verification as soon as a new insertion arrives, reducing polling delays. No API key is required.
+
+Use [Validator v4.0.0](https://github.com/hyperlane-xyz/hyperlane-monorepo/releases/tag/agents-v4.0.0), which supports the public `/validators` endpoint. Add [`websocketUrl`](/docs/operate/config/config-reference#websocketurl) to your existing configuration using one of these options:
+
+<CodeGroup>
+```bash As Arg
+--websocketUrl wss://explorer-api.hyperlane.xyz/validators
+```
+
+```bash As Env
+export HYP_WEBSOCKETURL="wss://explorer-api.hyperlane.xyz/validators"
+```
+
+```json As Config
+{
+  "websocketUrl": "wss://explorer-api.hyperlane.xyz/validators"
+}
+```
+</CodeGroup>
+
+**Upgrade checklist:**
+
+1. Update the Validator image to the new release.
+2. Add `websocketUrl` using exactly one of the options above.
+3. Remove the unsupported `lightweight` and `leightweigt` settings, even when set to `false`. This includes the `--lightweight` and `--leightweigt` arguments and the `HYP_LIGHTWEIGHT` and `HYP_LEIGHTWEIGT` environment variables.
+4. Keep the existing chain RPC URLs and `blocks.reorgPeriod`. For production Validators, use `rpcConsensusType: majority` with independent RPC providers.
+5. Restart the Validator and confirm the WebSocket handoff message described below appears in its logs.
+
+RPC log indexing is required for startup and recovery. Replace any previous WebSocket URL with the `/validators` URL above.
+
+Keep `websocketUrl` at the top level of your JSON config. Use the URL exactly as shown, without query parameters. The Validator supplies its origin domain and, for a numeric reorg period, requests the same confirmation depth. Block-tag reorg policies use the scraper's canonical stream. The Validator checks the negotiated policy before accepting the stream.
+
+**Keep your RPC endpoints configured.** The stream supplies live insertions only. At startup and after reconnecting, the Validator catches up through RPC, checks the stream's domain and Merkle Tree Hook address, and verifies its starting block hash through RPC before switching to WebSocket indexing. Coverage depends on the chains indexed by the scraper; if the requested domain or confirmation policy is unavailable, RPC indexing continues.
+
+Before signing, the Validator reconstructs the Merkle tree locally and checks its roots against on-chain checkpoints from your configured RPC endpoints, using its configured checkpoint verification and finality policy. WebSocket data alone cannot authorize a signature. If root verification fails, signing remains blocked while the Validator attempts recovery through RPC. Disconnects, sequence gaps, conflicting insertions, and rollbacks also restore RPC indexing.
+
+<Warning>
+  Keep your chain's required `blocks.reorgPeriod` and independent RPC endpoints.
+  Use `rpcConsensusType: majority`; `quorum` permits half of an even-sized RPC
+  pool to authorize a checkpoint. The WebSocket reduces indexing delay; it does
+  not replace finality checks or make a lower confirmation depth safe.
+</Warning>
+
+After catching up, look for `Live-start boundary verified; switched Merkle tree hook indexing to WebSocket` in the logs. Omitting `websocketUrl` keeps ordinary RPC-only indexing. See the [stream contract](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/typescript/scraper-proxy#validator-websocket-validators) for protocol details.
 
 ### Setup-specific configuration
 
@@ -223,7 +271,7 @@ The recommended installation method for a production environment is using a Dock
 First download the docker image:
 
 ```bash
-docker pull --platform linux/amd64 ghcr.io/hyperlane-xyz/hyperlane-agent:agents-v3.0.0
+docker pull --platform linux/amd64 ghcr.io/hyperlane-xyz/hyperlane-agent:agents-v4.0.0
 ```
 
 </Tab>
@@ -278,7 +326,7 @@ docker run \
   -e AWS_ACCESS_KEY_ID=ABCDEFGHIJKLMNOP \
   -e AWS_SECRET_ACCESS_KEY=xX-haha-nice-try-Xx \
   --mount ... \
-  ghcr.io/hyperlane-xyz/hyperlane-agent:agents-v3.0.0 \
+  ghcr.io/hyperlane-xyz/hyperlane-agent:agents-v4.0.0 \
   ./validator \
   --db /hyperlane_db \
   --originChainName <your_chain_name> \
