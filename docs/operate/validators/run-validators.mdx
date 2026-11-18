@@ -13,35 +13,29 @@ As you follow this guide, you can run a Hyperlane validator on any of the existi
 
 - **Secure Signing Key**
 
-  - Validators use this key to sign the `Mailbox`'s latest merkle root. Securing this key is important. If it is compromised, attackers can attempt to falsify messages, causing the Validator to be slashed.
+  - Validators use this key to sign Merkle Tree Hook checkpoints. A compromised key can be used to sign fraudulent checkpoints.
 
-  - The Hyperlane Validator agent currently supports signing with AWS KMS keys that are accessed via API keys/secrets as well as hexadecimal plaintext keys. See more under [agent keys](/docs/operate/set-up-agent-keys).
+  - The Validator supports AWS KMS, Google Cloud KMS, and local hex keys. See [checkpoint signer configuration](#checkpoint-signer-configuration) and [agent keys](/docs/operate/set-up-agent-keys).
 
 - **Publicly Readable Storage**
 
   - Validators write their signatures off-chain to publicly accessible, highly available, storage, so that they can be aggregated by the [Relayer](/docs/protocol/agents/relayer).
 
-  - The Hyperlane Validator agent currently supports storing signatures on AWS S3 using the same AWS API key above, as well as storing signatures in the local filesystem for testing.
-
-  - The design is [open source](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/56be527d691a11a1ff2de4a390fd0dae8bb77347/typescript/infra/src/agents) and generalizable to other storage and key solutions. There is a community-submitted work-in-progress [PR for GCS](https://github.com/hyperlane-xyz/hyperlane-monorepo/pull/3156).
+  - Use Amazon S3 or Google Cloud Storage (GCS) in production. For local testing, write signatures to the filesystem. See [checkpoint syncer configuration](#checkpoint-syncer-configuration).
 
 - **Machine Requirements**
 
-  - Validators can compile the Rust binary themselves or run a Docker image provided by Abacus Works. The binary can be run using your favorite cloud service. You can even run multiple instances of them in different regions for high availability, as Hyperlane has no notion of "double signing."
-
-  - Hardware requirements & costs are minimal - validators often start with a 2-Core / 2GB RAM / 4GB Storage setup with typical costs around $75/mo
+  - Validators can build the Rust binary or use the Docker image. Give each instance a persistent, writable database directory. You can run instances in different regions for high availability.
 
 - **RPC Node**
 
-  - Validators make simple view calls to read merkle roots from the [Mailbox](/docs/protocol/core/mailbox) contract on the chain they are validating for. You must use your own RPC urls not any public ones.
+  - Validators use RPC to index Merkle Tree Hook insertions and read on-chain checkpoints. Use private endpoints that can serve historical insertion logs and state reads under the origin chain's finality policy.
 
   - Validators should configure multiple RPC URLs for redundancy and reliability. Different chains have different configurations—check the Configuration section for details.
 
-<Warning>
-  Operating a Validator for Polygon mainnet requires access to an archive node.
-  This is because Validators should only sign roots once they've been finalized,
-  and Polygon requires 256 block confirmations to achieve finality.
-</Warning>
+<Note>
+  Polygon mainnet uses the `finalized` block tag. Choose an RPC provider that supports it and serves the insertion history your Validator needs. See the [Polygon chain configuration](https://github.com/hyperlane-xyz/hyperlane-registry/blob/main/chains/polygon/metadata.yaml).
+</Note>
 
 ## Guide
 
@@ -50,7 +44,7 @@ As you follow this guide, you can run a Hyperlane validator on any of the existi
 As a recap - before running a production Validator you need to have:
 
 1. Created a key for your Validator to sign with, see the [Agent Keys](/docs/operate/set-up-agent-keys) documentation.
-2. Set up the destination for your Validator signatures to be posted, see the [AWS Signatures Bucket Setup](/docs/operate/validators/validator-signatures-aws) guide.
+2. Set up storage for your Validator signatures. See [AWS signature bucket setup](/docs/operate/validators/validator-signatures-aws) or [Google Cloud Storage configuration](#checkpoint-syncer-configuration).
 
 ### Configuration
 
@@ -65,69 +59,51 @@ As a recap - before running a production Validator you need to have:
 
 #### RPC Configuration
 
-Hyperlane Validators and Relayers can use **multiple RPC URLs** to improve reliability and redundancy. The setup varies based on the chain type.
+Hyperlane Validators can use **multiple RPC URLs** for reliability and redundancy. For production, configure independent private providers. For local testing with endpoints marked public, set `--allowPublicRpcs true`.
 
 <Tabs>
   <Tab title="EVM Chains">
-    EVM-based chains support configuring multiple RPC endpoints for redundancy and can specify how they are used.
-
-    - **Configure multiple RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
-    - **RPC Selection Mode ([`rpcConsensusType`](/docs/operate/config/config-reference#chains-<chain-name>-rpcconsensustype))**:
-      - **Fallback**: The agent tries the first URL and switches to the next if needed.
-      - **Quorum**: Requires a majority of the URLs to agree with the exception of submitting transactions; it will automatically coordinate the "latest" block if not specified to reduce sync errors.
-
+    Set [`customRpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls) to a comma-separated list of RPC URLs. This replaces the chain's `rpcUrls` list. With `majority` or `quorum`, the Validator uses these endpoints for checkpoint votes.
   </Tab>
   <Tab title="Cosmos Chains">
     Cosmos-based chains require both **RPC and gRPC endpoints** for proper operation.
 
     - **Configure multiple RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
-    - **Configure gRPC endpoints:** Use [`customGrpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
-    - **Fallback Mechanism:** Cosmos agents always use **fallback mode**.
+    - **Configure gRPC endpoints:** Use [`customGrpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customgrpcurls). The Validator uses gRPC endpoints for checkpoint votes.
 
   </Tab>
   <Tab title="SVM Chains">
-    SVM-based chains support configuring multiple RPC endpoints. Agents automatically use **fallback mode**: if the current RPC fails or times out, they switch to the next available endpoint.
+    SVM-based chains support multiple RPC endpoints. Ordinary RPC calls can fail over to another endpoint if the current one fails or times out.
 
     - **Configure RPCs:** Use [`customRpcUrls`](/docs/operate/config/config-reference#chains-<chain-name>-customrpcurls).
 
-    <Warning>
-      For **SVM chains**, only **Fallback mode** is supported. SVM agents will automatically switch between configured RPC URLs when encountering errors or timeouts.
-    </Warning>
+    Checkpoint votes use the configured RPC endpoints.
 
     <Warning>
       **SVM Relayer Funding**: When relaying messages to SVM chains, make sure your Relayer key has sufficient funds on the destination chain. The Relayer performs view calls via simulations that require the sender to have funds for successful simulation, even for read operations. Without sufficient funds, you may encounter `No return data from InboxGetRecipientIsm instruction` errors.
     </Warning>
 
   </Tab>
+  <Tab title="Tron">
+    Configure the origin chain's RPC and wallet endpoints. The Validator uses `walletSolidityUrls` for checkpoint votes. Set `customWalletSolidityUrls` to override those URLs.
+  </Tab>
 </Tabs>
 
-#### Configuration Settings
+The origin chain's `rpcConsensusType` controls how the Validator verifies checkpoints before signing. With `majority` or `quorum`, the Validator compares each endpoint's reported root with its local tree at the reported leaf index. Providers can report different indices.
 
-Like the local setup, there are a few base arguments you should provide when configuring your Validator.
+| Mode | Checkpoint verification |
+| --- | --- |
+| `majority` (default) | At least two thirds of the configured state-read endpoints must match local history, rounded up. With four endpoints, three must match. |
+| `quorum` | At least half must match, rounded up. With four endpoints, two can authorize signing. |
+| `single` or `fallback` | Uses the chain provider to verify the checkpoint without a vote across endpoints. |
 
-| Parameter                                       | Description                                                                                             |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `--db`                                          | Path for writing persistent data to disk.                                                               |
-| `--originChainName`                             | Name of the chain being validated. For example: `ethereum`.                                             |
-| `--chains.[originChainName].customRpcUrls`      | Override the default RPC URLs used by the Validator for your origin chain.                              |
-| `--chains.[originChainName].blocks.reorgPeriod` | Number of block confirmations the Validator needs to wait for before signing the `Mailbox` merkle root. |
-| `--interval`                                    | Optional polling and retry interval in seconds. Defaults to the origin chain's `index.interval`, then 2 seconds. Fractional values down to `0.01` are supported. |
-
-<Info>
-  Your Validator takes both command line arguments and environment variables as
-  configuration. Take a look at the [agent
-  configuration](/docs/operate/config/agent-config) page and the [configuration
-  reference](/docs/operate/config/config-reference) for a full list of
-  configuration possibilities.
-</Info>
-
-You can also provide the path to additional configuration files as a comma separated list with the [`CONFIG_FILES` environment variable](/docs/operate/config/config-reference#config_files). If you choose to run in Docker, see the docker section of [agent configuration](/docs/operate/config/agent-config) for tips on mounting your config files into your Docker container.
+Exact duplicate URLs count once. With `majority` or `quorum`, an unavailable endpoint keeps its place in the vote. Signing waits until enough endpoints agree. Indexing and other RPC calls can still use fallback. See the [Validator checkpoint consensus rules](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/agents-v4.0.0/rust/main/agents/validator/README.md#validator-checkpoint-consensus).
 
 #### Validator WebSocket (optional)
 
-For faster updates, connect your Validator to the public WebSocket endpoint. It streams live Merkle Tree Hook insertions and wakes checkpoint verification as soon as a new insertion arrives, reducing polling delays. No API key is required.
+The [Validator WebSocket](/docs/reference/explorer/validator-websocket) wakes your Validator on each new Merkle Tree Hook insertion so it can verify and sign checkpoints sooner. Keep all existing RPC endpoints so the Validator can independently check its locally computed Merkle root against the on-chain root before signing.
 
-Use [Validator v4.0.0](https://github.com/hyperlane-xyz/hyperlane-monorepo/releases/tag/agents-v4.0.0), which supports the public `/validators` endpoint. Add [`websocketUrl`](/docs/operate/config/config-reference#websocketurl) to your existing configuration using one of these options:
+With [Validator v4.0.0](https://github.com/hyperlane-xyz/hyperlane-monorepo/releases/tag/agents-v4.0.0), add [`websocketUrl`](/docs/operate/config/config-reference#websocketurl) and keep your chain's configured `blocks.reorgPeriod`.
 
 <CodeGroup>
 ```bash As Arg
@@ -145,34 +121,35 @@ export HYP_WEBSOCKETURL="wss://explorer-api.hyperlane.xyz/validators"
 ```
 </CodeGroup>
 
-**Upgrade checklist:**
+#### Configuration Settings
 
-1. Update the Validator image to the new release.
-2. Add `websocketUrl` using exactly one of the options above.
-3. Remove the unsupported `lightweight` and `leightweigt` settings, even when set to `false`. This includes the `--lightweight` and `--leightweigt` arguments and the `HYP_LIGHTWEIGHT` and `HYP_LEIGHTWEIGT` environment variables.
-4. Keep the existing chain RPC URLs and `blocks.reorgPeriod`. For production Validators, use `rpcConsensusType: majority` with independent RPC providers.
-5. Restart the Validator and confirm the WebSocket handoff message described below appears in its logs.
+Replace `<origin>` with your origin chain name, such as `ethereum`.
 
-RPC log indexing is required for startup and recovery. Replace any previous WebSocket URL with the `/validators` URL above.
+| Parameter | Description |
+| --- | --- |
+| `--originChainName` | Name of the chain this Validator indexes and signs for. |
+| `--db` | Persistent database directory. Defaults to `validator_db_<origin>` in the working directory. |
+| `--chains.<origin>.customRpcUrls` | Comma-separated replacement for the origin chain's `rpcUrls`. For a custom chain config, include `rpcUrls` even when supplying an override. |
+| `--chains.<origin>.rpcConsensusType` | Checkpoint verification mode. Defaults to `majority`. |
+| `--chains.<origin>.blocks.reorgPeriod` | Confirmation depth or supported finality tag. Keep the origin chain's configured policy. |
+| `--websocketUrl` | Optional live insertion feed. Use `wss://explorer-api.hyperlane.xyz/validators` without query parameters. |
+| `--interval` | Polling and verification retry interval in seconds, including fractions down to `0.01`. Defaults to the chain's `index.interval`, then 2 seconds. |
+| `--skipAnnounce` | Local testing only. Set to `true` to skip the on-chain storage announcement. Defaults to `false`. |
+| `--maxSignConcurrency` | Maximum concurrent checkpoint signing operations per batch. Defaults to 50 and accepts 1 to 1,000. |
 
-Keep `websocketUrl` at the top level of your JSON config. Use the URL exactly as shown, without query parameters. The Validator supplies its origin domain and, for a numeric reorg period, requests the same confirmation depth. Block-tag reorg policies use the scraper's canonical stream. The Validator checks the negotiated policy before accepting the stream.
+<Info>
+  Your Validator takes both command line arguments and environment variables as
+  configuration. Take a look at the [agent
+  configuration](/docs/operate/config/agent-config) page and the [configuration
+  reference](/docs/operate/config/config-reference) for a full list of
+  configuration possibilities.
+</Info>
 
-**Keep your RPC endpoints configured.** The stream supplies live insertions only. At startup and after reconnecting, the Validator catches up through RPC, checks the stream's domain and Merkle Tree Hook address, and verifies its starting block hash through RPC before switching to WebSocket indexing. Coverage depends on the chains indexed by the scraper; if the requested domain or confirmation policy is unavailable, RPC indexing continues.
-
-Before signing, the Validator reconstructs the Merkle tree locally and checks its roots against on-chain checkpoints from your configured RPC endpoints, using its configured checkpoint verification and finality policy. WebSocket data alone cannot authorize a signature. If root verification fails, signing remains blocked while the Validator attempts recovery through RPC. Disconnects, sequence gaps, conflicting insertions, and rollbacks also restore RPC indexing.
-
-<Warning>
-  Keep your chain's required `blocks.reorgPeriod` and independent RPC endpoints.
-  Use `rpcConsensusType: majority`; `quorum` permits half of an even-sized RPC
-  pool to authorize a checkpoint. The WebSocket reduces indexing delay; it does
-  not replace finality checks or make a lower confirmation depth safe.
-</Warning>
-
-After catching up, look for `Live-start boundary verified; switched Merkle tree hook indexing to WebSocket` in the logs. Omitting `websocketUrl` keeps ordinary RPC-only indexing. See the [stream contract](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/typescript/scraper-proxy#validator-websocket-validators) for protocol details.
+You can also provide the path to additional configuration files as a comma separated list with the [`CONFIG_FILES` environment variable](/docs/operate/config/config-reference#config_files). If you choose to run in Docker, see the docker section of [agent configuration](/docs/operate/config/agent-config) for tips on mounting your config files into your Docker container.
 
 ### Setup-specific configuration
 
-These configurations requirements differ depending on which environment you are setting up.
+Choose a checkpoint signer and a storage backend for your environment.
 
 #### Checkpoint signer configuration
 
@@ -181,8 +158,7 @@ These configurations requirements differ depending on which environment you are 
 
 | Argument                                | Description                                                                                                                                  |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--validator.key`                       | Your Validator's private key, which is used to sign merkle roots.                                                                            |
-| `--chains.${localChainName}.signer.key` | Your Validator's private key, which will be used to submit a transaction onchain that publicly announces your Validator's checkpoint syncer. |
+| `--validator.key` | A `0x`-prefixed, 32-byte hex key for checkpoint signing. You can supply it through `HYP_VALIDATOR_KEY`. |
 
 </Tab>
 <Tab title="AWS KMS">
@@ -194,20 +170,31 @@ These configurations requirements differ depending on which environment you are 
 | `--validator.id`     | The alias of your Validator's AWS KMS key, prefixed with `alias/`. For example: `alias/hyperlane-validator-signer-${originChainName}`. |
 
 </Tab>
+<Tab title="Google Cloud KMS">
+
+Follow the [Google Cloud KMS setup guide](/docs/operate/google-cloud-kms) to create the key and grant the Validator access.
+
+Set `--validator.type gcp` and `--validator.keyVersionName` to the full resource name of an `EC_SIGN_SECP256K1_SHA256` key version. Give the Validator's Application Default Credentials (ADC) permission to read the public key and sign with that version.
+
+```text
+projects/PROJECT_ID/locations/LOCATION/keyRings/KEY_RING/cryptoKeys/KEY/cryptoKeyVersions/VERSION
+```
+
+</Tab>
 </Tabs>
 
 #### Transaction signer configuration
 
-The key configured in this step needs a small amount of funds to send the initial announcement transaction.
+Fund the transaction signer with native tokens to send the initial on-chain announcement. On EVM and Tron, the checkpoint signer also sends the transaction if neither `chains.<origin>.signer` nor `defaultSigner` is configured. For local tests, `skipAnnounce` can skip the transaction.
 
 <Tabs>
 <Tab title="Hex Key (EVM)">
 
-This is the same as the local configuration for the checkpoint signer.
+Use these settings to configure a separate EVM transaction signer.
 
 | Argument                                | Description                                                                                                                                  |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--chains.${localChainName}.signer.key` | Your Validator's private key, which will be used to submit a transaction onchain that publicly announces your Validator's checkpoint syncer. |
+| `--chains.${originChainName}.signer.key` | The `0x`-prefixed hex private key of the account that submits the on-chain announcement. |
 
 </Tab>
 <Tab title="AWS KMS (EVM)">
@@ -225,7 +212,17 @@ This is the same as the local configuration for the checkpoint signer.
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `--chains.${originChainName}.signer.type`   | Set to the `cosmosKey` literal.                                                                                                                  |
 | `--chains.${originChainName}.signer.prefix` | Set to the prefix literal associated with the chain's address format. Example: `osmo`.                                                           |
-| `--chains.${originChainName}.key`           | Your Validator's hex private key, which will be used to submit a transaction onchain that publicly announces your Validator's checkpoint syncer. |
+| `--chains.${originChainName}.signer.key` | The `0x`-prefixed hex private key of the account that submits the on-chain announcement. |
+
+</Tab>
+<Tab title="Google Cloud KMS (EVM or Tron)">
+
+Set `chains.<origin>.signer.type` to `gcp` and `chains.<origin>.signer.keyVersionName` to the full Cloud KMS key version resource name. The signer uses Application Default Credentials.
+
+</Tab>
+<Tab title="Hex Key (SVM)">
+
+Set `chains.<origin>.signer.key` to the funded Solana keypair's 32-byte seed as a `0x`-prefixed hex string.
 
 </Tab>
 </Tabs>
@@ -238,12 +235,12 @@ This is the same as the local configuration for the checkpoint signer.
 | Argument                  | Description                                                                                                                                                                                                                                                |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--checkpointSyncer.type` | Set to `localStorage`.                                                                                                                                                                                                                                     |
-| `--checkpointSyncer.path` | The path to your local directory where Validator signatures will be written. This should be the value of `$MY_VALIDATOR_SIGNATURES_DIRECTORY` from the local setup. For example: `--checkpointSyncer.path='/tmp/hyperlane-validator-signatures-ethereum'`. |
+| `--checkpointSyncer.path` | The path to your local directory where Validator signatures will be written. For example, use `--checkpointSyncer.path /tmp/hyperlane-validator-signatures-ethereum`. |
+
+Use `--skipAnnounce true` for local tests that only need checkpoint signing. The Validator still writes the signed announcement and checkpoints to disk. Local storage requires no cloud upload.
 
 <Warning>
-  Note that the Relayer **must** be configured with
-  `--allowLocalCheckpointSyncers` to be able to read signatures from this
-  Validator.
+  For end-to-end tests with a Relayer, leave `skipAnnounce` at its default so the Relayer can discover the storage location. Make the directory available to the Relayer at the same absolute path and configure it with `--allowLocalCheckpointSyncers true`.
 </Warning>
 
 </Tab>
@@ -254,7 +251,14 @@ This is the same as the local configuration for the checkpoint signer.
 | `--checkpointSyncer.type`   | Set to `s3`.                                                          |
 | `--checkpointSyncer.bucket` | The AWS S3 bucket name.                                               |
 | `--checkpointSyncer.region` | The region of your AWS S3 bucket. For example: `us-east-1`.           |
-| `--checkpointSyncer.folder` | A folder name to use for this validator, can be the name of the chain |
+| `--checkpointSyncer.folder` | An optional folder for this Validator's checkpoints. |
+
+</Tab>
+<Tab title="Google Cloud Storage">
+
+Set `--checkpointSyncer.type gcs` and `--checkpointSyncer.bucket` to the bucket name. If you set `--checkpointSyncer.folder`, use a single segment such as `ethereum-validator-1`. Nested paths prevent the Relayer from parsing the announced storage location.
+
+Grant the Validator read and write access to checkpoint objects and allow unauthenticated reads for Relayers. For workload credentials such as GKE Workload Identity, set `--checkpointSyncer.useApplicationDefault true`. For a service account key file, leave this setting off and set `--checkpointSyncer.serviceAccountKey` to the path inside the Validator process.
 
 </Tab>
 </Tabs>
@@ -282,10 +286,10 @@ docker pull --platform linux/amd64 ghcr.io/hyperlane-xyz/hyperlane-agent:agents-
 First, clone the Hyperlane monorepo:
 
 ```sh
-git clone git@github.com:hyperlane-xyz/hyperlane-monorepo.git
+git clone --branch agents-v4.0.0 --depth 1 https://github.com/hyperlane-xyz/hyperlane-monorepo.git
 ```
 
-Then follow the [setup instructions](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/rust/README.md) in the `rust` directory. This should setup `rustup` as well as Rosetta 2 if you are on Apple Silicon.
+Install `rustup` so Cargo can select the release's pinned Rust toolchain. On Apple Silicon you may also need Rosetta 2. [Rust workspace setup for v4.0.0](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/agents-v4.0.0/rust/README.md#setup)
 
 ```sh
 # install rustup
@@ -298,7 +302,8 @@ softwareupdate --install-rosetta --agree-to-license
 Build the Validator:
 
 ```sh
-cargo build --release bin validator
+cd hyperlane-monorepo/rust/main
+cargo build --release --bin validator
 ```
 
 </Tab>
@@ -306,68 +311,58 @@ cargo build --release bin validator
 
 ### Running the binary
 
-For production Validators that write their signatures to an S3 bucket and have their keys configured with AWS KMS, you will have to provide the AWS access key and secret as environment variables.
+The examples below use AWS KMS and S3 on Ethereum. Replace the key alias, bucket, and regions with your own. Set `ETHEREUM_RPC_URLS` to a comma-separated list of your private RPC endpoints. The agent loads contract addresses and finality settings from its bundled chain configuration.
+
+If you use AWS environment credentials, export the following variables before starting the Validator. AWS KMS also supports ECS task roles and EKS web identity.
 
 | Environment variable    | Description                                             |
 | ----------------------- | ------------------------------------------------------- |
 | `AWS_ACCESS_KEY_ID`     | The access key ID of your Validator's AWS IAM user.     |
-| `AWS_SECRET_ACCESS_KEY` | The secret access key of your Validator's AWS IAM user. |
+| `AWS_SECRET_ACCESS_KEY` | The AWS secret access key. |
+| `AWS_SESSION_TOKEN` | The session token, when using temporary credentials. |
 
 For a refresher, check out the [Agent Keys](/docs/operate/set-up-agent-keys) guide.
 
 <Tabs>
 <Tab title="Using Docker">
 
-Then start the container with the relevant arguments. For example, your configuration for AWS:
+Start the Validator with a persistent database volume.
 
 ```sh
-docker run \
-  -it \
-  -e AWS_ACCESS_KEY_ID=ABCDEFGHIJKLMNOP \
-  -e AWS_SECRET_ACCESS_KEY=xX-haha-nice-try-Xx \
-  --mount ... \
+docker run --platform linux/amd64 \
+  --mount type=volume,source=hyperlane-validator-ethereum,target=/data \
+  -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN \
   ghcr.io/hyperlane-xyz/hyperlane-agent:agents-v4.0.0 \
   ./validator \
-  --db /hyperlane_db \
-  --originChainName <your_chain_name> \
-  --reorgPeriod 1 \
-  --validator.region us-east-1 \
-  --checkpointSyncer.region us-east-1 \
+  --db /data/validator_db \
+  --originChainName ethereum \
+  --chains.ethereum.customRpcUrls "$ETHEREUM_RPC_URLS" \
   --validator.type aws \
-  --chains.<your_chain_name>.signer.type aws \
-  --validator.id alias/hyperlane-validator-signer-<your_chain_name> \
-  --chains.<your_chain_name>.signer.id alias/hyperlane-validator-signer-<your_chain_name> \
+  --validator.id alias/hyperlane-validator \
+  --validator.region us-east-1 \
   --checkpointSyncer.type s3 \
-  --checkpointSyncer.bucket hyperlane-validator-signatures-<your_name> \
-  --checkpointSyncer.folder <your_chain_name> \
+  --checkpointSyncer.bucket your-validator-signatures \
+  --checkpointSyncer.region us-east-1 \
+  --checkpointSyncer.folder ethereum
 ```
 
 </Tab>
 <Tab title="Building from source">
 
-See these instructions for building from source without Docker.
-
-We can run the built binary from within the `hyperlane-monorepo/rust` directory:
+Run the built binary from `hyperlane-monorepo/rust/main` so it can find the bundled chain configuration.
 
 ```sh
-# set AWS environment variables
-export AWS_ACCESS_KEY_ID=ABCDEFGHIJKLMNOP
-export AWS_SECRET_ACCESS_KEY=xX-haha-nice-try-Xx
-
-# run the Validator
 ./target/release/validator \
-  --db /hyperlane_db \
-  --originChainName <your_chain_name> \
-  --reorgPeriod 1 \
-  --validator.region us-east-1 \
-  --checkpointSyncer.region us-east-1 \
+  --db ./validator_db_ethereum \
+  --originChainName ethereum \
+  --chains.ethereum.customRpcUrls "$ETHEREUM_RPC_URLS" \
   --validator.type aws \
-  --chains.<your_chain_name>.signer.type aws \
-  --chains.<your_chain_name>.signer.region<region_name> \
-  --validator.id alias/hyperlane-validator-signer-<your_chain_name> \
-  --chains.<your_chain_name>.signer.id alias/hyperlane-validator-signer-<your_chain_name> \
+  --validator.id alias/hyperlane-validator \
+  --validator.region us-east-1 \
   --checkpointSyncer.type s3 \
-  --checkpointSyncer.bucket hyperlane-validator-signatures-<your_chain_name>
+  --checkpointSyncer.bucket your-validator-signatures \
+  --checkpointSyncer.region us-east-1 \
+  --checkpointSyncer.folder ethereum
 ```
 
 </Tab>
@@ -377,37 +372,37 @@ export AWS_SECRET_ACCESS_KEY=xX-haha-nice-try-Xx
 
 The [Relayer](/docs/operate/relayer/run-relayer) needs to know where to find your Validator's signatures. Your Validator will automatically attempt to announce itself by writing to the `ValidatorAnnounce` contract on the chain that you're validating.
 
-To do this, your Validator must have a small amount of tokens to pay for the gas for this transaction.
+The origin-chain transaction signer needs enough native tokens to pay for gas. The Validator writes a signed copy of the announcement to the checkpoint syncer before sending the transaction.
 
 If your Validator has not yet announced itself, and does not have enough tokens to pay for gas, it will log a message specifying how many tokens are needed.
 
 ### Success!
 
-The Validator will index the origin Mailbox contract for messages. If a message has been sent, you should see log messages that the Validator has signed them. If everything is configured correctly, you should see json files being written to your S3 bucket (if you followed the AWS setup) or to your local signatures directory if you followed the local setup. New json files get written every time a new outbound message is inserted into the mailbox.
+With the default `majority` policy, look for `Initial consensus backfill verified` in the logs after the chain has a Merkle Tree Hook insertion. Then look for `Initial historical checkpoint publication complete` to confirm that signed checkpoints have reached storage. For local storage, inspect `index.json` and the corresponding `<index>_with_id.json`. See [Validator monitoring](/docs/operate/validators/monitoring-alerting) for ongoing checks.
 
 ## Running Multiple Validators
 
 We encourage folks to validate on as many chains as they are interested in supporting. This section provides an overview of the considerations and instructions to set up multiple validators.
 
-Running multiple validators improves security and redundancy. By deploying validators across different chains or regions, you reduce the risk of a single point of failure. If one validator encounters downtime or issues, others can continue to operate, ensuring the integrity and availability of the validation process.
+Multiple instances can improve availability. To increase signer redundancy on a given origin, run distinct signing keys that the destination ISM is configured to accept.
 
 ### Running Multiple Validators: Key Considerations
 
-- **Reusing Keys**: The same key can be used by multiple validators.
+- **Reusing Keys**: You can reuse a signing key across origins. Use distinct keys for Validators that should count as separate signers on the same origin.
 - **Shared AWS Account**: The same AWS account can be used by multiple validators.
-- **Using a Shared S3 Bucket**: The same checkpoint syncer S3 bucket can be used by multiple validators, however each **must** use a different folder (e.g., `--checkpointSyncer.folder validator-1`, `--checkpointSyncer.folder validator-2`).
+- **Using a Shared Bucket**. Give each origin and signer its own folder in S3 or GCS (for example, `--checkpointSyncer.folder ethereum-validator-1`).
 
 ### Additional Steps for Multiple Validators
 
 #### 1. Create an Agent Configuration
 
 - Generate an agent [configuration](#configuration) file for each validator, specifying the chains they will validate and the corresponding RPC URLs.
-- Ensure that each configuration file points to the correct signing key and S3 folder.
+- Ensure that each configuration file points to the correct signing key and checkpoint storage location.
 
 #### 2. Run Each Validator
 
 - Ensure each Validator is assigned a unique database path (e.g., `--db /hyperlane_db_validator1`).
-- Configure each validator to expose metrics on a unique port (e.g., `--metrics-port 9090`, `--metrics-port 9091`).
+- When processes share a network namespace, assign each Validator a unique metrics port (for example, `--metricsPort 9090` and `--metricsPort 9091`).
 - If running multiple validators on the same machine, allocate sufficient system resources (CPU, memory, and storage).
 - Ensure logs are directed to separate files or services for easier debugging and monitoring.
 - If using Docker, assign unique container names and network configurations to avoid conflicts.
@@ -424,20 +419,22 @@ flowchart TB
     subgraph Origin
       Sender
       M_O[(Mailbox)]
-      POS[Proof of Stake]
+      MTH[(Merkle Tree Hook)]
+      ANN[(ValidatorAnnounce)]
 
       Sender -- "dispatch(destination, recipient, body)" --> M_O
+      M_O -- "dispatch hook" --> MTH
     end
 
     subgraph Cloud
-      aws[(Metadata<br>Database)]
+      storage[(Checkpoint storage)]
     end
 
     M_O -. "indexing" .-> Relayer
-    M_O -. "indexing" .-> V
-    POS == "staking" === V
+    MTH -. "insertions and checkpoints" .-> V
+    V -- "announces storage location" --> ANN
 
-    V -- "signatures" --> aws
+    V -- "signed checkpoints" --> storage
 
     subgraph Destination
       Recipient
@@ -451,10 +448,9 @@ flowchart TB
 
     Relayer -- "process()" --> M_D
 
-    aws -. "metadata" .-> Relayer
-    aws -. "moduleType()" .- ISM
-
-    POS -. "validators()" .- ISM
+    ANN -. "storage location" .-> Relayer
+    storage -. "signed checkpoints" .-> Relayer
+    ISM -. "moduleType()" .- Relayer
 
     click ISM https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/main/solidity/contracts/interfaces/isms/IMultisigIsm.sol
 

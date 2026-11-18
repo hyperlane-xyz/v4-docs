@@ -1,0 +1,80 @@
+---
+title: "Validator WebSocket API"
+description: "Subscribe to live Merkle Tree Hook insertions for one origin domain and verify the stream against chain RPC."
+---
+
+The public `/validators` endpoint streams Merkle Tree Hook insertions for one origin domain. Each new insertion wakes the Validator so it can check a checkpoint before the next poll. The Validator computes the Merkle root locally and signs only after verifying it against the on-chain root through its existing RPC endpoints.
+
+## Connect to an origin domain
+
+If you [run a Validator](/docs/operate/validators/run-validators#validator-websocket-optional), set `websocketUrl` to the URL below without query parameters. The Validator adds the origin domain, requests confirmations when configured as a number, and handles RPC recovery.
+
+```text
+wss://explorer-api.hyperlane.xyz/validators
+```
+
+To inspect the feed directly, include exactly one Hyperlane `domain` in the URL. This browser example logs new insertions on Ethereum. The server subscribes the connection automatically.
+
+```javascript
+const socket = new WebSocket('wss://explorer-api.hyperlane.xyz/validators?domain=1');
+
+socket.addEventListener('message', ({ data }) => {
+  const frame = JSON.parse(data);
+  if (frame.type === 'error') console.error(frame.error);
+  if (frame.type !== 'event' || frame.eventType !== 'merkle_tree_insertion') return;
+
+  const { leaf_index, message_id, block_number } = frame.data;
+  console.log('Leaf', leaf_index, 'message', message_id, 'block', block_number);
+});
+```
+
+| Direct connection | Confirmation policy |
+| --- | --- |
+| `/validators?domain=1` | Use the scraper's canonical policy for Ethereum. |
+| `/validators?domain=1&confirmations=12` | Send indexed insertions once the chain head is at least 12 blocks past the insertion. |
+| `/validators?domain=1&confirmations=0` | Send insertions as soon as they are indexed. These observations can roll back. |
+
+Custom confirmation counts require near-head indexing for the domain. If the requested policy is unavailable, the server rejects the subscription. The Validator requests its configured depth for a numeric `blocks.reorgPeriod` and uses the canonical stream for a block-tag policy.
+
+## Read the frames
+
+The first frame on a successful connection is `ready`. Check its domain and confirmation policy before processing insertions. For the canonical Ethereum connection it looks like this.
+
+```json
+{
+  "type": "ready",
+  "domain": 1,
+  "eventTypes": ["merkle_tree_insertion"],
+  "historicalStreaming": false,
+  "liveStartVersion": 1
+}
+```
+
+A custom feed also includes the requested `confirmations` in `ready`. Each insertion identifies the hook, message, and source block. In this example, the message occupies leaf 5. The top-level `sequence` carries the same index as a decimal string.
+
+```json
+{
+  "type": "event",
+  "eventType": "merkle_tree_insertion",
+  "domain": 1,
+  "sequence": "5",
+  "data": {
+    "domain": 1,
+    "merkle_tree_hook": "\\xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "message_id": "\\x0101010101010101010101010101010101010101010101010101010101010101",
+    "leaf_index": 5,
+    "block_number": "101"
+  }
+}
+```
+
+## Catch up and recover through RPC
+
+The feed sends live events only. A client that maintains a complete tree needs RPC history on startup and after every reconnect.
+
+1. Buffer insertion events as soon as you receive `ready`. Events can arrive before the `live_start` frame.
+2. Use `live_start` to find the block where RPC history and live coverage meet. Check the domain, confirmation policy, and hook address against your configuration. Verify the block hash through RPC and index through the advertised height.
+3. Check the on-chain leaf count at the boundary and wait until RPC indexing covers that count. Compare any overlapping insertions against the RPC data. Apply the remaining buffered insertions in contiguous leaf order.
+4. If you receive `live_start_unavailable`, keep indexing through RPC. On a disconnect, sequence gap, conflicting insertion, or `rollback`, return to RPC and verify a fresh `live_start` before switching back to live events.
+
+For wire-level details and connection limits, see the [scraper-proxy Validator WebSocket specification](https://github.com/hyperlane-xyz/hyperlane-monorepo/tree/main/typescript/scraper-proxy#validator-websocket-validators).

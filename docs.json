@@ -213,7 +213,8 @@
                 ]
               },
               "docs/reference/explorer/graphql-api",
-              "docs/reference/explorer/websocket-api"
+              "docs/reference/explorer/websocket-api",
+              "docs/reference/explorer/validator-websocket"
             ]
           }
         ]
@@ -332,7 +333,10 @@
           },
           {
             "group": "Key Management",
-            "pages": ["docs/operate//set-up-agent-keys"]
+            "pages": [
+              "docs/operate/set-up-agent-keys",
+              "docs/operate/google-cloud-kms"
+            ]
           },
           {
             "group": "Validators",
