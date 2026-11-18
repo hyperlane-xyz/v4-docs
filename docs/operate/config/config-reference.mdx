@@ -340,11 +340,16 @@ export HYP_CHAINS_${CHAIN_NAME}_SIGNER_*="...."
 
 **Type:** `Enum ("hexKey" | "aws" | "gcp" | "cosmosKey" | "starkKey" | "radixKey")`
 
-Accepted values for the different VMs are:
+| Chain | Transaction signer types |
+| --- | --- |
+| EVM and Tron | `hexKey`, `aws`, or `gcp` |
+| SVM (including Solana) | `hexKey` (Ed25519) |
+| Cosmos and Cosmos Native | `cosmosKey` |
+| Starknet | `starkKey` |
+| Radix | `radixKey` |
+| Aleo | `hexKey` (Aleo private key bytes). Requires an agent built with the `aleo` feature. |
 
-- EVM and Tron: `hexKey`, `aws`, or `gcp`. For `gcp`, supply `signer.keyVersionName` as a full Cloud KMS key version name.
-- sealevel: `hexKey` (ED25519)
-- cosmos: `cosmosKey`
+See the [Validator announcement signer table](/docs/operate/validators/run-validators#transaction-signer-configuration) for required fields and key formats on each chain. Google Cloud KMS requires the full `signer.keyVersionName` on EVM and Tron.
 
 <CodeGroup>
 ```bash As Arg
@@ -407,6 +412,44 @@ export HYP_CHAINS_${CHAIN_NAME}_SIGNER_KEY="8166f546bab6da521a8369cab06c5d2b9e46
     "ethereum": {
       "signer": {
         "key": "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"
+      }
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+## chains.`<chain_name>`.signer.keyVersionName
+
+**Description:** Full Google Cloud KMS key version name for an EVM or Tron transaction signer. Replace the example resource name with your own enabled key version.
+
+**Requires:** `chains.<chain_name>.signer.type = "gcp"`
+
+**Optional:** Required when the chain signer uses Google Cloud KMS.
+
+**Agents:** Validator, Relayer
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--chains.ethereum.signer.type gcp
+--chains.ethereum.signer.keyVersionName "projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
+```
+
+```bash As Env
+export HYP_CHAINS_ETHEREUM_SIGNER_TYPE=gcp
+export HYP_CHAINS_ETHEREUM_SIGNER_KEYVERSIONNAME="projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
+```
+
+```json As Config
+{
+  "chains": {
+    "ethereum": {
+      "signer": {
+        "type": "gcp",
+        "keyVersionName": "projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
       }
     }
   }
@@ -850,6 +893,40 @@ export HYP_DEFAULTSIGNER_KEY="8166f546bab6da521a8369cab06c5d2b9e46670292d85c875e
   "defaultsigner": {
     "type": "hexKey",
     "key": "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"
+  }
+}
+```
+
+</CodeGroup>
+
+## defaultsigner.keyVersionName
+
+**Description:** Full Google Cloud KMS key version name for the default EVM or Tron transaction signer. Configure a chain-specific signer for chains that need a different key type. Replace the example resource name with your own enabled key version.
+
+**Requires:** `defaultSigner.type = "gcp"`
+
+**Optional:** Required when the default signer uses Google Cloud KMS.
+
+**Agents:** Validator, Relayer
+
+**Type:** `string`
+
+<CodeGroup>
+```bash As Arg
+--defaultSigner.type gcp
+--defaultSigner.keyVersionName "projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
+```
+
+```bash As Env
+export HYP_DEFAULTSIGNER_TYPE=gcp
+export HYP_DEFAULTSIGNER_KEYVERSIONNAME="projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
+```
+
+```json As Config
+{
+  "defaultSigner": {
+    "type": "gcp",
+    "keyVersionName": "projects/your-project-id/locations/us-central1/keyRings/hyperlane-validators/cryptoKeys/validator-ethereum/cryptoKeyVersions/1"
   }
 }
 ```

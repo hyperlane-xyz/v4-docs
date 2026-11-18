@@ -189,51 +189,24 @@ projects/PROJECT_ID/locations/LOCATION/keyRings/KEY_RING/cryptoKeys/KEY/cryptoKe
 
 #### Transaction signer configuration
 
-Fund the transaction signer with native tokens to send the initial on-chain announcement. On EVM and Tron, the checkpoint signer also sends the transaction if neither `chains.<origin>.signer` nor `defaultSigner` is configured. For local tests, `skipAnnounce` can skip the transaction.
+The checkpoint signer uses secp256k1 on every origin chain. The transaction signer pays gas to publish the signed storage announcement on the origin chain. Keep your checkpoint key in KMS even when the announcement needs a separate local key.
 
-<Tabs>
-<Tab title="AWS KMS (EVM)">
+Configure the announcement signer under `chains.<origin>.signer`. If you omit it, the agent uses `defaultSigner` when configured. On EVM and Tron only, the Validator falls back to its checkpoint signer when both settings are absent.
 
-| Argument                                    | Description                                                                                                                            |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `--chains.${originChainName}.signer.type`   | Set to the `aws` literal.                                                                                                              |
-| `--chains.${originChainName}.signer.region` | The region of your AWS KMS key. For example: `us-east-1`.                                                                              |
-| `--chains.${originChainName}.signer.id`     | The alias of your Validator's AWS KMS key, prefixed with `alias/`. For example: `alias/hyperlane-validator-signer-${originChainName}`. |
+| Origin chain | Recommended announcement signer and settings |
+| --- | --- |
+| EVM and Tron | Reuse the checkpoint KMS key. For a separate AWS KMS key, set `type: aws`, `region`, and `id` with the key ID or an `alias/`-prefixed alias. For a separate Google Cloud KMS key, set `type: gcp` and `keyVersionName`. The agent also accepts `type: hexKey` for a local secp256k1 key. |
+| SVM (including Solana) | Use `type: hexKey` and set `key` to the funded Ed25519 keypair's 32-byte seed as `0x`-prefixed hex. |
+| Cosmos and Cosmos Native | Use `type: cosmosKey`, a `0x`-prefixed private `key`, and the chain's Bech32 `prefix` (for example, `osmo`). The optional `accountAddressType` defaults to `Bitcoin`. Set it to `Ethereum` for chains that use Ethereum-style account addresses. |
+| Starknet | Use `type: starkKey` with the private `key` and deployed account `address`, both encoded as 32-byte `0x`-prefixed hex strings. Set `legacy: true` only for accounts that require legacy execution encoding. |
+| Radix | Use `type: radixKey`, an Ed25519 private `key` as `0x`-prefixed hex, and the network `suffix`. Use `rdx` for mainnet or `tdx_2_` for Stokenet. The signer derives the preallocated account from the key. |
+| Aleo | Use `type: hexKey` and set `key` to the 32-byte little-endian serialization of the Aleo private key as `0x`-prefixed hex. The published agent image includes Aleo support. Source builds require `--features aleo`. |
 
-</Tab>
-<Tab title="Google Cloud KMS (EVM or Tron)">
-
-Set `chains.<origin>.signer.type` to `gcp` and `chains.<origin>.signer.keyVersionName` to the full Cloud KMS key version resource name. The signer uses Application Default Credentials.
-
-</Tab>
-<Tab title="Hex Key (EVM)">
-
-Use these settings to configure a separate EVM transaction signer.
-
-| Argument                                | Description                                                                                                                                  |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--chains.${originChainName}.signer.key` | The `0x`-prefixed hex private key of the account that submits the on-chain announcement. |
-
-</Tab>
-<Tab title="Hex Key (Cosmos)">
-
-| Argument                                    | Description                                                                                                                                      |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `--chains.${originChainName}.signer.type`   | Set to the `cosmosKey` literal.                                                                                                                  |
-| `--chains.${originChainName}.signer.prefix` | Set to the prefix literal associated with the chain's address format. Example: `osmo`.                                                           |
-| `--chains.${originChainName}.signer.key` | The `0x`-prefixed hex private key of the account that submits the on-chain announcement. |
-
-</Tab>
-<Tab title="Hex Key (SVM)">
-
-Set `chains.<origin>.signer.key` to the funded Solana keypair's 32-byte seed as a `0x`-prefixed hex string.
-
-</Tab>
-</Tabs>
+AWS and Google Cloud KMS transaction signers are available for EVM and Tron in v4.0.0. The other chain adapters in the table sign transactions with local keys. Fund the announcement account with native tokens. For local tests that only need checkpoint signing, use `skipAnnounce`. [Signer implementation](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/agents-v4.0.0/rust/main/hyperlane-base/src/settings/signers.rs)
 
 #### Checkpoint syncer configuration
 
-Choose storage independently of your signing key. Amazon S3 is the default production setup in this guide. Google Cloud Storage is also supported.
+Amazon S3 is the default production setup in this guide. Amazon S3 and Google Cloud Storage can both store signed checkpoints from any supported origin chain, regardless of the checkpoint or announcement signer.
 
 <Tabs>
 <Tab title="Amazon S3">
