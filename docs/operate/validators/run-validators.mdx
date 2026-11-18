@@ -44,7 +44,7 @@ As you follow this guide, you can run a Hyperlane validator on any of the existi
 As a recap - before running a production Validator you need to have:
 
 1. Created a key for your Validator to sign with, see the [Agent Keys](/docs/operate/set-up-agent-keys) documentation.
-2. Set up storage for your Validator signatures. See [AWS signature bucket setup](/docs/operate/validators/validator-signatures-aws) or [Google Cloud Storage configuration](#checkpoint-syncer-configuration).
+2. Set up storage for your Validator signatures. See [Amazon S3 setup](/docs/operate/validators/validator-signatures-aws) or [Google Cloud Storage setup](/docs/operate/validators/validator-signatures-gcs).
 
 ### Configuration
 
@@ -153,15 +153,12 @@ Choose a checkpoint signer and a storage backend for your environment.
 
 #### Checkpoint signer configuration
 
+For production, we strongly recommend an external, HSM-backed signing key. Use AWS KMS by default or Google Cloud KMS as an alternative.
+
 <Tabs>
-<Tab title="Hex Key">
-
-| Argument                                | Description                                                                                                                                  |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--validator.key` | A `0x`-prefixed, 32-byte hex key for checkpoint signing. You can supply it through `HYP_VALIDATOR_KEY`. |
-
-</Tab>
 <Tab title="AWS KMS">
+
+Create the signing key and grant the Validator access. [AWS KMS setup guide](/docs/operate/aws-kms)
 
 | Argument             | Description                                                                                                                            |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
@@ -181,6 +178,13 @@ projects/PROJECT_ID/locations/LOCATION/keyRings/KEY_RING/cryptoKeys/KEY/cryptoKe
 ```
 
 </Tab>
+<Tab title="Hex Key">
+
+| Argument                                | Description                                                                                                                                  |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--validator.key` | A `0x`-prefixed, 32-byte hex key for checkpoint signing. You can supply it through `HYP_VALIDATOR_KEY`. |
+
+</Tab>
 </Tabs>
 
 #### Transaction signer configuration
@@ -188,15 +192,6 @@ projects/PROJECT_ID/locations/LOCATION/keyRings/KEY_RING/cryptoKeys/KEY/cryptoKe
 Fund the transaction signer with native tokens to send the initial on-chain announcement. On EVM and Tron, the checkpoint signer also sends the transaction if neither `chains.<origin>.signer` nor `defaultSigner` is configured. For local tests, `skipAnnounce` can skip the transaction.
 
 <Tabs>
-<Tab title="Hex Key (EVM)">
-
-Use these settings to configure a separate EVM transaction signer.
-
-| Argument                                | Description                                                                                                                                  |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--chains.${originChainName}.signer.key` | The `0x`-prefixed hex private key of the account that submits the on-chain announcement. |
-
-</Tab>
 <Tab title="AWS KMS (EVM)">
 
 | Argument                                    | Description                                                                                                                            |
@@ -204,6 +199,20 @@ Use these settings to configure a separate EVM transaction signer.
 | `--chains.${originChainName}.signer.type`   | Set to the `aws` literal.                                                                                                              |
 | `--chains.${originChainName}.signer.region` | The region of your AWS KMS key. For example: `us-east-1`.                                                                              |
 | `--chains.${originChainName}.signer.id`     | The alias of your Validator's AWS KMS key, prefixed with `alias/`. For example: `alias/hyperlane-validator-signer-${originChainName}`. |
+
+</Tab>
+<Tab title="Google Cloud KMS (EVM or Tron)">
+
+Set `chains.<origin>.signer.type` to `gcp` and `chains.<origin>.signer.keyVersionName` to the full Cloud KMS key version resource name. The signer uses Application Default Credentials.
+
+</Tab>
+<Tab title="Hex Key (EVM)">
+
+Use these settings to configure a separate EVM transaction signer.
+
+| Argument                                | Description                                                                                                                                  |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--chains.${originChainName}.signer.key` | The `0x`-prefixed hex private key of the account that submits the on-chain announcement. |
 
 </Tab>
 <Tab title="Hex Key (Cosmos)">
@@ -215,11 +224,6 @@ Use these settings to configure a separate EVM transaction signer.
 | `--chains.${originChainName}.signer.key` | The `0x`-prefixed hex private key of the account that submits the on-chain announcement. |
 
 </Tab>
-<Tab title="Google Cloud KMS (EVM or Tron)">
-
-Set `chains.<origin>.signer.type` to `gcp` and `chains.<origin>.signer.keyVersionName` to the full Cloud KMS key version resource name. The signer uses Application Default Credentials.
-
-</Tab>
 <Tab title="Hex Key (SVM)">
 
 Set `chains.<origin>.signer.key` to the funded Solana keypair's 32-byte seed as a `0x`-prefixed hex string.
@@ -229,7 +233,30 @@ Set `chains.<origin>.signer.key` to the funded Solana keypair's 32-byte seed as 
 
 #### Checkpoint syncer configuration
 
+Choose storage independently of your signing key. Amazon S3 is the default production setup in this guide. Google Cloud Storage is also supported.
+
 <Tabs>
+<Tab title="Amazon S3">
+
+Create the bucket and grant write access to the Validator and public read access to Relayers. [Amazon S3 setup guide](/docs/operate/validators/validator-signatures-aws)
+
+| Argument                    | Description                                                           |
+| --------------------------- | --------------------------------------------------------------------- |
+| `--checkpointSyncer.type`   | Set to `s3`.                                                          |
+| `--checkpointSyncer.bucket` | The AWS S3 bucket name.                                               |
+| `--checkpointSyncer.region` | The region of your AWS S3 bucket. For example: `us-east-1`.           |
+| `--checkpointSyncer.folder` | An optional folder for this Validator's checkpoints. |
+
+</Tab>
+<Tab title="Google Cloud Storage">
+
+Create the bucket and configure its IAM bindings. [Google Cloud Storage setup guide](/docs/operate/validators/validator-signatures-gcs)
+
+Set `--checkpointSyncer.type gcs` and `--checkpointSyncer.bucket` to the bucket name. If you set `--checkpointSyncer.folder`, use a single segment such as `ethereum-validator-1`. Nested paths prevent the Relayer from parsing the announced storage location.
+
+Grant the Validator read and write access to checkpoint objects and allow unauthenticated reads for Relayers. For workload credentials such as GKE Workload Identity, set `--checkpointSyncer.useApplicationDefault true`. For a service account key file, leave this setting off and set `--checkpointSyncer.serviceAccountKey` to the path inside the Validator process.
+
+</Tab>
 <Tab title="Local Setup">
 
 | Argument                  | Description                                                                                                                                                                                                                                                |
@@ -242,23 +269,6 @@ Use `--skipAnnounce true` for local tests that only need checkpoint signing. The
 <Warning>
   For end-to-end tests with a Relayer, leave `skipAnnounce` at its default so the Relayer can discover the storage location. Make the directory available to the Relayer at the same absolute path and configure it with `--allowLocalCheckpointSyncers true`.
 </Warning>
-
-</Tab>
-<Tab title="Production Setup (AWS)">
-
-| Argument                    | Description                                                           |
-| --------------------------- | --------------------------------------------------------------------- |
-| `--checkpointSyncer.type`   | Set to `s3`.                                                          |
-| `--checkpointSyncer.bucket` | The AWS S3 bucket name.                                               |
-| `--checkpointSyncer.region` | The region of your AWS S3 bucket. For example: `us-east-1`.           |
-| `--checkpointSyncer.folder` | An optional folder for this Validator's checkpoints. |
-
-</Tab>
-<Tab title="Google Cloud Storage">
-
-Set `--checkpointSyncer.type gcs` and `--checkpointSyncer.bucket` to the bucket name. If you set `--checkpointSyncer.folder`, use a single segment such as `ethereum-validator-1`. Nested paths prevent the Relayer from parsing the announced storage location.
-
-Grant the Validator read and write access to checkpoint objects and allow unauthenticated reads for Relayers. For workload credentials such as GKE Workload Identity, set `--checkpointSyncer.useApplicationDefault true`. For a service account key file, leave this setting off and set `--checkpointSyncer.serviceAccountKey` to the path inside the Validator process.
 
 </Tab>
 </Tabs>
@@ -321,7 +331,7 @@ If you use AWS environment credentials, export the following variables before st
 | `AWS_SECRET_ACCESS_KEY` | The AWS secret access key. |
 | `AWS_SESSION_TOKEN` | The session token, when using temporary credentials. |
 
-For a refresher, check out the [Agent Keys](/docs/operate/set-up-agent-keys) guide.
+See [AWS KMS setup](/docs/operate/aws-kms) for key and IAM configuration.
 
 <Tabs>
 <Tab title="Using Docker">

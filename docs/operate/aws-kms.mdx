@@ -1,0 +1,66 @@
+---
+title: "AWS KMS"
+description: "Create an AWS KMS signing key and configure a Hyperlane agent to use it."
+---
+
+AWS KMS is the default signing setup in the Validator guide. The asymmetric signing key stays in AWS KMS hardware security modules. [AWS KMS key specs](https://docs.aws.amazon.com/kms/latest/developerguide/symm-asymm-choose-key-spec.html)
+
+## Create an IAM user
+
+Use an IAM user if your agent authenticates with access keys. If you already run the agent with an ECS task role or EKS web identity, use that role and skip to key creation.
+
+1. Go to AWS's Identity and Access Management (IAM) in the [AWS console](https://us-east-1.console.aws.amazon.com/iamv2/home).
+2. On the left, under "Access management", click "Users".
+3. Click the orange button "Add users".
+4. Pick a friendly and informative username, like `hyperlane-validator-${chain_name}` or `hyperlane-relayer-${chain_name}`. This username will be referenced in future steps, so if you choose a different username be sure to use your correct username in the future.
+5. Click "Next", you do not need to assign the user any permissions.
+6. Click "Create user".
+7. Click into the user that you just created
+8. Click the "Security Credentials" tab
+9. Scroll down to "Access Keys" and click "Create Access Key"
+10. Select "Application running outside AWS" and click "Next"
+11. Click "Next", no need to add a description tag&#x20;
+12. Click "Create access key"
+13. Copy the "Access key ID" and "Secret access key" to a safe place. Pass them to your agent as `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+
+## Create a KMS key
+
+This key will be used by your agent for signing.
+
+1. Go to AWS's Key Management Service (KMS) in the AWS console.
+2. Ensure you are in the region you want to create the key in. This can be confirmed by viewing the region at the top right of the console, or by finding the name in the URL's subdomain (e.g. `us-west-2.console.aws.amazon.com` means you're operating in the region `us-west-2`).
+3. On the left, click "Customer managed keys".
+4. Click "Create key".
+5. Select the "Asymmetric" key type.
+6. Select the "Sign and verify" key usage.
+7. Select the `ECC_SECG_P256K1` key spec.
+8. Click "Next".
+9. Set the Alias to something friendly and informative, like `hyperlane-validator-signer-${chain_name}` or `hyperlane-relayer-signer-${chain_name}`
+10. While not necessary, feel free to write a description and add any tags that you think will be useful.
+11. Click "Next".
+12. A key administrator is not required, but if you want, you can select one.
+13. Click "Next".
+14. Give the agent IAM user or role permission to use the key.
+15. Click "Next".
+16. In the Review page, scroll to the "Key policy". The generated key policy is acceptable, but you can make the access even less permissive if you wish by:
+    1. Removing the `kms:DescribeKey` and `kms:Verify` actions from the statement whose "Sid" is "Allow use of the key"
+    2. Removing the entire statement whose "Sid" is "Allow attachment of persistent resources".
+17. Click "Finish"
+
+<Tip>
+  Advanced users may consider using the [IAM/KMS Terraform
+  module](/docs/operate/guides/deploy-with-terraform#modules) instead to create
+  the IAM user and KMS key.
+</Tip>
+
+## Configure the agent
+
+For a Validator, set `validator.type` to `aws`, `validator.region` to the key's region, and `validator.id` to the key ID or alias. See [Validator checkpoint signer configuration](/docs/operate/validators/run-validators#checkpoint-signer-configuration) and [Amazon S3 checkpoint storage](/docs/operate/validators/validator-signatures-aws). For a Relayer, see [Relayer signer configuration](/docs/operate/relayer/run-relayer#aws-kms-keys).
+
+## Find the EVM address
+
+With the agent's AWS credentials available in your shell, set the key alias and region for Foundry's `cast`.
+
+```bash
+AWS_REGION=us-east-1 AWS_KMS_KEY_ID=alias/your-key-alias cast wallet address --aws
+```

@@ -73,7 +73,7 @@ For JSON configuration, add the `validator` block to your existing agent config 
 
 On EVM and Tron, if you leave the chain signer and `defaultSigner` unset, the Validator uses this key for its on-chain storage announcement. Fund that account with native tokens for gas. For other chains, configure a chain-specific transaction signer. [Transaction signer configuration](/docs/operate/validators/run-validators#transaction-signer-configuration)
 
-Choose your checkpoint storage separately. For a Google Cloud deployment, the Validator can write to Google Cloud Storage using workload credentials. [Checkpoint storage configuration](/docs/operate/validators/run-validators#checkpoint-syncer-configuration)
+Choose checkpoint storage separately. The Validator guide uses [Amazon S3](/docs/operate/validators/validator-signatures-aws) by default. For a Google Cloud deployment, you can use [Google Cloud Storage](/docs/operate/validators/validator-signatures-gcs) with workload credentials.
 
 ## Find the Validator's EVM address
 

@@ -1,0 +1,60 @@
+---
+title: "Google Cloud Storage"
+description: "Set up a Google Cloud Storage bucket for a Hyperlane Validator's checkpoints."
+---
+
+Google Cloud Storage is an alternative to [Amazon S3](/docs/operate/validators/validator-signatures-aws) for publishing signed checkpoints. You can use it with either supported KMS signer. [Agent keys](/docs/operate/set-up-agent-keys)
+
+## Create a bucket
+
+Use a dedicated bucket for Validator output. The bucket must allow public object reads so Relayers can fetch checkpoints. If your organization enforces public access prevention, use a checkpoint bucket in an environment that permits those reads. [Google Cloud public access prevention](https://docs.cloud.google.com/storage/docs/public-access-prevention)
+
+Replace the project ID and bucket name, and choose a location for the bucket.
+
+```bash
+PROJECT_ID="your-project-id"
+BUCKET_NAME="your-unique-validator-bucket"
+LOCATION="us-central1"
+
+gcloud storage buckets create "gs://${BUCKET_NAME}" \
+  --project="$PROJECT_ID" \
+  --location="$LOCATION" \
+  --uniform-bucket-level-access
+```
+
+## Grant access
+
+Set `SERVICE_ACCOUNT_EMAIL` to your Validator's Google Cloud service account. Give it bucket-scoped access to read and write objects. Grant public read access for Relayers. [Google Cloud bucket IAM](https://docs.cloud.google.com/storage/docs/access-control/using-iam-permissions)
+
+```bash
+SERVICE_ACCOUNT_EMAIL="validator@${PROJECT_ID}.iam.gserviceaccount.com"
+
+gcloud storage buckets add-iam-policy-binding "gs://${BUCKET_NAME}" \
+  --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+  --role="roles/storage.objectAdmin"
+
+gcloud storage buckets add-iam-policy-binding "gs://${BUCKET_NAME}" \
+  --member=allUsers \
+  --role="roles/storage.objectViewer"
+```
+
+## Configure the Validator
+
+Make the service account available to the Validator through Application Default Credentials. On GKE, use Workload Identity Federation. [Application Default Credentials](https://docs.cloud.google.com/docs/authentication/application-default-credentials)
+
+Add this block to your agent config and replace the bucket name. If you use a folder, set it to a single path segment. The Relayer expects that format in the announced storage location.
+
+```json
+{
+  "checkpointSyncer": {
+    "type": "gcs",
+    "bucket": "your-unique-validator-bucket",
+    "folder": "ethereum-validator-1",
+    "useApplicationDefault": true
+  }
+}
+```
+
+If you use a service account key file, omit `useApplicationDefault` and set `checkpointSyncer.serviceAccountKey` to its path inside the Validator process.
+
+Start the agent and verify checkpoint publication. [Run Validators](/docs/operate/validators/run-validators#success)
