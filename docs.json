@@ -482,6 +482,14 @@
     {
       "source": "/docs/protocol/interchain-gas-payment",
       "destination": "/docs/protocol/core/interchain-gas-payment"
+    },
+    {
+      "source": "/docs/operators/agent-configuration/configuration-reference",
+      "destination": "/docs/operate/config/config-reference"
+    },
+    {
+      "source": "/docs/operators/validators/announcing-your-validator",
+      "destination": "/docs/operate/validators/run-validators#announcing-your-validator"
     }
   ],
   "integrations": {
