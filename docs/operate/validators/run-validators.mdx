@@ -220,6 +220,10 @@ Create the bucket and grant write access to the Validator and public read access
 | `--checkpointSyncer.region` | The region of your AWS S3 bucket. For example: `us-east-1`.           |
 | `--checkpointSyncer.folder` | An optional folder for this Validator's checkpoints. |
 
+<Note>
+  From agent releases that include [hyperlane-monorepo#10093](https://github.com/hyperlane-xyz/hyperlane-monorepo/pull/10093), point the Validator at an S3-compatible store with `AWS_ENDPOINT_URL_S3`, not the global `AWS_ENDPOINT_URL`. Those releases also send the AWS STS requests behind role-based credentials, such as EKS web identity or assumed roles, to a global `AWS_ENDPOINT_URL`, even with `AWS_IGNORE_CONFIGURED_ENDPOINT_URLS` set. If the global variable has to stay, pin STS with `AWS_ENDPOINT_URL_STS=https://sts.<region>.amazonaws.com`.
+</Note>
+
 </Tab>
 <Tab title="Google Cloud Storage">
 
