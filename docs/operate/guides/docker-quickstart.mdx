@@ -42,7 +42,7 @@ You can read more about Agent Configs [here](/docs/operate/config/agent-config).
 | `originChainName`         | Should be the chain you are validating.                                                                                                                                    |
 | `checkpointSyncer.bucket` | Should reflect the name of the S3 bucket.                                                                                                                                  |
 | `checkpointSyncer.folder` | The name of the folder the validator will use within the bucket. You may use the same bucket for multiple validators, but ensure each folder name is unique per validator. |
-| `reorgPeriod`             | May be different for each chain. [Find the reorgPeriods](https://github.com/hyperlane-xyz/hyperlane-registry/tree/main/chains).                                            |
+| `chains.ethereum.blocks.reorgPeriod` | May be different for each chain. Keep the chain's configured value. [Find the reorgPeriods](https://github.com/hyperlane-xyz/hyperlane-registry/tree/main/chains). |
 
 Here is an example agent config.
 
@@ -51,6 +51,9 @@ Here is an example agent config.
   "chains": {
     "ethereum": {
       "customRpcUrls": "https://eth.llamarpc.com,https://rpc.mevblocker.io",
+      "blocks": {
+        "reorgPeriod": 15
+      },
       "signer": {
         "region": "us-east-1",
         "type": "aws",
@@ -71,7 +74,6 @@ Here is an example agent config.
     "type": "s3",
     "folder": "ethereum"
   },
-  "reorgPeriod": 14,
   "metricsPort": "9090"
 }
 ```

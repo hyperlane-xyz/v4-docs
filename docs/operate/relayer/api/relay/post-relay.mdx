@@ -1,6 +1,6 @@
 ---
 title: 'Submit Transaction for Relay'
-api: 'POST http://localhost:9090/relay'
+api: 'POST http://localhost:8900/relay'
 ---
 
 Submit an on-chain transaction for fast relay. The relayer extracts any Hyperlane messages from the transaction, filters to eligible messages (currently CCTP V2 only), and immediately enqueues them for delivery — bypassing the normal block-polling delay.
@@ -43,7 +43,7 @@ Hyperlane hosts public relay API endpoints:
 - **Mainnet**: `https://relay-api.hyperlane.xyz/relay`
 - **Testnet**: `https://testnet-relay-api.hyperlane.xyz/relay`
 
-For self-hosted relayers, replace the URL with your relayer's address (default: `http://localhost:9090/relay`).
+Self-hosted relayers serve this endpoint only when [`relayApiEnabled`](/docs/operate/config/config-reference#relayapienabled) is `true`. It listens on [`relayApiPort`](/docs/operate/config/config-reference#relayapiport), not the metrics port (default: `http://localhost:8900/relay`).
 </Note>
 
 <RequestExample>
@@ -149,6 +149,6 @@ The relayer maintains a 5-minute deduplication window per `(origin_chain, tx_has
 A `GET /relay` request returns `200 OK` with body `up` and can be used as a liveness probe.
 
 ```bash
-curl http://localhost:9090/relay
+curl http://localhost:8900/relay
 # up
 ```
