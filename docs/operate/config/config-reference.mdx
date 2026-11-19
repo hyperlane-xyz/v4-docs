@@ -98,13 +98,13 @@ export HYP_CHAINS_ETHEREUM_NAME="ethereum"
 
 </CodeGroup>
 
-## chains.`<chain_name>`.domain
+## chains.`<chain_name>`.domainId
 
-**Description:** Hyperplane domain id to uniquely identify the domain. See also: [Domain Identifiers](/docs/reference/domains).
+**Description:** Hyperlane domain id to uniquely identify the domain. See also: [Domain Identifiers](/docs/reference/domains).
 
 **Requires:** Alignment with domain name if it is a known domain.
 
-**Optional:** No
+**Optional:** Defaults to `chains.<chain_name>.chainId`
 
 **Agents:** All
 
@@ -112,23 +112,23 @@ export HYP_CHAINS_ETHEREUM_NAME="ethereum"
 
 <CodeGroup>
 ```bash As Arg
---chains.${CHAIN_NAME}.domain $DOMAIN_ID
---chains.ethereum.domain 1
+--chains.${CHAIN_NAME}.domainId $DOMAIN_ID
+--chains.ethereum.domainId 1
 ```
 
 ```bash As Env
-export HYP_CHAINS_${CHAIN_NAME}_DOMAIN="$DOMAIN_NAME"
-export HYP_CHAINS_ETHEREUM_DOMAIN=1
+export HYP_CHAINS_${CHAIN_NAME}_DOMAINID="$DOMAIN_ID"
+export HYP_CHAINS_ETHEREUM_DOMAINID=1
 ```
 
 ```json As Config
 {
   "chains": {
     "<chain_name>": {
-      "domain": "<domain_id>"
+      "domainId": "<domain_id>"
     },
     "ethereum": {
-      "domain": 1
+      "domainId": 1
     }
   }
 }
@@ -149,26 +149,22 @@ export HYP_CHAINS_ETHEREUM_DOMAIN=1
 <CodeGroup>
 ```bash As Arg
 --chains.${CHAIN_NAME}.mailbox "$MAILBOX_ADDRESS"
---chains.ethereum.mailbox "0x35231d4c2D8B8ADcB5617A638A0c4548684c7C70"
+--chains.ethereum.mailbox "0xc005dc82818d67AF737725bD4bf75435d065D239"
 ```
 
 ```bash As Env
 export HYP_CHAINS_${CHAIN_NAME}_MAILBOX="$MAILBOX_ADDRESS"
-export HYP_CHAINS_ETHEREUM_MAILBOX="0x35231d4c2D8B8ADcB5617A638A0c4548684c7C70"
+export HYP_CHAINS_ETHEREUM_MAILBOX="0xc005dc82818d67AF737725bD4bf75435d065D239"
 ```
 
 ```json As Config
 {
   "chains": {
     "<chain_name>": {
-      "addresses": {
-        "mailbox": "<mailbox_address>"
-      }
+      "mailbox": "<mailbox_address>"
     },
     "ethereum": {
-      "addresses": {
-        "mailbox": "0x35231d4c2D8B8ADcB5617A638A0c4548684c7C70"
-      }
+      "mailbox": "0xc005dc82818d67AF737725bD4bf75435d065D239"
     }
   }
 }
@@ -189,26 +185,22 @@ export HYP_CHAINS_ETHEREUM_MAILBOX="0x35231d4c2D8B8ADcB5617A638A0c4548684c7C70"
 <CodeGroup>
 ```bash As Arg
 --chains.${CHAIN_NAME}.interchainGasPaymaster "$IGP_ADDRESS"
---chains.ethereum.interchainGasPaymaster "0x6cA0B6D22da47f091B7613223cD4BB03a2d77918"
+--chains.ethereum.interchainGasPaymaster "0x9e6B1022bE9BBF5aFd152483DAD9b88911bC8611"
 ```
 
 ```bash As Env
 export HYP_CHAINS_${CHAIN_NAME}_INTERCHAINGASPAYMASTER="$IGP_ADDRESS"
-export HYP_CHAINS_ETHEREUM_INTERCHAINGASPAYMASTER="0x6cA0B6D22da47f091B7613223cD4BB03a2d77918"
+export HYP_CHAINS_ETHEREUM_INTERCHAINGASPAYMASTER="0x9e6B1022bE9BBF5aFd152483DAD9b88911bC8611"
 ```
 
 ```json As Config
 {
   "chains": {
     "<chain_name>": {
-      "addresses": {
-        "interchainGasPaymaster": "<igp_address>"
-      }
+      "interchainGasPaymaster": "<igp_address>"
     },
     "ethereum": {
-      "addresses": {
-        "interchainGasPaymaster": "0x6cA0B6D22da47f091B7613223cD4BB03a2d77918"
-      }
+      "interchainGasPaymaster": "0x9e6B1022bE9BBF5aFd152483DAD9b88911bC8611"
     }
   }
 }
@@ -229,26 +221,22 @@ export HYP_CHAINS_ETHEREUM_INTERCHAINGASPAYMASTER="0x6cA0B6D22da47f091B7613223cD
 <CodeGroup>
 ```bash As Arg
 --chains.${CHAIN_NAME}.validatorAnnounce "$VALIDATOR_ANNOUNCE_ADDRESS"
---chains.ethereum.validatorAnnounce "0x9bBdef63594D5FFc2f370Fe52115DdFFe97Bc524"
+--chains.ethereum.validatorAnnounce "0xCe74905e51497b4adD3639366708b821dcBcff96"
 ```
 
 ```bash As Env
 export HYP_CHAINS_${CHAIN_NAME}_VALIDATORANNOUNCE="$VALIDATOR_ANNOUNCE_ADDRESS"
-export HYP_CHAINS_ETHEREUM_VALIDATORANNOUNCE="0x9bBdef63594D5FFc2f370Fe52115DdFFe97Bc524"
+export HYP_CHAINS_ETHEREUM_VALIDATORANNOUNCE="0xCe74905e51497b4adD3639366708b821dcBcff96"
 ```
 
 ```json As Config
 {
   "chains": {
     "<chain_name>": {
-      "addresses": {
-        "validatorAnnounce": "<validator_announce_address>"
-      }
+      "validatorAnnounce": "<validator_announce_address>"
     },
     "ethereum": {
-      "addresses": {
-        "validatorAnnounce": "0x9bBdef63594D5FFc2f370Fe52115DdFFe97Bc524"
-      }
+      "validatorAnnounce": "0xCe74905e51497b4adD3639366708b821dcBcff96"
     }
   }
 }
@@ -281,14 +269,10 @@ export HYP_CHAINS_ETHEREUM_MERKLETREEHOOK="0x48e6c30B97748d1e2e03bf3e9FbE3890ca5
 {
   "chains": {
     "<chain_name>": {
-      "addresses": {
-        "merkleTreeHook": "<merkle_tree_hook_address>"
-      }
+      "merkleTreeHook": "<merkle_tree_hook_address>"
     },
     "ethereum": {
-      "addresses": {
-        "merkleTreeHook": "0x48e6c30B97748d1e2e03bf3e9FbE3890ca5f8CCA"
-      }
+      "merkleTreeHook": "0x48e6c30B97748d1e2e03bf3e9FbE3890ca5f8CCA"
     }
   }
 }
@@ -1947,26 +1931,26 @@ export HYP_TRANSACTIONGASLIMIT="250000000"
 
 ## skiptransactiongaslimitfor
 
-**Description:** List of domain ids to skip applying the `transactiongaslimit` for.
+**Description:** List of chain names to skip applying the `transactiongaslimit` for. Each name must also be in [`relaychains`](#relaychains), or the relayer fails at startup.
 
 **Optional:** Defaults to using the `transactiongaslimit` for all domains
 
 **Agents:** Relayer
 
-**Type:** `string` (comma separated list of domain ids)
+**Type:** `string` (comma separated list of chain names, without spaces)
 
 <CodeGroup>
 ```bash As Arg
---skipTransactionGasLimitFor "43114,10,42220"
+--skipTransactionGasLimitFor "avalanche,optimism,celo"
 ```
 
 ```bash As Env
-export HYP_SKIPTRANSACTIONGASLIMITFOR="43114,10,42220"
+export HYP_SKIPTRANSACTIONGASLIMITFOR="avalanche,optimism,celo"
 ```
 
 ```json As Config
 {
-  "skiptransactiongaslimitfor": "43114,10,42220"
+  "skiptransactiongaslimitfor": "avalanche,optimism,celo"
 }
 ```
 
@@ -2021,6 +2005,60 @@ export HYP_MAXMESSAGERETRIES="120"
 ```json As Config
 {
   "maxmessageretries": "120"
+}
+```
+
+</CodeGroup>
+
+## relayApiEnabled
+
+**Description:** Serve the [relay API](/docs/operate/relayer/api/relay/post-relay) (`/relay`) on its own port. Run it behind an ingress that enforces per-tenant rate limits.
+
+**Optional:** Yes. Defaults to `false`.
+
+**Agents:** Relayer
+
+**Type:** `boolean`
+
+<CodeGroup>
+```bash As Arg
+--relayApiEnabled true
+```
+
+```bash As Env
+export HYP_RELAYAPIENABLED=true
+```
+
+```json As Config
+{
+  "relayApiEnabled": true
+}
+```
+
+</CodeGroup>
+
+## relayApiPort
+
+**Description:** Port for the relay API. It is separate from `metricsport`, which serves the other relayer API endpoints.
+
+**Optional:** Yes. Defaults to `8900`.
+
+**Agents:** Relayer
+
+**Type:** `Numeric (string | number)`
+
+<CodeGroup>
+```bash As Arg
+--relayApiPort 8900
+```
+
+```bash As Env
+export HYP_RELAYAPIPORT=8900
+```
+
+```json As Config
+{
+  "relayApiPort": 8900
 }
 ```
 

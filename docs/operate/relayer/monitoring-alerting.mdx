@@ -2,7 +2,7 @@
 title: "Monitoring & Alerting"
 ---
 
-The relayer exposes metrics on the port number specified by the argument . Port is the default, though any valid port can be chosen.
+The relayer exposes metrics on the port number specified by [`metricsPort`](/docs/operate/config/config-reference#metricsport). Port `9090` is the default, though any valid port can be chosen.
 
 We recommend using Prometheus to scrape these metrics and Grafana to visualize them, using [this dashboard JSON template](https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/2f7f714c5b698fedcead9825f52da6ef95f96be1/tools/grafana/easy-relayer-dashboard-template.json), as seen below. The benefit of this dashboard is that it displays multiple validators at the same time. The screenshot shows metrics grouped by chain or by kubernetes pod.
 
@@ -10,8 +10,10 @@ We recommend using Prometheus to scrape these metrics and Grafana to visualize t
 
 <Note>
   If running as a Docker image, make sure to port-forward the metrics endpoint
-  port. For, instance, to forward port 9090 on the local port 80, add the
-  following flag to your `docker run` command: `-p 9090:80`
+  port. For instance, to forward port 9090 on the local port 80, add the
+  following flag to your `docker run` command: `-p 127.0.0.1:80:9090`. The
+  metrics port also serves the relayer API, so don't expose it publicly. Put
+  authentication in front of it at the deployment layer.
 </Note>
 
 ## Metrics
